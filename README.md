@@ -45,7 +45,7 @@ lib/
 
 **Installation**
 ```bash
-git clone https://github.com/yourusername/pos-system-flutter.git
+git clone https://github.com/mevsiee/capstone
 cd pos-system-flutter
 flutter pub get
 flutter run
