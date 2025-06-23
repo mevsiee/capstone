@@ -55,7 +55,6 @@ flutter run
 - Firebase integration
 - Shopee & TikTok Shop sync
 - Cloud Firestore support
-- Dashboard analytics (Looker Studio)
 
 **License**
 
