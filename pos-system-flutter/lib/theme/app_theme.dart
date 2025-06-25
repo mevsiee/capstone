@@ -91,7 +91,7 @@ class AppTheme {
         ),
       ),
     ),
-    dividerTheme: DividerTheme(
+    dividerTheme: DividerThemeData(
       color: borderColor,
       thickness: 1,
     ),

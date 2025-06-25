@@ -44,7 +44,7 @@ class DailySalesReportDialog extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        reportData['date'],
+                        reportData['date']!,
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey[600],
@@ -74,21 +74,21 @@ class DailySalesReportDialog extends StatelessWidget {
                   _buildSummaryBox(
                     'Total Sales',
                     '₱${reportData['totalSales']}',
-                    reportData['totalTransactions'],
+                    reportData['totalTransactions']!,
                   ),
                   const SizedBox(height: 8),
                   // Retail
                   _buildSummaryBox(
                     'Retail',
                     '₱${reportData['retailSales']}',
-                    reportData['retailTransactions'],
+                    reportData['retailTransactions']!,
                   ),
                   const SizedBox(height: 8),
                   // Wholesale
                   _buildSummaryBox(
                     'Wholesale',
                     '₱${reportData['wholesaleSales']}',
-                    reportData['wholesaleTransactions'],
+                    reportData['wholesaleTransactions']!,
                   ),
                 ],
               ),

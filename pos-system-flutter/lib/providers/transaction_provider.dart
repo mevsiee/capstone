@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:pos_system/models/staff.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pos_system/models/transaction.dart';
 import 'package:pos_system/models/cart_item.dart';

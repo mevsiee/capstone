@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pos_system/models/cart_item.dart';
 import 'package:pos_system/data/products.dart';
+import 'package:pos_system/models/product.dart';
 
 class CartItemList extends StatelessWidget {
   final List<CartItem> items;
