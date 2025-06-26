@@ -9,7 +9,7 @@ class AppTheme {
   static const Color mutedTextColor = Color(0xFF6B7280);
   static const Color borderColor = Color(0xFFE5E7EB);
   static const Color destructiveColor = Color(0xFFEF4444);
-  
+
   static ThemeData lightTheme = ThemeData(
     primaryColor: primaryColor,
     scaffoldBackgroundColor: backgroundColor,
@@ -32,7 +32,7 @@ class AppTheme {
       elevation: 0,
       centerTitle: true,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: cardColor,
       elevation: 1,
       shape: RoundedRectangleBorder(
@@ -82,7 +82,7 @@ class AppTheme {
         foregroundColor: primaryColor,
       ),
     ),
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       labelColor: primaryColor,
       unselectedLabelColor: mutedTextColor,
       indicator: BoxDecoration(
