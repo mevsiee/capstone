@@ -15,27 +15,45 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
   String _selectedCategory = '';
-  final List<String> _categories = ['Tops', 'Bottoms', 'Dresses', 'Outerwear', 'Accessories', 'Footwear'];
-  
+  final List<String> _categories = [
+    'Tops',
+    'Bottoms',
+    'Dresses',
+    'Outerwear',
+    'Accessories',
+    'Footwear'
+  ];
+
   final List<String> _selectedSizes = [];
   final List<String> _selectedColors = [];
-  
+
   // Controllers for custom input
   final TextEditingController _customSizeController = TextEditingController();
   final TextEditingController _customColorController = TextEditingController();
-  
+
   // Currently selected values from dropdowns
   String? _selectedSizeFromDropdown;
   String? _selectedColorFromDropdown;
-  
+
   // Custom option identifiers
   static const String _customSizeOption = 'custom_size';
   static const String _customColorOption = 'custom_color';
-  
+
   // Only letter sizes, no numbers
   final List<String> _commonSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-  final List<String> _commonColors = ['Black', 'White', 'Navy', 'Gray', 'Blue', 'Red', 'Green', 'Yellow', 'Pink', 'Maroon'];
-  
+  final List<String> _commonColors = [
+    'Black',
+    'White',
+    'Navy',
+    'Gray',
+    'Blue',
+    'Red',
+    'Green',
+    'Yellow',
+    'Pink',
+    'Maroon'
+  ];
+
   // Flags to show custom input fields
   bool _showCustomSizeInput = false;
   bool _showCustomColorInput = false;
@@ -75,7 +93,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Name field
               const Text(
                 'Name',
@@ -100,7 +118,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Category dropdown
               const Text(
                 'Category',
@@ -138,7 +156,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Price field
               const Text(
                 'Price (₱)',
@@ -149,7 +167,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _priceController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -171,10 +190,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              
+
               const Divider(),
               const SizedBox(height: 16),
-              
+
               // Sizes section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -186,7 +205,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     ),
                   ),
                   Text(
-                    _selectedSizes.isEmpty ? 'No sizes added' : '${_selectedSizes.length} sizes',
+                    _selectedSizes.isEmpty
+                        ? 'No sizes added'
+                        : '${_selectedSizes.length} sizes',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 14,
@@ -216,7 +237,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         // Add custom size option
                         const DropdownMenuItem<String>(
                           value: _customSizeOption,
-                          child: Text('Add Custom Size...', 
+                          child: Text(
+                            'Add Custom Size...',
                             style: TextStyle(
                               fontStyle: FontStyle.italic,
                               color: Colors.blue,
@@ -228,7 +250,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         setState(() {
                           _selectedSizeFromDropdown = value;
                           _showCustomSizeInput = value == _customSizeOption;
-                          
+
                           // If a standard size is selected, we can enable the Add button
                           if (value != null && value != _customSizeOption) {
                             _customSizeController.clear();
@@ -241,18 +263,22 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   SizedBox(
                     width: 80,
                     child: ElevatedButton(
-                      onPressed: (_selectedSizeFromDropdown != null && _selectedSizeFromDropdown != _customSizeOption) || 
-                                (_showCustomSizeInput && _customSizeController.text.isNotEmpty)
+                      onPressed: (_selectedSizeFromDropdown != null &&
+                                  _selectedSizeFromDropdown !=
+                                      _customSizeOption) ||
+                              (_showCustomSizeInput &&
+                                  _customSizeController.text.isNotEmpty)
                           ? () {
                               String sizeToAdd;
-                              
+
                               if (_showCustomSizeInput) {
                                 sizeToAdd = _customSizeController.text.trim();
                               } else {
                                 sizeToAdd = _selectedSizeFromDropdown!;
                               }
-                              
-                              if (sizeToAdd.isNotEmpty && !_selectedSizes.contains(sizeToAdd)) {
+
+                              if (sizeToAdd.isNotEmpty &&
+                                  !_selectedSizes.contains(sizeToAdd)) {
                                 setState(() {
                                   _selectedSizes.add(sizeToAdd);
                                   _selectedSizeFromDropdown = null;
@@ -262,7 +288,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               } else if (_selectedSizes.contains(sizeToAdd)) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Size "$sizeToAdd" already added'),
+                                    content:
+                                        Text('Size "$sizeToAdd" already added'),
                                     backgroundColor: Colors.red,
                                   ),
                                 );
@@ -270,8 +297,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: (_selectedSizeFromDropdown != null && _selectedSizeFromDropdown != _customSizeOption) || 
-                                        (_showCustomSizeInput && _customSizeController.text.isNotEmpty)
+                        backgroundColor: (_selectedSizeFromDropdown != null &&
+                                    _selectedSizeFromDropdown !=
+                                        _customSizeOption) ||
+                                (_showCustomSizeInput &&
+                                    _customSizeController.text.isNotEmpty)
                             ? Colors.black
                             : Colors.grey[400],
                         foregroundColor: Colors.white,
@@ -319,7 +349,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 ),
               ],
               const SizedBox(height: 16),
-              
+
               // Colors section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -331,7 +361,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     ),
                   ),
                   Text(
-                    _selectedColors.isEmpty ? 'No colors added' : '${_selectedColors.length} colors',
+                    _selectedColors.isEmpty
+                        ? 'No colors added'
+                        : '${_selectedColors.length} colors',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 14,
@@ -361,7 +393,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         // Add custom color option
                         const DropdownMenuItem<String>(
                           value: _customColorOption,
-                          child: Text('Add Custom Color...', 
+                          child: Text(
+                            'Add Custom Color...',
                             style: TextStyle(
                               fontStyle: FontStyle.italic,
                               color: Colors.blue,
@@ -373,7 +406,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         setState(() {
                           _selectedColorFromDropdown = value;
                           _showCustomColorInput = value == _customColorOption;
-                          
+
                           // If a standard color is selected, we can enable the Add button
                           if (value != null && value != _customColorOption) {
                             _customColorController.clear();
@@ -386,18 +419,22 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   SizedBox(
                     width: 80,
                     child: ElevatedButton(
-                      onPressed: (_selectedColorFromDropdown != null && _selectedColorFromDropdown != _customColorOption) || 
-                                (_showCustomColorInput && _customColorController.text.isNotEmpty)
+                      onPressed: (_selectedColorFromDropdown != null &&
+                                  _selectedColorFromDropdown !=
+                                      _customColorOption) ||
+                              (_showCustomColorInput &&
+                                  _customColorController.text.isNotEmpty)
                           ? () {
                               String colorToAdd;
-                              
+
                               if (_showCustomColorInput) {
                                 colorToAdd = _customColorController.text.trim();
                               } else {
                                 colorToAdd = _selectedColorFromDropdown!;
                               }
-                              
-                              if (colorToAdd.isNotEmpty && !_selectedColors.contains(colorToAdd)) {
+
+                              if (colorToAdd.isNotEmpty &&
+                                  !_selectedColors.contains(colorToAdd)) {
                                 setState(() {
                                   _selectedColors.add(colorToAdd);
                                   _selectedColorFromDropdown = null;
@@ -407,7 +444,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               } else if (_selectedColors.contains(colorToAdd)) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Color "$colorToAdd" already added'),
+                                    content: Text(
+                                        'Color "$colorToAdd" already added'),
                                     backgroundColor: Colors.red,
                                   ),
                                 );
@@ -415,8 +453,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: (_selectedColorFromDropdown != null && _selectedColorFromDropdown != _customColorOption) || 
-                                        (_showCustomColorInput && _customColorController.text.isNotEmpty)
+                        backgroundColor: (_selectedColorFromDropdown != null &&
+                                    _selectedColorFromDropdown !=
+                                        _customColorOption) ||
+                                (_showCustomColorInput &&
+                                    _customColorController.text.isNotEmpty)
                             ? Colors.black
                             : Colors.grey[400],
                         foregroundColor: Colors.white,
@@ -464,7 +505,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 ),
               ],
               const SizedBox(height: 32),
-              
+
               // Add Product button
               SizedBox(
                 width: double.infinity,
@@ -495,17 +536,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     if (_selectedSizes.isEmpty) {
       _showError('Please add at least one size');
       return;
     }
-    
+
     if (_selectedColors.isEmpty) {
       _showError('Please add at least one color');
       return;
     }
-    
+
     // Create new product
     final newProduct = Product(
       id: const Uuid().v4(),
@@ -515,7 +556,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       colors: _selectedColors,
       price: double.parse(_priceController.text),
     );
-    
+
     // Return the new product to the previous screen
     Navigator.of(context).pop(newProduct);
   }

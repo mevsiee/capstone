@@ -3,7 +3,6 @@ import 'package:uuid/uuid.dart';
 import 'package:pos_system/models/cart_item.dart';
 import 'package:pos_system/models/product.dart';
 import 'package:pos_system/providers/product_provider.dart';
-import 'package:pos_system/models/staff.dart';
 
 class CartProvider with ChangeNotifier {
   List<CartItem> _items = [];

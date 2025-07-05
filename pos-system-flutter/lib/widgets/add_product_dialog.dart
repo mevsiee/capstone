@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 
 class AddProductDialog extends StatefulWidget {
   final Function(Product) onAddProduct;
-  
+
   const AddProductDialog({
     Key? key,
     required this.onAddProduct,
@@ -19,16 +19,47 @@ class _AddProductDialogState extends State<AddProductDialog> {
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
   String _selectedCategory = '';
-  final List<String> _categories = ['Tops', 'Bottoms', 'Dresses', 'Outerwear', 'Accessories', 'Footwear'];
-  
+  final List<String> _categories = [
+    'Tops',
+    'Bottoms',
+    'Dresses',
+    'Outerwear',
+    'Accessories',
+    'Footwear'
+  ];
+
   final List<String> _selectedSizes = [];
   final List<String> _selectedColors = [];
-  
+
   String _sizeInput = '';
   String _colorInput = '';
-  
-  final List<String> _commonSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '28', '30', '32', '34', '36'];
-  final List<String> _commonColors = ['Black', 'White', 'Navy', 'Gray', 'Blue', 'Red', 'Green', 'Yellow', 'Pink', 'Maroon', 'Washed'];
+
+  final List<String> _commonSizes = [
+    'XS',
+    'S',
+    'M',
+    'L',
+    'XL',
+    'XXL',
+    '28',
+    '30',
+    '32',
+    '34',
+    '36'
+  ];
+  final List<String> _commonColors = [
+    'Black',
+    'White',
+    'Navy',
+    'Gray',
+    'Blue',
+    'Red',
+    'Green',
+    'Yellow',
+    'Pink',
+    'Maroon',
+    'Washed'
+  ];
 
   @override
   void dispose() {
@@ -43,7 +74,9 @@ class _AddProductDialogState extends State<AddProductDialog> {
     return AlertDialog(
       contentPadding: const EdgeInsets.all(16.0),
       content: SizedBox(
-        width: MediaQuery.of(context).size.width > 500 ? 500 : MediaQuery.of(context).size.width * 0.9,
+        width: MediaQuery.of(context).size.width > 500
+            ? 500
+            : MediaQuery.of(context).size.width * 0.9,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -80,7 +113,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                 ],
               ),
               const SizedBox(height: 24),
-              
+
               // Name field
               const Text(
                 'Name',
@@ -99,7 +132,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Category dropdown
               const Text(
                 'Category',
@@ -133,7 +166,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                 isExpanded: true,
               ),
               const SizedBox(height: 16),
-              
+
               // Price field
               const Text(
                 'Price (₱)',
@@ -144,7 +177,8 @@ class _AddProductDialogState extends State<AddProductDialog> {
               const SizedBox(height: 8),
               TextField(
                 controller: _priceController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -156,10 +190,10 @@ class _AddProductDialogState extends State<AddProductDialog> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               const Divider(),
               const SizedBox(height: 16),
-              
+
               // Sizes section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -171,7 +205,9 @@ class _AddProductDialogState extends State<AddProductDialog> {
                     ),
                   ),
                   Text(
-                    _selectedSizes.isEmpty ? 'No sizes added' : '${_selectedSizes.length} sizes',
+                    _selectedSizes.isEmpty
+                        ? 'No sizes added'
+                        : '${_selectedSizes.length} sizes',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 14,
@@ -212,7 +248,8 @@ class _AddProductDialogState extends State<AddProductDialog> {
                     width: 80,
                     child: ElevatedButton(
                       onPressed: () {
-                        if (_sizeInput.isNotEmpty && !_selectedSizes.contains(_sizeInput)) {
+                        if (_sizeInput.isNotEmpty &&
+                            !_selectedSizes.contains(_sizeInput)) {
                           setState(() {
                             _selectedSizes.add(_sizeInput);
                             _sizeInput = '';
@@ -247,7 +284,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                 ),
               ],
               const SizedBox(height: 16),
-              
+
               // Colors section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -259,7 +296,9 @@ class _AddProductDialogState extends State<AddProductDialog> {
                     ),
                   ),
                   Text(
-                    _selectedColors.isEmpty ? 'No colors added' : '${_selectedColors.length} colors',
+                    _selectedColors.isEmpty
+                        ? 'No colors added'
+                        : '${_selectedColors.length} colors',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 14,
@@ -300,7 +339,8 @@ class _AddProductDialogState extends State<AddProductDialog> {
                     width: 80,
                     child: ElevatedButton(
                       onPressed: () {
-                        if (_colorInput.isNotEmpty && !_selectedColors.contains(_colorInput)) {
+                        if (_colorInput.isNotEmpty &&
+                            !_selectedColors.contains(_colorInput)) {
                           setState(() {
                             _selectedColors.add(_colorInput);
                             _colorInput = '';
@@ -335,7 +375,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                 ),
               ],
               const SizedBox(height: 24),
-              
+
               // Action buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -368,33 +408,33 @@ class _AddProductDialogState extends State<AddProductDialog> {
       _showError('Please enter a product name');
       return;
     }
-    
+
     if (_selectedCategory.isEmpty) {
       _showError('Please select a category');
       return;
     }
-    
+
     if (_priceController.text.isEmpty) {
       _showError('Please enter a price');
       return;
     }
-    
+
     final price = double.tryParse(_priceController.text);
     if (price == null || price <= 0) {
       _showError('Please enter a valid price');
       return;
     }
-    
+
     if (_selectedSizes.isEmpty) {
       _showError('Please add at least one size');
       return;
     }
-    
+
     if (_selectedColors.isEmpty) {
       _showError('Please add at least one color');
       return;
     }
-    
+
     // Create new product
     final newProduct = Product(
       id: const Uuid().v4(),
@@ -404,10 +444,10 @@ class _AddProductDialogState extends State<AddProductDialog> {
       colors: _selectedColors,
       price: price,
     );
-    
+
     // Call the callback function
     widget.onAddProduct(newProduct);
-    
+
     // Close the dialog
     Navigator.of(context).pop();
   }

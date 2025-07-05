@@ -31,15 +31,12 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      category: json['category'] as String,
-      sizes: (json['sizes'] as List<dynamic>).map((size) => size as String).toList(),
-      colors: (json['colors'] as List<dynamic>).map((color) => color as String).toList(),
-      price: json['price'] as double,
-      bulkPricing: json['bulkPricing'] != null 
-          ? BulkPricing.fromJson(json['bulkPricing'] as Map<String, dynamic>) 
-          : null,
+      id: json['Product_ID']?.toString() ?? '',
+      name: json['Name']?.toString() ?? '',
+      category: json['Category']?.toString() ?? '',
+      sizes: List<String>.from(json['Size'] ?? []),
+      colors: List<String>.from(json['Color'] ?? []),
+      price: (json['Price'] ?? 0),
     );
   }
 }

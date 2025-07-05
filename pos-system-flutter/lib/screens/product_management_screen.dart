@@ -1,7 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 import 'package:pos_system/models/product.dart';
-import 'package:pos_system/providers/product_provider.dart';
 import 'package:pos_system/screens/add_product_screen.dart';
 import 'package:pos_system/screens/edit_product_screen.dart';
 
@@ -9,179 +9,159 @@ class ProductManagementScreen extends StatefulWidget {
   const ProductManagementScreen({Key? key}) : super(key: key);
 
   @override
-  State<ProductManagementScreen> createState() => _ProductManagementScreenState();
+  State<ProductManagementScreen> createState() =>
+      _ProductManagementScreenState();
 }
 
 class _ProductManagementScreenState extends State<ProductManagementScreen> {
   String _selectedCategory = 'All';
-  final List<String> _categories = ['All', 'Tops', 'Bottoms', 'Dresses', 'Outerwear', 'Accessories', 'Footwear'];
-  
+  final List<String> _categories = [
+    'All',
+    'Tops',
+    'Bottoms',
+    'Dresses',
+    'Outerwear',
+    'Accessories',
+    'Footwear'
+  ];
+
+  List<Product> _allProducts = [];
+  bool _isLoading = true;
+  String _errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProducts();
+  }
+
+  Future<void> _fetchProducts() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    try {
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/api/products'));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final List<dynamic> jsonList = data['products'];
+
+        final List<Product> loadedProducts = jsonList.map((jsonItem) {
+          return Product(
+            id: jsonItem['Product_ID']?.toString() ?? '',
+            name: jsonItem['Name']?.toString() ?? '',
+            category: jsonItem['Category']?.toString() ?? '',
+            price: (jsonItem['Price'] ?? 0),
+            colors: List<String>.from(jsonItem['Color'] ?? []),
+            sizes: List<String>.from(jsonItem['Size'] ?? []),
+          );
+        }).toList();
+
+        setState(() {
+          _allProducts = loadedProducts;
+        });
+      } else {
+        setState(() {
+          _errorMessage =
+              'Failed to load products. Status code: ${response.statusCode}';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to connect to API: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  List<Product> get _filteredProducts {
+    if (_selectedCategory == 'All') return _allProducts;
+    return _allProducts.where((p) => p.category == _selectedCategory).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final productProvider = Provider.of<ProductProvider>(context);
-    
-    // Filter products based on selected category
-    final displayProducts = productProvider.getProductsByCategory(_selectedCategory);
-    
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Product Management'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title
-            const Text(
-              'Product Management',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            
-            // Category dropdown
-            DropdownButton<String>(
-              value: _selectedCategory,
-              isExpanded: true,
-              items: _categories.map((category) {
-                return DropdownMenuItem<String>(
-                  value: category,
-                  child: Text(category),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _selectedCategory = value;
-                  });
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-            
-            // Product list
-            Expanded(
-              child: displayProducts.isEmpty
-                  ? const Center(
-                      child: Text('No products found in this category'),
-                    )
-                  : ListView.builder(
-                      itemCount: displayProducts.length,
-                      itemBuilder: (context, index) {
-                        final product = displayProducts[index];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 8.0),
-                          child: ListTile(
-                            title: Text(product.name),
-                            subtitle: Text('${product.category} - ₱${product.price.toStringAsFixed(2)}'),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () {
-                                    _navigateToEditProduct(product, productProvider);
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () {
-                                    _deleteProduct(product, productProvider);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-            ),
-            // Add padding at the bottom to ensure the last item is not covered by the FAB
-            const SizedBox(height: 80),
-          ],
-        ),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _errorMessage.isNotEmpty
+                ? Center(
+                    child: Text(_errorMessage,
+                        style: const TextStyle(color: Colors.red)))
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DropdownButton<String>(
+                        value: _selectedCategory,
+                        isExpanded: true,
+                        items: _categories.map((category) {
+                          return DropdownMenuItem<String>(
+                            value: category,
+                            child: Text(category),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              _selectedCategory = value;
+                            });
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: _filteredProducts.isEmpty
+                            ? const Center(child: Text('No products found.'))
+                            : ListView.builder(
+                                itemCount: _filteredProducts.length,
+                                itemBuilder: (context, index) {
+                                  final product = _filteredProducts[index];
+                                  return Card(
+                                    child: ListTile(
+                                      title: Text(product.name),
+                                      subtitle: Text(
+                                          '${product.category} - ₱${product.price}'),
+                                      trailing: IconButton(
+                                        icon: const Icon(Icons.edit),
+                                        onPressed: () {
+                                          // Optional: Add edit functionality
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                      const SizedBox(height: 80),
+                    ],
+                  ),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 16.0),
-        child: FloatingActionButton(
-          onPressed: () => _navigateToAddProduct(productProvider),
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _navigateToAddProduct(),
+        child: const Icon(Icons.add),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
-  Future<void> _navigateToAddProduct(ProductProvider productProvider) async {
+  Future<void> _navigateToAddProduct() async {
     final result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const AddProductScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const AddProductScreen()),
     );
-    
-    // Check if a product was returned
-    if (result != null && result is Product) {
-      productProvider.addProduct(result);
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${result.name} has been added'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
-  }
 
-  Future<void> _navigateToEditProduct(Product product, ProductProvider productProvider) async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => EditProductScreen(product: product),
-      ),
-    );
-    
-    // Check if an updated product was returned
-    if (result != null && result is Product) {
-      productProvider.updateProduct(result);
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${result.name} has been updated'),
-          backgroundColor: Colors.green,
-        ),
-      );
+    if (result != null) {
+      // Re-fetch the data after adding
+      _fetchProducts();
     }
-  }
-
-  void _deleteProduct(Product product, ProductProvider productProvider) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Product'),
-        content: Text('Are you sure you want to delete "${product.name}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              productProvider.deleteProduct(product.id);
-              Navigator.of(context).pop();
-              
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${product.name} has been deleted'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
