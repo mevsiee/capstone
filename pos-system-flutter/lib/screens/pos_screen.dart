@@ -7,7 +7,6 @@ import 'package:pos_system/providers/product_provider.dart';
 import 'package:pos_system/widgets/product_form.dart';
 import 'package:pos_system/widgets/cart_summary.dart';
 import 'package:pos_system/data/staff.dart';
-import 'package:pos_system/widgets/daily_sales_report_dialog.dart';
 
 class PosScreen extends StatefulWidget {
   const PosScreen({Key? key}) : super(key: key);

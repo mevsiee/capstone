@@ -44,8 +44,8 @@ class AccountSettingsScreen extends StatelessWidget {
                         backgroundImage: user?.image != null ? NetworkImage(user!.image!) : null,
                         child: user?.image == null
                             ? Text(
-                                user != null && user!.name.isNotEmpty 
-                                    ? user!.name[0] 
+                                user != null && user.name.isNotEmpty 
+                                    ? user.name[0] 
                                     : '?',
                                 style: const TextStyle(fontSize: 24),
                               )
