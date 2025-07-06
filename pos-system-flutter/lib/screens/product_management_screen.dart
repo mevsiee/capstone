@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pos_system/models/product.dart';
 import 'package:pos_system/screens/add_product_screen.dart';
 import 'package:pos_system/screens/edit_product_screen.dart';
@@ -35,15 +37,25 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
     _fetchProducts();
   }
 
+  String getBaseUrl() {
+    if (Platform.isAndroid) {
+      return 'http://10.0.2.2:3000';
+    } else {
+      return 'http://localhost:3000';
+    }
+  }
+
   Future<void> _fetchProducts() async {
     setState(() {
       _isLoading = true;
       _errorMessage = '';
     });
 
+    final prefs = await SharedPreferences.getInstance();
+
     try {
       final response =
-          await http.get(Uri.parse('http://localhost:3000/api/products'));
+          await http.get(Uri.parse('${getBaseUrl()}/api/products'));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -54,22 +66,27 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
             id: jsonItem['Product_ID']?.toString() ?? '',
             name: jsonItem['Name']?.toString() ?? '',
             category: jsonItem['Category']?.toString() ?? '',
-            price: (jsonItem['Price'] ?? 0),
+            price: (jsonItem['Price'] ?? 0).toDouble(),
             colors: List<String>.from(jsonItem['Color'] ?? []),
             sizes: List<String>.from(jsonItem['Size'] ?? []),
           );
         }).toList();
 
+        // ✅ Save to cache
+        await prefs.setString('cached_products', jsonEncode(jsonList));
+
         setState(() {
           _allProducts = loadedProducts;
         });
       } else {
+        _loadCachedProducts(prefs);
         setState(() {
           _errorMessage =
               'Failed to load products. Status code: ${response.statusCode}';
         });
       }
     } catch (e) {
+      _loadCachedProducts(prefs);
       setState(() {
         _errorMessage = 'Failed to connect to API: $e';
       });
@@ -77,6 +94,31 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  void _loadCachedProducts(SharedPreferences prefs) {
+    final cachedData = prefs.getString('cached_products');
+    if (cachedData != null) {
+      try {
+        final List<dynamic> jsonList = jsonDecode(cachedData);
+        final List<Product> cachedProducts = jsonList.map((jsonItem) {
+          return Product(
+            id: jsonItem['Product_ID']?.toString() ?? '',
+            name: jsonItem['Name']?.toString() ?? '',
+            category: jsonItem['Category']?.toString() ?? '',
+            price: (jsonItem['Price'] ?? 0).toDouble(),
+            colors: List<String>.from(jsonItem['Color'] ?? []),
+            sizes: List<String>.from(jsonItem['Size'] ?? []),
+          );
+        }).toList();
+
+        setState(() {
+          _allProducts = cachedProducts;
+        });
+      } catch (e) {
+        print('Failed to parse cached data: $e');
+      }
     }
   }
 
@@ -160,7 +202,6 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
     );
 
     if (result != null) {
-      // Re-fetch the data after adding
       _fetchProducts();
     }
   }
