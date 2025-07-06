@@ -33,7 +33,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.5
   provider: ^6.0.5
-  shared_preferences: ^2.2.0
+  shared_preferences: ^2.2.2
   intl: ^0.18.1
   uuid: ^3.0.7
   # Removed pdf, path_provider, open_file, and csv packages as they were only used for reporting
