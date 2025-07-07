@@ -4,11 +4,7 @@
 # This file should be version controlled and should not be manually edited.
 
 version:
-<<<<<<< Updated upstream
-  revision: "8defaa71a77c16e8547abdbfad2053ce3a6e2d5b"
-=======
   revision: "35c388afb57ef061d06a39b537336c87e0e3d1b1"
->>>>>>> Stashed changes
   channel: "stable"
 
 project_type: app
@@ -17,19 +13,11 @@ project_type: app
 migration:
   platforms:
     - platform: root
-<<<<<<< Updated upstream
-      create_revision: 8defaa71a77c16e8547abdbfad2053ce3a6e2d5b
-      base_revision: 8defaa71a77c16e8547abdbfad2053ce3a6e2d5b
-    - platform: web
-      create_revision: 8defaa71a77c16e8547abdbfad2053ce3a6e2d5b
-      base_revision: 8defaa71a77c16e8547abdbfad2053ce3a6e2d5b
-=======
       create_revision: 35c388afb57ef061d06a39b537336c87e0e3d1b1
       base_revision: 35c388afb57ef061d06a39b537336c87e0e3d1b1
-    - platform: windows
+    - platform: android
       create_revision: 35c388afb57ef061d06a39b537336c87e0e3d1b1
       base_revision: 35c388afb57ef061d06a39b537336c87e0e3d1b1
->>>>>>> Stashed changes
 
   # User provided section
 

@@ -4,8 +4,8 @@ import 'package:pos_system/providers/auth_provider.dart';
 import 'package:pos_system/providers/cart_provider.dart';
 import 'package:pos_system/providers/transaction_provider.dart';
 import 'package:pos_system/providers/product_provider.dart';
-import 'package:pos_system/screens/login_screen.dart';
-import 'package:pos_system/screens/home_screen.dart';
+import 'package:pos_system/screens/Authentication/login_screen.dart';
+import 'package:pos_system/screens/Main%20Screen/home_screen.dart';
 import 'package:pos_system/theme/app_theme.dart';
 
 void main() {
