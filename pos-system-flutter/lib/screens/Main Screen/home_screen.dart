@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pos_system/providers/auth_provider.dart';
 import 'package:pos_system/widgets/app_header.dart';
-import 'package:pos_system/screens/pos_screen.dart';
-import 'package:pos_system/screens/transaction_history_screen.dart';
-import 'package:pos_system/screens/product_management_screen.dart';
+import 'package:pos_system/screens/Transaction/pos_screen.dart';
+import 'package:pos_system/screens/Transaction/transaction_history_screen.dart';
+import 'package:pos_system/screens/Product%20Screen/product_management_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);

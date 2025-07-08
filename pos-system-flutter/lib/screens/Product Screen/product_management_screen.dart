@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pos_system/models/product.dart';
-import 'package:pos_system/screens/add_product_screen.dart';
-import 'package:pos_system/screens/edit_product_screen.dart';
+import 'package:pos_system/screens/Product%20Screen/add_product_screen.dart';
+import 'package:pos_system/screens/Product%20Screen/edit_product_screen.dart';
 
 class ProductManagementScreen extends StatefulWidget {
   const ProductManagementScreen({Key? key}) : super(key: key);
