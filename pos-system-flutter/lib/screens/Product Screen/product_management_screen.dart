@@ -1,8 +1,7 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:pos_system/models/product.dart';
+import 'package:provider/provider.dart';
+import '../../models/product.dart';
+import '../../providers/product_provider.dart';
 import 'package:pos_system/screens/Product%20Screen/add_product_screen.dart';
 import 'package:pos_system/screens/Product%20Screen/edit_product_screen.dart';
 
@@ -15,97 +14,45 @@ class ProductManagementScreen extends StatefulWidget {
 }
 
 class _ProductManagementScreenState extends State<ProductManagementScreen> {
-  String _selectedCategory = 'All';
-  final List<String> _categories = [
-    'All',
-    'Tops',
-    'Bottoms',
-    'Dresses',
-    'Outerwear',
-    'Accessories',
-    'Footwear'
-  ];
-
-  List<Product> _allProducts = [];
-  bool _isLoading = true;
-  String _errorMessage = '';
-
   @override
   void initState() {
     super.initState();
-    _fetchProducts();
-  }
-
-  String getBaseUrl() {
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:3000';
-    } else {
-      return 'http://localhost:3000';
-    }
-  }
-
-  Future<void> _fetchProducts() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = '';
+    Future.microtask(() {
+      Provider.of<ProductProvider>(context, listen: false).fetchProducts();
     });
-
-    try {
-      final response =
-          await http.get(Uri.parse('http://localhost:3000/api/products'));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final List<dynamic> jsonList = data['products'];
-
-        final List<Product> loadedProducts = jsonList.map((jsonItem) {
-          return Product(
-            id: jsonItem['Product_ID']?.toString() ?? '',
-            name: jsonItem['Name']?.toString() ?? '',
-            category: jsonItem['Category']?.toString() ?? '',
-            price: (jsonItem['Price'] ?? 0).toDouble(),
-            colors: List<String>.from(jsonItem['Color'] ?? []),
-            sizes: List<String>.from(jsonItem['Size'] ?? []),
-          );
-        }).toList();
-
-        setState(() {
-          _allProducts = loadedProducts;
-        });
-      }
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  List<Product> get _filteredProducts {
-    if (_selectedCategory == 'All') return _allProducts;
-    return _allProducts.where((p) => p.category == _selectedCategory).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<ProductProvider>(context);
+    final isLoading = provider.isLoading;
+    final errorMessage = provider.errorMessage;
+    final selectedCategory = provider.selectedCategory;
+    final filteredProducts = provider.filteredProducts;
+    final categories = provider.categories;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Product Management'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: _isLoading
+        child: isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _errorMessage.isNotEmpty
+            : errorMessage.isNotEmpty
                 ? Center(
-                    child: Text(_errorMessage,
-                        style: const TextStyle(color: Colors.red)))
+                    child: Text(
+                      errorMessage,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  )
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       DropdownButton<String>(
-                        value: _selectedCategory,
+                        value: selectedCategory,
                         isExpanded: true,
-                        items: _categories.map((category) {
+                        items: categories.map((category) {
                           return DropdownMenuItem<String>(
                             value: category,
                             child: Text(category),
@@ -113,38 +60,39 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                         }).toList(),
                         onChanged: (value) {
                           if (value != null) {
-                            setState(() {
-                              _selectedCategory = value;
-                            });
+                            provider.changeCategory(value);
                           }
                         },
                       ),
                       const SizedBox(height: 16),
                       Expanded(
-                        child: _filteredProducts.isEmpty
+                        child: filteredProducts.isEmpty
                             ? const Center(child: Text('No products found.'))
                             : ListView.builder(
-                                itemCount: _filteredProducts.length,
+                                itemCount: filteredProducts.length,
                                 itemBuilder: (context, index) {
-                                  final product = _filteredProducts[index];
+                                  final product = filteredProducts[index];
                                   return Card(
                                     child: ListTile(
                                       title: Text(product.name),
                                       subtitle: Text(
                                           '${product.category} - ₱${product.price}'),
                                       trailing: IconButton(
-                                          icon: const Icon(Icons.edit),
-                                          onPressed: () async {
-                                            final updatedProduct =
-                                                await Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    EditProductScreen(
-                                                        product: product),
-                                              ),
-                                            );
-                                          }),
+                                        icon: const Icon(Icons.edit),
+                                        onPressed: () async {
+                                          final updated = await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  EditProductScreen(
+                                                      product: product),
+                                            ),
+                                          );
+                                          if (updated != null) {
+                                            provider.fetchProducts();
+                                          }
+                                        },
+                                      ),
                                     ),
                                   );
                                 },
@@ -155,19 +103,17 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                   ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddProduct(),
+        onPressed: () async {
+          final result = await Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const AddProductScreen()),
+          );
+
+          if (result != null) {
+            provider.fetchProducts();
+          }
+        },
         child: const Icon(Icons.add),
       ),
     );
-  }
-
-  Future<void> _navigateToAddProduct() async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const AddProductScreen()),
-    );
-
-    if (result != null) {
-      _fetchProducts();
-    }
   }
 }
