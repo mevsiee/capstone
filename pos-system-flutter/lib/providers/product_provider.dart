@@ -47,7 +47,7 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final url = Uri.parse('http://localhost:3000/api/products');
+      final url = Uri.parse('http://10.0.2.2:3000/api/products');
 
       final response = await http.get(url);
 

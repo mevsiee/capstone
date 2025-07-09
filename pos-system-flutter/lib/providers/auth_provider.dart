@@ -1,9 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:pos_system/models/user.dart';
 
 class AuthProvider with ChangeNotifier {
+  final fb_auth.FirebaseAuth _firebaseAuth = fb_auth.FirebaseAuth.instance;
+
   User? _user;
   bool _isLoading = false;
 
@@ -12,48 +13,41 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   AuthProvider() {
-    _loadUserFromPrefs();
+    checkLoginStatus(); // Check current Firebase session
   }
 
-  Future<void> _loadUserFromPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userJson = prefs.getString('user');
-    
-    if (userJson != null) {
-      try {
-        final Map<String, dynamic> userMap = json.decode(userJson) as Map<String, dynamic>;
-        _user = User.fromJson(userMap);
-        notifyListeners();
-      } catch (e) {
-        print('Error loading user from preferences: $e');
-      }
+  Future<void> checkLoginStatus() async {
+    final fbUser = _firebaseAuth.currentUser;
+
+    if (fbUser != null) {
+      _user = User(
+        name: fbUser.displayName ?? "No Name",
+        email: fbUser.email ?? "No Email",
+        image: fbUser.photoURL ??
+            "https://api.dicebear.com/7.x/avataaars/svg?seed=default",
+      );
+    } else {
+      _user = null;
     }
+
+    notifyListeners();
   }
 
   Future<bool> login(String email, String password) async {
     _isLoading = true;
     notifyListeners();
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
-
-    // Mock login - in a real app, this would validate against a backend
-    if (email.isNotEmpty) {
-      final mockUser = User(
-        name: "John Doe",
+    try {
+      await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
-        image: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
+        password: password,
       );
 
-      _user = mockUser;
-      
-      // Save to shared preferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user', json.encode(mockUser.toJson()));
-      
+      await checkLoginStatus();
       _isLoading = false;
-      notifyListeners();
       return true;
+    } on fb_auth.FirebaseAuthException catch (e) {
+      debugPrint("Login failed: ${e.message}");
     }
 
     _isLoading = false;
@@ -62,12 +56,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
+    await _firebaseAuth.signOut();
     _user = null;
-    
-    // Clear from shared preferences
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('user');
-    
     notifyListeners();
   }
 }
