@@ -1,12 +1,13 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../models/product.dart';
 
 class ProductProvider with ChangeNotifier {
   List<Product> _products = [];
+  List<String> _categories = [
+    'All'
+  ]; // Start with 'All', then append API values.
 
   bool _isLoading = false;
   String _errorMessage = '';
@@ -17,16 +18,7 @@ class ProductProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
   String get selectedCategory => _selectedCategory;
-
-  List<String> get categories => [
-        'All',
-        'Tops',
-        'Bottoms',
-        'Dresses',
-        'Outerwear',
-        'Accessories',
-        'Footwear',
-      ];
+  List<String> get categories => _categories;
 
   // Filtered product list based on selected category
   List<Product> get filteredProducts {
@@ -40,6 +32,29 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// ✅ Fetch categories from /api/configurations
+  Future<void> fetchConfigurations() async {
+    try {
+      final url = Uri.parse('http://localhost:3000/api/configurations');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        final List<String> fetchedCategories =
+            List<String>.from(data['categories'] ?? []);
+        _categories = ['All', ...fetchedCategories];
+        notifyListeners();
+      } else {
+        _errorMessage = 'Failed to load configurations';
+        notifyListeners();
+      }
+    } catch (e) {
+      _errorMessage = 'Error loading configurations: $e';
+      notifyListeners();
+    }
+  }
+
   // Fetch product list from the API
   Future<void> fetchProducts() async {
     _isLoading = true;
@@ -47,8 +62,7 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final url = Uri.parse('http://10.0.2.2:3000/api/products');
-
+      final url = Uri.parse('http://localhost:3000/api/products');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -76,7 +90,7 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Add a new product to the list (local only; optional to add POST API)
+  // Add a new product to the list
   void addProduct(Product product) {
     _products.add(product);
     notifyListeners();
@@ -91,10 +105,22 @@ class ProductProvider with ChangeNotifier {
     }
   }
 
-  // Delete product from the list
-  void deleteProduct(String productId) {
-    _products.removeWhere((p) => p.id == productId);
-    notifyListeners();
+  // 🔥 API-based delete product
+  Future<void> deleteProduct(String productId) async {
+    final url = Uri.parse('http://localhost:3000/api/products/$productId');
+
+    try {
+      final response = await http.delete(url);
+
+      if (response.statusCode == 200) {
+        _products.removeWhere((p) => p.id == productId);
+        notifyListeners();
+      } else {
+        throw Exception('Failed to delete product: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error deleting product: $e');
+    }
   }
 
   // Optional: Get product by ID

@@ -78,6 +78,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             }
                             return null;
                           },
+                          onChanged: (_) {
+                            if (authProvider.errorMessage.isNotEmpty) {
+                              authProvider.clearError();
+                            }
+                          },
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
@@ -93,7 +98,19 @@ class _LoginScreenState extends State<LoginScreen> {
                             }
                             return null;
                           },
+                          onChanged: (_) {
+                            if (authProvider.errorMessage.isNotEmpty) {
+                              authProvider.clearError();
+                            }
+                          },
                         ),
+                        if (authProvider.errorMessage.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            authProvider.errorMessage,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ],
                         const SizedBox(height: 24),
                         SizedBox(
                           width: double.infinity,
@@ -110,7 +127,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   )
                                 : const Icon(Icons.login),
                             label: Text(
-                              authProvider.isLoading ? 'Signing in...' : 'Sign In',
+                              authProvider.isLoading
+                                  ? 'Signing in...'
+                                  : 'Sign In',
                             ),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -120,8 +139,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 : () async {
                                     if (_formKey.currentState!.validate()) {
                                       await authProvider.login(
-                                        _emailController.text,
-                                        _passwordController.text,
+                                        _emailController.text.trim(),
+                                        _passwordController.text.trim(),
                                       );
                                     }
                                   },
