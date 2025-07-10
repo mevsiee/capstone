@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1062872438604",
+    "project_id": "eshop-pos",
+    "storage_bucket": "eshop-pos.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1062872438604:android:1367030756caead78521e9",
+        "android_client_info": {
+          "package_name": "com.example.pos_system"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1062872438604-f0nm2ti9qmfeue0aruq16o1klg6v3ad5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyRfRBA6T2pH5I1Z3zG-8e6XWnWB5Ci8A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1062872438604-f0nm2ti9qmfeue0aruq16o1klg6v3ad5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

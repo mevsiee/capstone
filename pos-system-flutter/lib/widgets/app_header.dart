@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pos_system/models/user.dart';
-import 'package:pos_system/screens/account_settings_screen.dart';
+import 'package:pos_system/screens/User%20Management/account_settings_screen.dart';
 
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final User? user;
