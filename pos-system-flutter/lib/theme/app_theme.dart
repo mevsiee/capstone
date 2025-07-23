@@ -14,7 +14,7 @@ class AppTheme {
     primaryColor: primaryColor,
     scaffoldBackgroundColor: backgroundColor,
     cardColor: cardColor,
-    colorScheme: ColorScheme.light(
+    colorScheme: const ColorScheme.light(
       primary: primaryColor,
       secondary: secondaryColor,
       onPrimary: Colors.white,
@@ -35,21 +35,21 @@ class AppTheme {
       elevation: 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: borderColor),
+        side: const BorderSide(color: borderColor),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: borderColor),
+        borderSide: const BorderSide(color: borderColor),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: borderColor),
+        borderSide: const BorderSide(color: borderColor),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: primaryColor),
+        borderSide: const BorderSide(color: primaryColor),
       ),
       filled: true,
       fillColor: backgroundColor,
@@ -68,7 +68,7 @@ class AppTheme {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: textColor,
-        side: BorderSide(color: borderColor),
+        side: const BorderSide(color: borderColor),
         minimumSize: const Size(double.infinity, 48),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -80,7 +80,7 @@ class AppTheme {
         foregroundColor: primaryColor,
       ),
     ),
-    tabBarTheme: TabBarThemeData(
+    tabBarTheme: const TabBarThemeData(
       labelColor: primaryColor,
       unselectedLabelColor: mutedTextColor,
       indicator: BoxDecoration(
@@ -89,7 +89,7 @@ class AppTheme {
         ),
       ),
     ),
-    dividerTheme: DividerThemeData(
+    dividerTheme: const DividerThemeData(
       color: borderColor,
       thickness: 1,
     ),

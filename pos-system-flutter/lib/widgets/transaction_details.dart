@@ -46,8 +46,8 @@ class TransactionDetails extends StatelessWidget {
                       topRight: Radius.circular(4),
                     ),
                   ),
-                  child: Row(
-                    children: const [
+                  child: const Row(
+                    children: [
                       Expanded(
                         flex: 3,
                         child: Text(

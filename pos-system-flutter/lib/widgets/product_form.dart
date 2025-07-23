@@ -32,7 +32,7 @@ class _ProductFormState extends State<ProductForm> {
   
   // Red asterisk widget for required fields
   Widget _requiredAsterisk() {
-    return Text(
+    return const Text(
       ' *',
       style: TextStyle(
         color: Colors.red,
@@ -91,7 +91,7 @@ class _ProductFormState extends State<ProductForm> {
               // Product dropdown with red asterisk
               Row(
                 children: [
-                  Text('Product'),
+                  const Text('Product'),
                   _requiredAsterisk(),
                 ],
               ),
@@ -130,7 +130,7 @@ class _ProductFormState extends State<ProductForm> {
                       children: [
                         Row(
                           children: [
-                            Text('Size'),
+                            const Text('Size'),
                             _requiredAsterisk(),
                           ],
                         ),
@@ -172,7 +172,7 @@ class _ProductFormState extends State<ProductForm> {
                       children: [
                         Row(
                           children: [
-                            Text('Color'),
+                            const Text('Color'),
                             _requiredAsterisk(),
                           ],
                         ),
@@ -250,7 +250,7 @@ class _ProductFormState extends State<ProductForm> {
                       children: [
                         Row(
                           children: [
-                            Text('Quantity'),
+                            const Text('Quantity'),
                             _requiredAsterisk(),
                           ],
                         ),

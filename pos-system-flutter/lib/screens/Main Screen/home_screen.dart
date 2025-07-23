@@ -78,10 +78,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                children: [
-                  const PosScreen(key: PageStorageKey('pos_screen')),
-                  const TransactionHistoryScreen(key: PageStorageKey('transaction_history')),
-                  const ProductManagementScreen(key: PageStorageKey('product_management')),
+                children: const [
+                  PosScreen(key: PageStorageKey('pos_screen')),
+                  TransactionHistoryScreen(key: PageStorageKey('transaction_history')),
+                  ProductManagementScreen(key: PageStorageKey('product_management')),
                 ],
               ),
             ),

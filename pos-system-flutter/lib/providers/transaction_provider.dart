@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:pos_system/models/staff.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pos_system/models/transaction.dart';
 import 'package:pos_system/models/cart_item.dart';
-import 'package:pos_system/data/staff.dart';
 import 'package:http/http.dart' as http;
 
 String generateCustomTransactionId() {
@@ -74,7 +72,7 @@ class TransactionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addTransaction({
+  Future<bool> addTransaction({
     required List<CartItem> items,
     required String location,
     required double subtotal,
@@ -87,15 +85,6 @@ class TransactionProvider with ChangeNotifier {
     final date =
         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-    String? supervisorName;
-    if (supervisorId != null) {
-      final supervisor = staffMembers.firstWhere(
-        (staff) => staff.id == supervisorId,
-        orElse: () => Staff(id: '', name: 'Unknown', position: ''),
-      );
-      supervisorName = supervisor.name;
-    }
-
     final transactionId = generateCustomTransactionId();
 
     final tempTransaction = Transaction(
@@ -107,32 +96,28 @@ class TransactionProvider with ChangeNotifier {
       discount: discount,
       total: total,
       employee: employee,
-      supervisorId: supervisorId,
-      supervisorName: supervisorName,
       timestamp: now.toIso8601String(),
     );
 
     try {
       final url = Uri.parse('http://localhost:3000/api/transactions');
-      print('📤 Posting transaction: ${json.encode(tempTransaction.toJson())}');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
         body: json.encode(tempTransaction.toJson()),
       );
 
-      print('✅ Response status: ${response.statusCode}');
-      print('✅ Response body: ${response.body}');
-
       if (response.statusCode == 201) {
         _transactions.insert(0, tempTransaction);
         await _cacheTransactions();
         notifyListeners();
+        return true;
       } else {
-        throw Exception('Failed to add transaction');
+        return false;
       }
     } catch (e) {
       print('❌ Error adding transaction: $e');
+      return false;
     }
   }
 

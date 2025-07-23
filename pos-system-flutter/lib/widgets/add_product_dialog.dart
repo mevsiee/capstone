@@ -70,7 +70,6 @@ class _AddProductDialogState extends State<AddProductDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
     return AlertDialog(
       contentPadding: const EdgeInsets.all(16.0),
       content: SizedBox(

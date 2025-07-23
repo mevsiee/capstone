@@ -77,7 +77,7 @@ class _AddProductFormState extends State<_AddProductForm> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: vm.priceController,
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: const InputDecoration(
                   hintText: 'Enter price',
                   border: OutlineInputBorder(),

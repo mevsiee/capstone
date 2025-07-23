@@ -41,15 +41,13 @@ class AccountSettingsScreen extends StatelessWidget {
                       CircleAvatar(
                         radius: 30,
                         backgroundColor: Colors.grey[300],
-                        backgroundImage: user?.image != null ? NetworkImage(user!.image!) : null,
-                        child: user?.image == null
-                            ? Text(
-                                user != null && user.name.isNotEmpty 
-                                    ? user.name[0] 
-                                    : '?',
-                                style: const TextStyle(fontSize: 24),
-                              )
-                            : null,
+                        child: Text(
+                          user?.name.isNotEmpty == true
+                              ? user!.name[0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                              fontSize: 24, color: Colors.black),
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -94,7 +92,7 @@ class AccountSettingsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Account settings
           Card(
             child: Column(
@@ -147,7 +145,7 @@ class AccountSettingsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Logout button
           ElevatedButton.icon(
             icon: const Icon(Icons.logout),

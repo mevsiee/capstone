@@ -9,8 +9,6 @@ class Transaction {
   final double discount;
   final double total;
   final String employee;
-  final String? supervisorId;
-  final String? supervisorName;
   final String timestamp;
 
   Transaction({
@@ -22,8 +20,6 @@ class Transaction {
     required this.discount,
     required this.total,
     required this.employee,
-    this.supervisorId,
-    this.supervisorName,
     required this.timestamp,
   });
 
@@ -51,8 +47,6 @@ class Transaction {
       'discount': discount,
       'total': total,
       'employee': employee,
-      'supervisorId': supervisorId,
-      'supervisorName': supervisorName,
       'timestamp': timestamp,
     };
   }
@@ -81,8 +75,6 @@ class Transaction {
       discount: json['discount'] as double,
       total: json['total'] as double,
       employee: json['employee'] as String,
-      supervisorId: json['supervisorId'] as String?,
-      supervisorName: json['supervisorName'] as String?,
       timestamp: json['timestamp'] as String,
     );
   }

@@ -97,22 +97,22 @@ class DailySalesReportDialog extends StatelessWidget {
             const Divider(height: 40),
             
             // Top Products
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Top Products',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
                     'No products sold',
-                    style: const TextStyle(fontSize: 14),
+                    style: TextStyle(fontSize: 14),
                   ),
                 ],
               ),
@@ -121,22 +121,22 @@ class DailySalesReportDialog extends StatelessWidget {
             const Divider(height: 40),
             
             // Sales by Location
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(24, 0, 24, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Sales by Location',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
                     'No sales by location',
-                    style: const TextStyle(fontSize: 14),
+                    style: TextStyle(fontSize: 14),
                   ),
                 ],
               ),

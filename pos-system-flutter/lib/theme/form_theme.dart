@@ -4,16 +4,16 @@ class FormTheme {
   static InputDecoration inputDecorationWithAsterisk(String label) {
     return InputDecoration(
       labelText: '$label *',
-      labelStyle: TextStyle(
+      labelStyle: const TextStyle(
         color: Colors.black87,
       ),
-      border: OutlineInputBorder(),
-      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      floatingLabelStyle: TextStyle(
+      border: const OutlineInputBorder(),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      floatingLabelStyle: const TextStyle(
         color: Colors.blue,
       ),
       suffixText: '*',
-      suffixStyle: TextStyle(
+      suffixStyle: const TextStyle(
         color: Colors.red,
         fontWeight: FontWeight.bold,
       ),
@@ -24,7 +24,7 @@ class FormTheme {
     return Row(
       children: [
         Text(label),
-        Text(
+        const Text(
           ' *',
           style: TextStyle(
             color: Colors.red,

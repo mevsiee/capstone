@@ -161,6 +161,21 @@ app.post('/api/transactions', async (req, res) => {
 });
 
 
+app.get('/api/employees', async (req, res) => {
+  try {
+    const snapshot = await db.collection('Employees').get(); // Adjust collection name if different
+    const employees = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    res.status(200).json(employees);
+  } catch (error) {
+    console.error('Error fetching employees:', error);
+    res.status(500).json({ error: 'Failed to fetch employees' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });

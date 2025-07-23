@@ -25,8 +25,6 @@ class AuthProvider with ChangeNotifier {
       _user = User(
         name: fbUser.displayName ?? "No Name",
         email: fbUser.email ?? "No Email",
-        image: fbUser.photoURL ??
-            "https://api.dicebear.com/7.x/avataaars/svg?seed=default",
       );
     } else {
       _user = null;
