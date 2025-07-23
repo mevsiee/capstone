@@ -1,10 +1,21 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:pos_system/models/staff.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pos_system/models/transaction.dart';
 import 'package:pos_system/models/cart_item.dart';
 import 'package:pos_system/data/staff.dart';
+import 'package:http/http.dart' as http;
+
+String generateCustomTransactionId() {
+  final millis = DateTime.now().millisecondsSinceEpoch;
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  final rand = Random();
+  final randomPart =
+      List.generate(5, (index) => chars[rand.nextInt(chars.length)]).join();
+  return 'TRX-$millis-$randomPart';
+}
 
 class TransactionProvider with ChangeNotifier {
   List<Transaction> _transactions = [];
@@ -14,27 +25,43 @@ class TransactionProvider with ChangeNotifier {
   String? get expandedTransactionId => _expandedTransactionId;
 
   TransactionProvider() {
-    _loadTransactions();
+    fetchTransactions();
   }
 
-  Future<void> _loadTransactions() async {
+  Future<void> fetchTransactions() async {
     final prefs = await SharedPreferences.getInstance();
-    final transactionsJson = prefs.getString('transactions');
-    
-    if (transactionsJson != null) {
-      try {
-        final List<dynamic> decoded = json.decode(transactionsJson) as List<dynamic>;
-        _transactions = decoded.map((item) => Transaction.fromJson(item as Map<String, dynamic>)).toList();
-        notifyListeners();
-      } catch (e) {
-        print('Error loading transactions from preferences: $e');
+    final cachedTransactions = prefs.getString('transactions');
+
+    try {
+      final url = Uri.parse('http://localhost:3000/api/transactions');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        _transactions = data.map((item) => Transaction.fromJson(item)).toList();
+        await _cacheTransactions();
+      } else {
+        if (cachedTransactions != null) {
+          _transactions = (json.decode(cachedTransactions) as List)
+              .map((item) => Transaction.fromJson(item))
+              .toList();
+        }
+      }
+    } catch (e) {
+      if (cachedTransactions != null) {
+        _transactions = (json.decode(cachedTransactions) as List)
+            .map((item) => Transaction.fromJson(item))
+            .toList();
       }
     }
+
+    notifyListeners();
   }
 
-  Future<void> _saveTransactions() async {
+  Future<void> _cacheTransactions() async {
     final prefs = await SharedPreferences.getInstance();
-    final transactionsJson = json.encode(_transactions.map((t) => t.toJson()).toList());
+    final transactionsJson =
+        json.encode(_transactions.map((t) => t.toJson()).toList());
     await prefs.setString('transactions', transactionsJson);
   }
 
@@ -57,9 +84,9 @@ class TransactionProvider with ChangeNotifier {
     String? supervisorId,
   }) async {
     final now = DateTime.now();
-    final date = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-    
-    // Find supervisor name if ID is provided
+    final date =
+        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
     String? supervisorName;
     if (supervisorId != null) {
       final supervisor = staffMembers.firstWhere(
@@ -68,9 +95,11 @@ class TransactionProvider with ChangeNotifier {
       );
       supervisorName = supervisor.name;
     }
-    
-    final newTransaction = Transaction(
-      id: "TRX-${(_transactions.length + 1).toString().padLeft(3, '0')}",
+
+    final transactionId = generateCustomTransactionId();
+
+    final tempTransaction = Transaction(
+      id: transactionId,
       date: date,
       location: location == 'store' ? 'Store' : 'Warehouse',
       items: items,
@@ -83,11 +112,30 @@ class TransactionProvider with ChangeNotifier {
       timestamp: now.toIso8601String(),
     );
 
-    _transactions.insert(0, newTransaction);
-    await _saveTransactions();
-    notifyListeners();
+    try {
+      final url = Uri.parse('http://localhost:3000/api/transactions');
+      print('📤 Posting transaction: ${json.encode(tempTransaction.toJson())}');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(tempTransaction.toJson()),
+      );
+
+      print('✅ Response status: ${response.statusCode}');
+      print('✅ Response body: ${response.body}');
+
+      if (response.statusCode == 201) {
+        _transactions.insert(0, tempTransaction);
+        await _cacheTransactions();
+        notifyListeners();
+      } else {
+        throw Exception('Failed to add transaction');
+      }
+    } catch (e) {
+      print('❌ Error adding transaction: $e');
+    }
   }
-  
+
   Future<void> clearTransactions() async {
     _transactions = [];
     _expandedTransactionId = null;

@@ -105,10 +105,10 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> wit
                     // Transaction list
                     Expanded(
                       child: transactionProvider.transactions.isEmpty
-                          ? Center(
+                          ? const Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                                children: [
                                   Icon(
                                     Icons.receipt_long,
                                     size: 64,

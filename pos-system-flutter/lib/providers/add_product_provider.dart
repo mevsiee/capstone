@@ -1,35 +1,24 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../models/product.dart';
 
-class EditProductViewModel extends ChangeNotifier {
-  final Product product;
+class AddProductViewModel extends ChangeNotifier {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController priceController = TextEditingController();
 
-  late TextEditingController nameController;
-  late TextEditingController priceController;
+  List<String> availableCategories = [];
+  List<String> availableSizes = [];
+  List<String> availableColors = [];
 
-  late String selectedCategory;
+  String selectedCategory = '';
   String? tempSelectedSize;
   String? tempSelectedColor;
 
   List<String> selectedSizes = [];
   List<String> selectedColors = [];
 
-  List<String> availableCategories = [];
-  List<String> availableSizes = [];
-  List<String> availableColors = [];
-
   bool isLoading = false;
-  bool isLoadingConfig = true;
-
-  EditProductViewModel({required this.product}) {
-    nameController = TextEditingController(text: product.name);
-    priceController = TextEditingController(text: product.price.toString());
-    selectedCategory = product.category;
-    selectedSizes = List.from(product.sizes);
-    selectedColors = List.from(product.colors);
-  }
+  bool isConfigLoading = true;
 
   Future<void> fetchConfigurations() async {
     try {
@@ -40,37 +29,19 @@ class EditProductViewModel extends ChangeNotifier {
         availableCategories = List<String>.from(data['categories'] ?? []);
         availableSizes = List<String>.from(data['sizes'] ?? []);
         availableColors = List<String>.from(data['colors'] ?? []);
-
-        // Set default category if needed
-        if (!availableCategories.contains(selectedCategory)) {
-          selectedCategory =
-              availableCategories.isNotEmpty ? availableCategories.first : '';
-        }
-      } else {
-        debugPrint("Failed to load configurations");
       }
     } catch (e) {
       debugPrint("Error fetching configurations: $e");
     }
-
-    isLoadingConfig = false;
+    isConfigLoading = false;
     notifyListeners();
   }
 
   void updateCategory(String? category) {
-    if (category == null) return;
-    selectedCategory = category;
-    notifyListeners();
-  }
-
-  void updateTempSize(String? size) {
-    tempSelectedSize = size;
-    notifyListeners();
-  }
-
-  void updateTempColor(String? color) {
-    tempSelectedColor = color;
-    notifyListeners();
+    if (category != null) {
+      selectedCategory = category;
+      notifyListeners();
+    }
   }
 
   void addSize(String size) {
@@ -97,14 +68,14 @@ class EditProductViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> updateProduct() async {
+  Future<bool> submitProduct() async {
     isLoading = true;
     notifyListeners();
 
-    final url = Uri.parse('http://192.168.254.113:3000/api/products/${product.id}');
+    final url = Uri.parse('http://192.168.254.113:3000/api/products');
 
     try {
-      final response = await http.put(
+      final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({

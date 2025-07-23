@@ -110,7 +110,55 @@ app.get("/api/configurations", async (req, res) => {
 
 
 
+app.post("/api/products", async (req, res) => {
+  try {
+    const { Name, Category, Price, Size, Color } = req.body;
 
+    // Get max Product_ID
+    const snapshot = await db.collection("POS_Product").get();
+    let maxId = 0;
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      if (data.Product_ID && typeof data.Product_ID === "number") {
+        if (data.Product_ID > maxId) maxId = data.Product_ID;
+      }
+    });
+
+    const newId = maxId + 1;
+
+    const newProduct = {
+      Product_ID: newId,
+      Name,
+      Category,
+      Price,
+      Size,
+      Color,
+    };
+
+    await db.collection("POS_Product").add(newProduct);
+
+    res.status(200).json({ message: "Product added successfully", Product_ID: newId });
+  } catch (error) {
+    console.error("Error adding product:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.post('/api/transactions', async (req, res) => {
+  try {
+    const transactionData = req.body;
+
+    // Use the custom transaction ID as the Firestore document ID
+    const docId = transactionData.id;
+
+    await db.collection('POS_Transactions').doc(docId).set(transactionData);
+
+    res.status(201).json({ message: 'Transaction added successfully', id: docId });
+  } catch (error) {
+    console.error('Error adding transaction:', error);
+    res.status(500).json({ message: 'Failed to add transaction', error });
+  }
+});
 
 
 app.listen(PORT, () => {

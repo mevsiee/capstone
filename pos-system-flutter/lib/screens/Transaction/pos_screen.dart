@@ -90,13 +90,13 @@ class _PosScreenState extends State<PosScreen> with AutomaticKeepAliveClientMixi
                               const SizedBox(height: 16),
                               
                               // Supervisor selection with red asterisk
-                              Column(
+                              const Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   // Title and asterisk
                                   Row(
                                     children: [
-                                      const Text(
+                                      Text(
                                         'Transaction Supervisor',
                                         style: TextStyle(
                                           fontSize: 18,
@@ -114,7 +114,7 @@ class _PosScreenState extends State<PosScreen> with AutomaticKeepAliveClientMixi
                                     ],
                                   ),
                                   // Description with no gap
-                                  const Text(
+                                  Text(
                                     'Staff member who authorized this transaction',
                                     style: TextStyle(
                                       fontSize: 12,
@@ -131,7 +131,7 @@ class _PosScreenState extends State<PosScreen> with AutomaticKeepAliveClientMixi
                               SizedBox(
                                 height: 60, // Fixed height to prevent overflow
                                 child: DropdownButtonFormField<String>(
-                                  decoration: InputDecoration(
+                                  decoration: const InputDecoration(
                                     labelText: 'Select Employee',
                                     border: OutlineInputBorder(),
                                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
