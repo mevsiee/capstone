@@ -13,24 +13,25 @@ class DailySalesReportDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reportData = _generateDailyReportData();
-    
+
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
       child: Container(
-        width: MediaQuery.of(context).size.width > 450 ? 400 : MediaQuery.of(context).size.width * 0.9,
+        width: MediaQuery.of(context).size.width > 450
+            ? 400
+            : MediaQuery.of(context).size.width * 0.9,
         padding: const EdgeInsets.all(0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with close button
+            // Header
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 24, 16, 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,17 +39,12 @@ class DailySalesReportDialog extends StatelessWidget {
                       const Text(
                         'Daily Sales Report',
                         style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         reportData['date']!,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -56,91 +52,28 @@ class DailySalesReportDialog extends StatelessWidget {
                     icon: const Icon(Icons.close),
                     onPressed: () => Navigator.of(context).pop(),
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 40,
-                      minHeight: 40,
-                    ),
+                    constraints:
+                        const BoxConstraints(minWidth: 40, minHeight: 40),
                   ),
                 ],
               ),
             ),
-            
-            // Sales summary boxes - stacked vertically
+
+            // Sales Summary
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
-                  // Total Sales
                   _buildSummaryBox(
                     'Total Sales',
                     '₱${reportData['totalSales']}',
                     reportData['totalTransactions']!,
                   ),
-                  const SizedBox(height: 8),
-                  // Retail
-                  _buildSummaryBox(
-                    'Retail',
-                    '₱${reportData['retailSales']}',
-                    reportData['retailTransactions']!,
-                  ),
-                  const SizedBox(height: 8),
-                  // Wholesale
-                  _buildSummaryBox(
-                    'Wholesale',
-                    '₱${reportData['wholesaleSales']}',
-                    reportData['wholesaleTransactions']!,
-                  ),
                 ],
               ),
             ),
-            
-            const Divider(height: 40),
-            
-            // Top Products
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Top Products',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'No products sold',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-            
-            const Divider(height: 40),
-            
-            // Sales by Location
-            const Padding(
-              padding: EdgeInsets.fromLTRB(24, 0, 24, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Sales by Location',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'No sales by location',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
+
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -158,34 +91,26 @@ class DailySalesReportDialog extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Title and transactions
+          // Left: Title + transaction count
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
               Text(
                 transactions,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
             ],
           ),
-          // Amount
+          // Right: Amount
           Text(
             amount,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -195,16 +120,18 @@ class DailySalesReportDialog extends StatelessWidget {
   Map<String, String> _generateDailyReportData() {
     final now = DateTime.now();
     final dateFormatter = DateFormat('MMMM d, yyyy');
-    
-    // For simplicity, we'll just return placeholder data
+    double totalSales = 0.0;
+
+    for (final tx in transactions) {
+      totalSales += tx.total;
+    }
+
+    final numberFormatter = NumberFormat("#,##0.00", "en_US");
+
     return {
       'date': dateFormatter.format(now),
-      'totalSales': '0.0',
-      'totalTransactions': '0 transactions',
-      'retailSales': '0.0',
-      'retailTransactions': '0 transactions',
-      'wholesaleSales': '0.0',
-      'wholesaleTransactions': '0 transactions',
+      'totalSales': numberFormatter.format(totalSales),
+      'totalTransactions': '${transactions.length} transactions',
     };
   }
 }

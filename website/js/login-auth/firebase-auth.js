@@ -1,11 +1,11 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyAJLvwiX8p4MhXECrwjYkNj-3bjz_-ws0k",
-  authDomain: "eshop-pos.firebaseapp.com",
-  projectId: "eshop-pos",
-  storageBucket: "eshop-pos.firebasestorage.app",
-  messagingSenderId: "1062872438604",
-  appId: "1:1062872438604:web:9d654fd276b9d4158521e9",
-  measurementId: "G-HBJLH7Q3CH"
+  apiKey: "AIzaSyCAg8tRotR85IWP2qehTLKn5mMSAK_Hu1g",
+  authDomain: "eshop-44c5e.firebaseapp.com",
+  projectId: "eshop-44c5e",
+  storageBucket: "eshop-44c5e.firebasestorage.app",
+  messagingSenderId: "1037520511366",
+  appId: "1:1037520511366:web:dbd821023be0c3aa48cc07",
+  measurementId: "G-NVTV17LBHP"
 };
 
 // ✅ Initialize Firebase

@@ -14,6 +14,7 @@ class ProductManagementScreen extends StatefulWidget {
 }
 
 class _ProductManagementScreenState extends State<ProductManagementScreen> {
+  bool _initialized = false;
   @override
   void initState() {
     super.initState();
@@ -22,6 +23,15 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
       provider.fetchConfigurations(); // 🟢 Fetch dynamic categories
       provider.fetchProducts();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      Provider.of<ProductProvider>(context, listen: false).fetchProducts();
+      _initialized = true;
+    }
   }
 
   Future<void> _showDeleteConfirmationDialog(Product product) async {

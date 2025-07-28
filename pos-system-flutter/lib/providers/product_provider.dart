@@ -59,6 +59,9 @@ class ProductProvider with ChangeNotifier {
   }
 
   Future<void> fetchConfigurations() async {
+    _isLoading = true;
+    notifyListeners();
+
     try {
       final url = Uri.parse('http://192.168.254.113:3000/api/configurations');
       final response = await http.get(url);
@@ -68,12 +71,15 @@ class ProductProvider with ChangeNotifier {
         final List<String> fetchedCategories =
             List<String>.from(data['categories'] ?? []);
         _categories = ['All', ...fetchedCategories];
+        _errorMessage = '';
       } else {
         _errorMessage = 'Failed to load configurations';
       }
     } catch (e) {
       _errorMessage = 'Error loading configurations: $e';
     }
+
+    _isLoading = false;
     notifyListeners();
   }
 
