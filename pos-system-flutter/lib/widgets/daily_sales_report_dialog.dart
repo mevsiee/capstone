@@ -119,7 +119,8 @@ class DailySalesReportDialog extends StatelessWidget {
 
   Map<String, String> _generateDailyReportData() {
     final now = DateTime.now();
-    final dateFormatter = DateFormat('MMMM d, yyyy');
+    final dateTimeFormatter =
+        DateFormat('hh:mm a - MMMM d, yyyy'); // e.g. July 28, 2025 - 01:45 PM
     double totalSales = 0.0;
 
     for (final tx in transactions) {
@@ -129,7 +130,7 @@ class DailySalesReportDialog extends StatelessWidget {
     final numberFormatter = NumberFormat("#,##0.00", "en_US");
 
     return {
-      'date': dateFormatter.format(now),
+      'date': dateTimeFormatter.format(now),
       'totalSales': numberFormatter.format(totalSales),
       'totalTransactions': '${transactions.length} transactions',
     };
