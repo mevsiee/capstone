@@ -4,26 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="/styles/dashboard.css">
+    <link rel="stylesheet" href="../styles/dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    
-
 </head>
 <body class="dashboard-body">
     <div class="dashboard-container">
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h3>ESHOP CLOTHING</h3>
+        <header class="main-header">
+            <div class="header-content">
+                <h1>EShop InventoryIQ</h1>
+                <h2>Forecasting & Management System</h2>
             </div>
-            
+        </header>
+        <nav class="sidebar">
             <ul class="sidebar-menu">
                 <li class="menu-item active">
                     <a href="#" data-section="main-dashboard">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>Main Dashboard</span>
+                        <i class="fas fa-th-large"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" data-section="inventory">
+                        <i class="fas fa-box"></i>
+                        <span>Inventory</span>
                     </a>
                 </li>
                 <li class="menu-item">
@@ -33,29 +39,21 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" data-section="inventory">
-                        <i class="fas fa-boxes-stacked"></i>
-                        <span>Inventory</span>
+                    <a href="#" data-section="settings">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Log Out</span>
                     </a>
                 </li>
             </ul>
-            
-            <div class="sidebar-footer">
-                <button class="logout-btn" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </button>
-            </div>
         </nav>
         
-        <main class="main-content">
-            <header class="content-header"> 
-                <h1 id="pageTitle">Main Dashboard</h1>
-                <div class="user-info">
-                    <span>Welcome </span>
-                </div>
-            </header>
-            
+        <main class="main-content">           
             <div class="content-area">
                 <div id="main-dashboard" class="content-section active">
                     <div class="placeholder-content">

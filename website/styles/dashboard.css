@@ -5,116 +5,132 @@
 }
 
 body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Poppins", sans-serif;
   height: 100vh;
-  overflow: auto;
+  overflow: hidden;
+  background: #000;
 }
 
 /* Dashboard Styles */
 .dashboard-container {
   display: flex;
   height: 100vh;
+  padding-top: 80px;
 }
 
 .sidebar {
-  width: 250px;
-  background: #2c3e50;
+  width: 100px;
+  background: #090909;
   color: white;
   display: flex;
   flex-direction: column;
+  padding: 20px 0;
+  height: calc(100vh - 80px);
+  position: fixed;
+  left: 0;
+  border: none;
 }
 
-.sidebar-header {
-  padding: 20px;
-  border-bottom: 1px solid #34495e;
+.main-header {
+  width: 100%;
+  background: #090909;
+  padding: 20px 40px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  text-align: center;
 }
 
-.sidebar-header h3 {
-  font-weight: 500;
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-content h1 {
+  color: #F0B810;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.header-content h2 {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #fff;
 }
 
 .sidebar-menu {
   flex: 1;
   list-style: none;
-  padding: 20px 0;
+  padding: 0;
 }
 
 .menu-item {
-  margin-bottom: 5px;
+  margin-bottom: 20px;
+  padding: 0 10px;
 }
 
 .menu-item a {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 15px 20px;
+  justify-content: center;
+  padding: 8px;
   color: #bdc3c7;
   text-decoration: none;
   transition: all 0.3s;
+  text-align: center;
 }
 
 .menu-item a:hover,
 .menu-item.active a {
-  background: #34495e;
-  color: white;
+  color: #F0B810;
+  background: transparent;
 }
 
 .menu-item i {
-  margin-right: 10px;
-  width: 20px;
+  font-size: 1.2rem;
+  margin-bottom: 2px;
 }
 
-.sidebar-footer {
-  padding: 20px;
-  border-top: 1px solid #34495e;
+.menu-item a span {
+  font-size: 0.7rem;
+  margin-top: 4px;
 }
 
-.logout-btn {
-  width: 100%;
-  padding: 10px;
-  background: transparent;
-  color: #bdc3c7;
-  border: 1px solid #34495e;
-  border-radius: 5px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.3s;
-}
-
-.logout-btn:hover {
-  background: #e74c3c;
-  border-color: #e74c3c;
-  color: white;
-}
+/* Remove sidebar footer styles as they're no longer needed */
 
 .main-content {
   flex: 1;
-  background: #f8f9fa;
+  background: #000;
   overflow-y: auto;
+  margin-left: 80px;
+  height: calc(100vh - 80px);
 }
 
 .content-header {
-  background: white;
+  background: transparent;
   padding: 20px 30px;
-  border-bottom: 1px solid #dee2e6;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: white;
 }
 
 .content-header h1 {
-  color: #2c3e50;
-  font-weight: 500;
+  color: #F0B810;
+  font-weight: 600;
+  font-size: 1.75rem;
 }
 
 .user-info {
-  color: #6c757d;
+  color: #fff;
+  font-size: 0.9rem;
 }
 
 .content-area {
-  padding: 30px;
+  padding: 20px 30px;
 }
 
 .content-section {
@@ -125,27 +141,26 @@ body {
   display: block;
 }
 
-.placeholder-content iframe{
-  text-align: center;
-  padding: 60px 20px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+.placeholder-content iframe {
+  width: 100%;
+  height: calc(100vh - 120px);
+  border: none;
+  background: #000;
 }
 
 .placeholder-content i {
   font-size: 4rem;
-  color: #667eea;
+  color: #F0B810;
   margin-bottom: 20px;
 }
 
 .placeholder-content h3 {
-  color: #2c3e50;
+  color: #fff;
   margin-bottom: 10px;
 }
 
 .placeholder-content p {
-  color: #6c757d;
+  color: #bdc3c7;
 }
 
 /* Responsive Design for Dashboard */
