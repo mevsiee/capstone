@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Inventory - EShop InventoryIQ</title>
     <link rel="stylesheet" href="../styles/dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,13 +20,13 @@
         </header>
         <nav class="sidebar">
             <ul class="sidebar-menu">
-                <li class="menu-item active">
+                <li class="menu-item">
                     <a href="dashboard.html">
                         <i class="fas fa-th-large"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
-                <li class="menu-item">
+                <li class="menu-item active">
                     <a href="inventory.html">
                         <i class="fas fa-box"></i>
                         <span>Inventory</span>
@@ -53,41 +53,45 @@
             </ul>
         </nav>
         
-        <main class="main-content">           
+        <main class="main-content">
             <div class="content-area">
-                <div id="main-dashboard" class="content-section active">
-                    <div class="placeholder-content">
-                            <iframe
-                                id="lookerReport"
-                                width="100%"
-                                height="750"
-                                src="https://lookerstudio.google.com/embed/reporting/d9d56361-72fb-467a-a307-d7355cbbbc18/page/oZmQF"
-                                frameborder="0"
-                                style="border:0"
-                                allowfullscreen
-                                sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
-                            </iframe>
+                <div class="inventory-content">
+                    <div class="inventory-header">
+                        <h2>Inventory Management</h2>
+                        <button class="add-item-btn">
+                            <i class="fas fa-plus"></i> Add New Item
+                        </button>
                     </div>
-                </div>
-                
-                <div id="analytics" class="content-section">
-                    <div class="placeholder-content">
-                          
+                    <div class="inventory-filters">
+                        <input type="search" placeholder="Search items..." class="search-input">
+                        <select class="filter-select">
+                            <option value="all">All Categories</option>
+                            <option value="low">Low Stock</option>
+                            <option value="out">Out of Stock</option>
+                        </select>
                     </div>
-                </div>
-                    <div id="inventory" class="content-section">
-                    <div class="placeholder-content">
-                        <i class="fas fa-analytics"></i>
-                        <h3>inventory</h3>
-                        <p>This section is ready for your Looker analytics</p>
+                    <div class="inventory-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Stock Level</th>
+                                    <th>Unit Price</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody">
+                                <!-- Table content will be populated by JavaScript -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </main>
     </div>
     
-    <script src="/js/UI/dashboard.js"></script>
-    <script src="/js/login-auth/dashboard-auth.js"></script>
-    
+    <script src="../js/login-auth/firebase-auth.js"></script>
+    <script src="../js/inventory.js"></script>
 </body>
 </html>

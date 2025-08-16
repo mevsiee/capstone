@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Analytics - EShop InventoryIQ</title>
     <link rel="stylesheet" href="../styles/dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
         </header>
         <nav class="sidebar">
             <ul class="sidebar-menu">
-                <li class="menu-item active">
+                <li class="menu-item">
                     <a href="dashboard.html">
                         <i class="fas fa-th-large"></i>
                         <span>Dashboard</span>
@@ -32,7 +32,7 @@
                         <span>Inventory</span>
                     </a>
                 </li>
-                <li class="menu-item">
+                <li class="menu-item active">
                     <a href="analytics.html">
                         <i class="fas fa-chart-bar"></i>
                         <span>Analytics</span>
@@ -53,41 +53,51 @@
             </ul>
         </nav>
         
-        <main class="main-content">           
+        <main class="main-content">
             <div class="content-area">
-                <div id="main-dashboard" class="content-section active">
-                    <div class="placeholder-content">
-                            <iframe
-                                id="lookerReport"
-                                width="100%"
-                                height="750"
-                                src="https://lookerstudio.google.com/embed/reporting/d9d56361-72fb-467a-a307-d7355cbbbc18/page/oZmQF"
-                                frameborder="0"
-                                style="border:0"
-                                allowfullscreen
-                                sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
-                            </iframe>
+                <div class="analytics-content">
+                    <div class="analytics-header">
+                        <h2>Analytics Dashboard</h2>
+                        <div class="date-range-picker">
+                            <input type="date" id="startDate">
+                            <input type="date" id="endDate">
+                            <button class="apply-date">Apply</button>
+                        </div>
                     </div>
-                </div>
-                
-                <div id="analytics" class="content-section">
-                    <div class="placeholder-content">
-                          
+                    <div class="analytics-cards">
+                        <div class="analytics-card">
+                            <h3>Total Sales</h3>
+                            <p class="card-value" id="totalSales">₱0.00</p>
+                            <p class="card-change positive">+15% vs last period</p>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Total Orders</h3>
+                            <p class="card-value" id="totalOrders">0</p>
+                            <p class="card-change positive">+8% vs last period</p>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Average Order Value</h3>
+                            <p class="card-value" id="avgOrderValue">₱0.00</p>
+                            <p class="card-change negative">-3% vs last period</p>
+                        </div>
                     </div>
-                </div>
-                    <div id="inventory" class="content-section">
-                    <div class="placeholder-content">
-                        <i class="fas fa-analytics"></i>
-                        <h3>inventory</h3>
-                        <p>This section is ready for your Looker analytics</p>
+                    <div class="charts-container">
+                        <div class="chart-wrapper">
+                            <h3>Sales Trend</h3>
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                        <div class="chart-wrapper">
+                            <h3>Top Products</h3>
+                            <canvas id="productsChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
     
-    <script src="/js/UI/dashboard.js"></script>
-    <script src="/js/login-auth/dashboard-auth.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/login-auth/firebase-auth.js"></script>
+    <script src="../js/analytics.js"></script>
 </body>
 </html>
