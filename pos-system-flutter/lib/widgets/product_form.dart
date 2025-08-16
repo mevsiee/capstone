@@ -255,27 +255,94 @@ class _ProductFormState extends State<ProductForm> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        TextFormField(
-                          initialValue: _quantity.toString(),
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
+                        Container(
+                          height: 56,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(4),
                           ),
-                          onChanged: (value) {
-                            setState(() {
-                              _quantity = int.tryParse(value) ?? 1;
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Required';
-                            }
-                            final parsedValue = int.tryParse(value);
-                            if (parsedValue == null || parsedValue < 1) {
-                              return 'Invalid';
-                            }
-                            return null;
-                          },
+                          child: Row(
+                            children: [
+                              // Decrease button
+                              SizedBox(
+                                width: 36,
+                                height: 56,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: _quantity > 1 ? () {
+                                      setState(() {
+                                        _quantity--;
+                                      });
+                                    } : null,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: _quantity > 1 ? Colors.red.shade50 : Colors.grey.shade100,
+                                        borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(4),
+                                          bottomLeft: Radius.circular(4),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.remove,
+                                        color: _quantity > 1 ? Colors.red : Colors.grey,
+                                        size: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // Quantity display
+                              Expanded(
+                                child: Container(
+                                  height: 56,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.symmetric(
+                                      vertical: BorderSide(color: Colors.grey.shade300),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    _quantity.toString(),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // Increase button
+                              SizedBox(
+                                width: 36,
+                                height: 56,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        _quantity++;
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.green.shade50,
+                                        borderRadius: const BorderRadius.only(
+                                          topRight: Radius.circular(4),
+                                          bottomRight: Radius.circular(4),
+                                        ),
+                                      ),
+                                      child: const Icon(
+                                        Icons.add,
+                                        color: Colors.green,
+                                        size: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -351,6 +418,41 @@ class _ProductFormState extends State<ProductForm> {
                 ),
               
               const SizedBox(height: 24),
+              
+              if (_selectedProductId.isNotEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Total:',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      Text(
+                        '₱${_calculateTotal(productProvider).toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              
+              if (_selectedProductId.isNotEmpty)
+                const SizedBox(height: 16),
               
               // Add/Update button
               SizedBox(
@@ -508,5 +610,16 @@ class _ProductFormState extends State<ProductForm> {
     
     final product = productProvider.getProductById(_selectedProductId);
     return product?.bulkPricing;
+  }
+
+  double _calculateTotal(ProductProvider productProvider) {
+    if (_selectedProductId.isEmpty) return 0;
+    
+    final unitPrice = _getProductPrice(productProvider);
+    final subtotal = unitPrice * _quantity;
+    final total = subtotal - _discount;
+    
+    // Ensure total is not negative
+    return total < 0 ? 0 : total;
   }
 }
