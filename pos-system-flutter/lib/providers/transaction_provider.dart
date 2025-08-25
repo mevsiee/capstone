@@ -17,7 +17,8 @@ String generateCustomTransactionId() {
 }
 
 class TransactionProvider with ChangeNotifier {
-  final String _apiUrl = 'http://192.168.254.113:3000/api/transactions';
+  final String _apiUrl =
+      'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/transactions';
   List<Transaction> _transactions = [];
   String? _expandedTransactionId;
 
@@ -132,7 +133,8 @@ class TransactionProvider with ChangeNotifier {
       await LocalDBHelper.insertTransaction(transaction);
       _transactions.insert(0, transaction);
       await _cacheTransactions();
-      _showStatus('Transaction saved locally (awaiting sync)', color: Colors.orange);
+      _showStatus('Transaction saved locally (awaiting sync)',
+          color: Colors.orange);
       notifyListeners();
 
       Future.delayed(const Duration(seconds: 3), () {

@@ -63,7 +63,8 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final url = Uri.parse('http://192.168.254.113:3000/api/configurations');
+      final url = Uri.parse(
+          'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/configurations');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -90,7 +91,8 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final url = Uri.parse('http://192.168.254.113:3000/api/products');
+      final url = Uri.parse(
+          'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/products');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -192,8 +194,8 @@ class ProductProvider with ChangeNotifier {
   }
 
   Future<void> deleteProduct(String productId) async {
-    final url =
-        Uri.parse('http://192.168.254.113:3000/api/products/$productId');
+    final url = Uri.parse(
+        'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/products/$productId');
 
     try {
       final response = await http.delete(url);
