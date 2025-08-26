@@ -1,0 +1,269 @@
+/* Static info display styling */
+.settings-section .static-info {
+    border: 1.5px solid #2B2B2B;
+    border-radius: 4px;
+    background: #111;
+    color: white !important;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    margin-top: 0.25rem;
+    font-family: 'Poppins', sans-serif;
+}
+/* Settings Page Styles */
+.settings-content {
+    padding: 2rem;
+    color: #fff;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.settings-title {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: #F0B810;
+}
+
+/* Account Information Section */
+.settings-section {
+    border: 2px solid #2B2B2B;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.settings-section h2 {
+    color: #fff;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+/* Form Styles */
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+/* Input Styles - Matching the mockup */
+.dark-input {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: rgba(255, 255, 255, 0.87);
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.dark-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    transition: opacity 0.3s ease;
+}
+
+.dark-input.has-value {
+    color: rgba(255, 255, 255, 0.87);
+    font-weight: 400;
+}
+
+.dark-input.has-value::placeholder {
+    opacity: 0;
+}
+
+.dark-input:focus {
+    border-color: #F0B810;
+    outline: none;
+    color: rgba(255, 255, 255, 1);
+}
+
+/* Ensure input value is always visible */
+.dark-input:not(:placeholder-shown) {
+    color: rgba(255, 255, 255, 0.87);
+}
+.settings-content {
+    padding: 2rem;
+    color: #fff;
+}
+
+.settings-title {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: #F0B810;
+}
+
+.settings-section {
+    background: #000;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.settings-section h2 {
+    color: #fff;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.section-description {
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Form Styles */
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.dark-input {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #fff;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.dark-input::placeholder {
+    color: #555;
+}
+
+.dark-input:focus {
+    border-color: #F0B810;
+    outline: none;
+}
+
+/* Password Input Styles */
+.password-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.toggle-password:hover {
+    color: #F0B810;
+}
+
+/* Platform Integration Styles */
+.platform-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.platform-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #062111;
+    border-radius: 4px;
+    border: 1px solid #333;
+}
+
+    .platform-checkmark {
+        width: 1.5em;
+        height: 1.5em;
+        margin-left: 0.5em;
+        vertical-align: middle;
+        filter: invert(62%) sepia(97%) saturate(1000%) hue-rotate(75deg) brightness(110%) contrast(110%);
+    }
+
+.platform-info h3 {
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.platform-info p {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.platform-status {
+    background: #081c0f;
+    color: #4caf50;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.platform-status.active {
+    background: #011107;
+    color: #4bbf4f;
+}
+
+/* Button Styles */
+.save-btn {
+    background: #F0B810;
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: background-color 0.2s;
+    font-family: Poppins, sans-serif;
+}
+
+.save-btn:hover {
+    background: #ffc400;
+}
