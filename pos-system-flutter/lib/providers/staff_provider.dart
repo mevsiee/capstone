@@ -53,8 +53,8 @@ class StaffProvider with ChangeNotifier {
     }
 
     try {
-      final response = await http.get(Uri.parse(
-          'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/employees'));
+      final response = await http
+          .get(Uri.parse('http://192.168.244.121:3000/api/employees'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as List;

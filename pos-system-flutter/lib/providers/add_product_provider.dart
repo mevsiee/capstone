@@ -22,8 +22,8 @@ class AddProductViewModel extends ChangeNotifier {
 
   Future<void> fetchConfigurations() async {
     try {
-      final response = await http.get(Uri.parse(
-          "https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/configurations"));
+      final response = await http
+          .get(Uri.parse("http://192.168.244.121:3000/api/configurations"));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         availableCategories = List<String>.from(data['categories'] ?? []);
@@ -72,8 +72,7 @@ class AddProductViewModel extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    final url = Uri.parse(
-        'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/products');
+    final url = Uri.parse('http://192.168.244.121:3000/api/products');
 
     try {
       final response = await http.post(
