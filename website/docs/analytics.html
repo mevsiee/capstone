@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics - EShop InventoryIQ</title>
     <link rel="stylesheet" href="../styles/dashboard.css">
+    <link rel="stylesheet" href="../styles/analytics.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -57,38 +58,69 @@
             <div class="content-area">
                 <div class="analytics-content">
                     <div class="analytics-header">
-                        <h2>Analytics Dashboard</h2>
-                        <div class="date-range-picker">
-                            <input type="date" id="startDate">
-                            <input type="date" id="endDate">
-                            <button class="apply-date">Apply</button>
+                        <h1 class="title">Analytics and Forecasting</h1>
+                        <div class="export-container">
+                            <button class="export-button"><i class="fas fa-file-excel"></i> Export Excel</button>
+                            <button class="export-button"><i class="fas fa-file-pdf"></i> Export PDF</button>
                         </div>
                     </div>
-                    <div class="analytics-cards">
-                        <div class="analytics-card">
-                            <h3>Total Sales</h3>
-                            <p class="card-value" id="totalSales">₱0.00</p>
-                            <p class="card-change positive">+15% vs last period</p>
+
+                    <div class="tab-container">
+                        <button class="tab-button active">Total Sales</button>
+                        <button class="tab-button">Total Orders</button>
+                    </div>
+
+                    <div class="content-grid">
+                        <div class="chart-panel">
+                            <canvas id="trendChart"></canvas>
                         </div>
-                        <div class="analytics-card">
-                            <h3>Total Orders</h3>
-                            <p class="card-value" id="totalOrders">0</p>
-                            <p class="card-change positive">+8% vs last period</p>
-                        </div>
-                        <div class="analytics-card">
-                            <h3>Average Order Value</h3>
-                            <p class="card-value" id="avgOrderValue">₱0.00</p>
-                            <p class="card-change negative">-3% vs last period</p>
+
+                        <div class="stats-panel">
+                            <div class="stat-group">
+                                <div class="stat-label">Total Projected Sales (Q3)</div>
+                                <div class="stat-value">₱ 248,100.00</div>
+                                <div class="stat-growth">+9.2% from current quarter</div>
+                            </div>
+
+                            <div class="stat-group">
+                                <div class="stat-label">Highest Growth Category</div>
+                                <div class="stat-value" style="font-size: 18px;">Polo Button Down (Shopee)</div>
+                                <div class="stat-growth">+22.5% projected growth</div>
+                            </div>
+
+                            <div class="progress-circle">
+                                <div class="circle-text">50%</div>
+                                <div class="circle-label">Growth</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="charts-container">
-                        <div class="chart-wrapper">
-                            <h3>Sales Trend</h3>
-                            <canvas id="salesChart"></canvas>
+
+                    <div class="scenarios-panel">
+                        <h2 class="scenarios-title">Explore Your Growth Scenarios: Performance Forecasting Adjustments</h2>
+                        <p class="scenarios-subtitle">See how price, costs, logistics impacts your performance for future shopee and retail channels</p>
+
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Price Adjustment Impact</span>
+                                <span>0%</span>
+                            </div>
+                            <input type="range" class="slider" min="-50" max="50" value="0">
+                            <div class="range-values">
+                                <span>-50%</span>
+                                <span>+50%</span>
+                            </div>
                         </div>
-                        <div class="chart-wrapper">
-                            <h3>Top Products</h3>
-                            <canvas id="productsChart"></canvas>
+
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Advertising Expense Impact</span>
+                                <span>0%</span>
+                            </div>
+                            <input type="range" class="slider" min="-50" max="50" value="0">
+                            <div class="range-values">
+                                <span>-50%</span>
+                                <span>+50%</span>
+                            </div>
                         </div>
                     </div>
                 </div>
