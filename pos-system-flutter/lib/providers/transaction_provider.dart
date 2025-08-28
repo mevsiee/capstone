@@ -17,8 +17,7 @@ String generateCustomTransactionId() {
 }
 
 class TransactionProvider with ChangeNotifier {
-  final String _apiUrl =
-      'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/transactions';
+  final String _apiUrl = 'http://192.168.244.121:3000/api/transactions';
   List<Transaction> _transactions = [];
   String? _expandedTransactionId;
 

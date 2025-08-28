@@ -24,12 +24,12 @@ class _ProductFormState extends State<ProductForm> {
   String _selectedColor = '';
   int _quantity = 1;
   double _discount = 0;
-  
+
   final _formKey = GlobalKey<FormState>();
-  
+
   List<String> _availableSizes = [];
   List<String> _availableColors = [];
-  
+
   // Red asterisk widget for required fields
   Widget _requiredAsterisk() {
     return const Text(
@@ -40,16 +40,17 @@ class _ProductFormState extends State<ProductForm> {
       ),
     );
   }
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final cartProvider = Provider.of<CartProvider>(context);
     final editingItemId = cartProvider.editingItemId;
-    
+
     // If we're editing an item, populate the form
     if (editingItemId != null && _selectedProductId.isEmpty) {
-      final editingItem = cartProvider.items.firstWhere((item) => item.id == editingItemId);
+      final editingItem =
+          cartProvider.items.firstWhere((item) => item.id == editingItemId);
       setState(() {
         _selectedProductId = editingItem.productId;
         _selectedSize = editingItem.size;
@@ -60,16 +61,15 @@ class _ProductFormState extends State<ProductForm> {
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
     final productProvider = Provider.of<ProductProvider>(context);
     final editingItemId = cartProvider.editingItemId;
-    
     // Get all products from the provider
     final allProducts = productProvider.products;
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -87,8 +87,6 @@ class _ProductFormState extends State<ProductForm> {
                 ),
               ),
               const SizedBox(height: 16),
-              
-              // Product dropdown with red asterisk
               Row(
                 children: [
                   const Text('Product'),
@@ -96,31 +94,114 @@ class _ProductFormState extends State<ProductForm> {
                 ],
               ),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
+
+              // Product grid
+              Container(
+                height: 250, // Fixed height for the grid
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(4),
                 ),
-                value: _selectedProductId.isNotEmpty ? _selectedProductId : null,
-                items: _buildProductDropdownItems(allProducts),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _selectedProductId = value;
-                      _selectedSize = '';
-                      _selectedColor = '';
-                      _updateAvailableSizesAndColors();
-                    });
-                  }
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please select a product';
-                  }
-                  return null;
-                },
+                child: allProducts.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No products available',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      )
+                    : GridView.builder(
+                        padding: const EdgeInsets.all(4),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4, // 3 columns like in the image
+                          crossAxisSpacing: 4,
+                          mainAxisSpacing: 4,
+                          childAspectRatio: 1, // Square cards
+                        ),
+                        itemCount: allProducts.length,
+                        itemBuilder: (context, index) {
+                          final product = allProducts[index];
+                          final isSelected = _selectedProductId == product.id;
+
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedProductId = product.id;
+                                _selectedSize = '';
+                                _selectedColor = '';
+                                _updateAvailableSizesAndColors();
+                              });
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? Colors.green.shade50
+                                    : Colors.white,
+                                border: Border.all(
+                                  color: isSelected
+                                      ? Colors.green
+                                      : Colors.grey.shade300,
+                                  width: isSelected ? 2 : 1,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Product name
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 2),
+                                    child: Text(
+                                      product.name.toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: isSelected
+                                            ? Colors.green.shade700
+                                            : Colors.black87,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  // Price
+                                  Text(
+                                    '₱${product.price.toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      fontSize: 8,
+                                      color: isSelected
+                                          ? Colors.green.shade600
+                                          : Colors.grey.shade600,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
               ),
+
+              // Validation message for product selection
+              if (_selectedProductId.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    'Please select a product',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+
               const SizedBox(height: 16),
-              
+
               // Size and Color dropdowns with red asterisks
               Row(
                 children: [
@@ -139,7 +220,8 @@ class _ProductFormState extends State<ProductForm> {
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                           ),
-                          value: _selectedSize.isNotEmpty ? _selectedSize : null,
+                          value:
+                              _selectedSize.isNotEmpty ? _selectedSize : null,
                           items: _availableSizes.map((size) {
                             return DropdownMenuItem<String>(
                               value: size,
@@ -181,7 +263,8 @@ class _ProductFormState extends State<ProductForm> {
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                           ),
-                          value: _selectedColor.isNotEmpty ? _selectedColor : null,
+                          value:
+                              _selectedColor.isNotEmpty ? _selectedColor : null,
                           items: _availableColors.map((color) {
                             return DropdownMenuItem<String>(
                               value: color,
@@ -210,7 +293,7 @@ class _ProductFormState extends State<ProductForm> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Price, Quantity, and Discount
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,7 +307,8 @@ class _ProductFormState extends State<ProductForm> {
                         const SizedBox(height: 8),
                         Container(
                           height: 56,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 16),
                           decoration: BoxDecoration(
                             color: const Color(0xFFF3F4F6),
                             borderRadius: BorderRadius.circular(4),
@@ -242,7 +326,7 @@ class _ProductFormState extends State<ProductForm> {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  
+
                   // Quantity input with red asterisk
                   Expanded(
                     child: Column(
@@ -265,19 +349,23 @@ class _ProductFormState extends State<ProductForm> {
                             children: [
                               // Decrease button
                               SizedBox(
-                                width: 36,
+                                width: 23,
                                 height: 56,
                                 child: Material(
                                   color: Colors.transparent,
                                   child: InkWell(
-                                    onTap: _quantity > 1 ? () {
-                                      setState(() {
-                                        _quantity--;
-                                      });
-                                    } : null,
+                                    onTap: _quantity > 1
+                                        ? () {
+                                            setState(() {
+                                              _quantity--;
+                                            });
+                                          }
+                                        : null,
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: _quantity > 1 ? Colors.red.shade50 : Colors.grey.shade100,
+                                        color: _quantity > 1
+                                            ? Colors.red.shade50
+                                            : Colors.grey.shade100,
                                         borderRadius: const BorderRadius.only(
                                           topLeft: Radius.circular(4),
                                           bottomLeft: Radius.circular(4),
@@ -285,7 +373,9 @@ class _ProductFormState extends State<ProductForm> {
                                       ),
                                       child: Icon(
                                         Icons.remove,
-                                        color: _quantity > 1 ? Colors.red : Colors.grey,
+                                        color: _quantity > 1
+                                            ? Colors.red
+                                            : Colors.grey,
                                         size: 14,
                                       ),
                                     ),
@@ -300,7 +390,8 @@ class _ProductFormState extends State<ProductForm> {
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     border: Border.symmetric(
-                                      vertical: BorderSide(color: Colors.grey.shade300),
+                                      vertical: BorderSide(
+                                          color: Colors.grey.shade300),
                                     ),
                                   ),
                                   child: Text(
@@ -314,7 +405,7 @@ class _ProductFormState extends State<ProductForm> {
                               ),
                               // Increase button
                               SizedBox(
-                                width: 36,
+                                width: 23,
                                 height: 56,
                                 child: Material(
                                   color: Colors.transparent,
@@ -348,7 +439,7 @@ class _ProductFormState extends State<ProductForm> {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  
+
                   // Discount input
                   Expanded(
                     child: Column(
@@ -374,10 +465,12 @@ class _ProductFormState extends State<ProductForm> {
                               if (parsedValue == null || parsedValue < 0) {
                                 return 'Invalid';
                               }
-                              
+
                               // Check if discount is greater than total price
                               if (_selectedProductId.isNotEmpty) {
-                                final totalPrice = _getProductPrice(productProvider) * _quantity;
+                                final totalPrice =
+                                    _getProductPrice(productProvider) *
+                                        _quantity;
                                 if (parsedValue > totalPrice) {
                                   return 'Discount too high';
                                 }
@@ -391,8 +484,9 @@ class _ProductFormState extends State<ProductForm> {
                   ),
                 ],
               ),
-              
-              if (_selectedProductId.isNotEmpty && _getProductBulkPricing(productProvider) != null)
+
+              if (_selectedProductId.isNotEmpty &&
+                  _getProductBulkPricing(productProvider) != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Row(
@@ -416,9 +510,9 @@ class _ProductFormState extends State<ProductForm> {
                     ],
                   ),
                 ),
-              
+
               const SizedBox(height: 24),
-              
+
               if (_selectedProductId.isNotEmpty)
                 Container(
                   width: double.infinity,
@@ -450,19 +544,21 @@ class _ProductFormState extends State<ProductForm> {
                     ],
                   ),
                 ),
-              
-              if (_selectedProductId.isNotEmpty)
-                const SizedBox(height: 16),
-              
+
+              if (_selectedProductId.isNotEmpty) const SizedBox(height: 16),
+
               // Add/Update button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _selectedProductId.isEmpty || _selectedSize.isEmpty || _selectedColor.isEmpty
+                  onPressed: _selectedProductId.isEmpty ||
+                          _selectedSize.isEmpty ||
+                          _selectedColor.isEmpty
                       ? null
                       : () {
                           if (_formKey.currentState!.validate()) {
-                            if (editingItemId != null && widget.onUpdateCart != null) {
+                            if (editingItemId != null &&
+                                widget.onUpdateCart != null) {
                               // Update existing item
                               widget.onUpdateCart!(
                                 editingItemId,
@@ -472,7 +568,7 @@ class _ProductFormState extends State<ProductForm> {
                                 _quantity,
                                 _discount,
                               );
-                              
+
                               // Show success message
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -489,7 +585,7 @@ class _ProductFormState extends State<ProductForm> {
                                 _quantity,
                                 _discount,
                               );
-                              
+
                               // Show success message
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -498,7 +594,7 @@ class _ProductFormState extends State<ProductForm> {
                                 ),
                               );
                             }
-                            
+
                             // Reset form
                             setState(() {
                               _selectedProductId = '';
@@ -509,7 +605,7 @@ class _ProductFormState extends State<ProductForm> {
                               _availableSizes = [];
                               _availableColors = [];
                             });
-                            
+
                             // Clear editing state
                             if (editingItemId != null) {
                               cartProvider.stopEditing();
@@ -533,62 +629,17 @@ class _ProductFormState extends State<ProductForm> {
     );
   }
 
-  List<DropdownMenuItem<String>> _buildProductDropdownItems(List<Product> products) {
-    final Map<String, List<Product>> productsByCategory = {};
-    
-    // Group products by category
-    for (var product in products) {
-      if (!productsByCategory.containsKey(product.category)) {
-        productsByCategory[product.category] = [];
-      }
-      productsByCategory[product.category]!.add(product);
-    }
-    
-    final List<DropdownMenuItem<String>> items = [];
-    
-    // Sort categories alphabetically
-    final sortedCategories = productsByCategory.keys.toList()..sort();
-    
-    for (var category in sortedCategories) {
-      // Add category header
-      items.add(
-        DropdownMenuItem<String>(
-          enabled: false,
-          child: Text(
-            category,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-        ),
-      );
-      
-      // Add products in this category
-      final categoryProducts = productsByCategory[category]!;
-      for (var product in categoryProducts) {
-        items.add(
-          DropdownMenuItem<String>(
-            value: product.id,
-            child: Text('${product.name} - ₱${product.price.toStringAsFixed(2)}'),
-          ),
-        );
-      }
-    }
-    
-    return items;
-  }
-
   void _updateAvailableSizesAndColors() {
     if (_selectedProductId.isEmpty) {
       _availableSizes = [];
       _availableColors = [];
       return;
     }
-    
-    final productProvider = Provider.of<ProductProvider>(context, listen: false);
+
+    final productProvider =
+        Provider.of<ProductProvider>(context, listen: false);
     final product = productProvider.getProductById(_selectedProductId);
-    
+
     if (product != null) {
       _availableSizes = List<String>.from(product.sizes);
       _availableColors = List<String>.from(product.colors);
@@ -600,25 +651,25 @@ class _ProductFormState extends State<ProductForm> {
 
   double _getProductPrice(ProductProvider productProvider) {
     if (_selectedProductId.isEmpty) return 0;
-    
+
     final product = productProvider.getProductById(_selectedProductId);
     return product?.price ?? 0;
   }
 
   BulkPricing? _getProductBulkPricing(ProductProvider productProvider) {
     if (_selectedProductId.isEmpty) return null;
-    
+
     final product = productProvider.getProductById(_selectedProductId);
     return product?.bulkPricing;
   }
 
   double _calculateTotal(ProductProvider productProvider) {
     if (_selectedProductId.isEmpty) return 0;
-    
+
     final unitPrice = _getProductPrice(productProvider);
     final subtotal = unitPrice * _quantity;
     final total = subtotal - _discount;
-    
+
     // Ensure total is not negative
     return total < 0 ? 0 : total;
   }
