@@ -277,3 +277,170 @@ td {
     color: #000;
     cursor: pointer;
 }
+
+/* Product Cost Update Modal Specific Styles */
+.product-selection {
+    background: #0A0A0A;
+    border: 1px solid #333;
+    border-radius: 4px;
+    margin-bottom: 24px;
+}
+
+.selection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #333;
+}
+
+.selected-count {
+    color: #666;
+    font-size: 14px;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.checkbox-container input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #F4B301;
+}
+
+.product-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #1A1A1A;
+}
+
+.product-item:last-child {
+    border-bottom: none;
+}
+
+.product-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.product-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-name {
+    color: #fff;
+}
+
+.product-sku {
+    color: #666;
+    font-size: 12px;
+}
+
+.current-cost {
+    color: #F4B301;
+}
+
+.cost-update-section {
+    padding: 20px 0;
+}
+
+.cost-input {
+    margin-bottom: 20px;
+}
+
+.cost-input label {
+    display: block;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.input-with-currency {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.currency-symbol {
+    position: absolute;
+    left: 12px;
+    color: #666;
+}
+
+.input-with-currency input {
+    width: 100%;
+    padding: 8px 12px 8px 28px;
+    background: transparent;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 16px;
+}
+
+.bulk-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.bulk-actions button {
+    padding: 6px 12px;
+    background: #1A1A1A;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.bulk-actions button:hover {
+    background: #252525;
+}
+
+.update-summary {
+    background: #0A0A0A;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 16px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    color: #fff;
+}
+
+.summary-item:last-child {
+    margin-bottom: 0;
+    padding-top: 12px;
+    border-top: 1px solid #333;
+}
+
+.summary-item .value {
+    color: #F4B301;
+}
+
+.summary-item .value.neutral {
+    color: #fff;
+}
+
+.summary-item .value.positive {
+    color: #4CAF50;
+}
+
+.summary-item .value.negative {
+    color: #F44336;
+}

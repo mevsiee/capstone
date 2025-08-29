@@ -162,6 +162,68 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Update Product Cost Modal -->
+                <div id="updateCostModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Update Product Cost</h2>
+                            <button class="close-btn">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="modal-subtitle">Update the cost for selected products</p>
+                            
+                            <div class="product-selection">
+                                <div class="selection-header">
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" id="selectAllProducts">
+                                        <span class="checkmark"></span>
+                                        Select All Products
+                                    </label>
+                                    <span class="selected-count">0 Selected</span>
+                                </div>
+                                <div class="product-list">
+                                    <!-- Products will be populated by JavaScript -->
+                                </div>
+                            </div>
+
+                            <div class="cost-update-section">
+                                <div class="cost-input">
+                                    <label>New Product Cost</label>
+                                    <div class="input-with-currency">
+                                        <span class="currency-symbol">₱</span>
+                                        <input type="number" id="newCost" min="0" step="0.01" placeholder="0.00">
+                                    </div>
+                                </div>
+                                
+                                <div class="bulk-actions">
+                                    <button class="increase-btn">+10%</button>
+                                    <button class="decrease-btn">-10%</button>
+                                    <button class="custom-btn">Custom %</button>
+                                </div>
+
+                                <div class="update-summary">
+                                    <div class="summary-item">
+                                        <span>Current Average Cost:</span>
+                                        <span class="value">₱100.00</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>New Average Cost:</span>
+                                        <span class="value">₱100.00</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>Cost Difference:</span>
+                                        <span class="value neutral">₱0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="cancel-btn">Cancel</button>
+                            <button class="save-btn">Update Cost</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
