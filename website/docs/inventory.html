@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory - EShop InventoryIQ</title>
     <link rel="stylesheet" href="../styles/dashboard.css">
+    <link rel="stylesheet" href="../styles/inventory.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -55,36 +56,110 @@
         
         <main class="main-content">
             <div class="content-area">
-                <div class="inventory-content">
-                    <div class="inventory-header">
-                        <h2>Inventory Management</h2>
-                        <button class="add-item-btn">
-                            <i class="fas fa-plus"></i> Add New Item
-                        </button>
+                <h1 class="page-title">Inventory</h1>
+                
+                <div class="stock-cards">
+                    <div class="stock-card high">
+                        <h3>High Stock <i class="fas fa-check-circle"></i></h3>
+                        <div class="stock-count">15</div>
                     </div>
-                    <div class="inventory-filters">
-                        <input type="search" placeholder="Search items..." class="search-input">
-                        <select class="filter-select">
-                            <option value="all">All Categories</option>
-                            <option value="low">Low Stock</option>
-                            <option value="out">Out of Stock</option>
-                        </select>
+                    <div class="stock-card medium">
+                        <h3>Medium Stock <i class="fas fa-exclamation-circle"></i></h3>
+                        <div class="stock-count">24</div>
                     </div>
-                    <div class="inventory-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Product Name</th>
-                                    <th>Category</th>
-                                    <th>Stock Level</th>
-                                    <th>Unit Price</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventoryTableBody">
-                                <!-- Table content will be populated by JavaScript -->
-                            </tbody>
-                        </table>
+                    <div class="stock-card low">
+                        <h3>Low Stock <i class="fas fa-triangle-exclamation"></i></h3>
+                        <div class="stock-count">8</div>
+                    </div>
+                </div>
+
+                <div class="inventory-controls">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search inventory items">
+                    </div>
+                    <div class="control-buttons">
+                        <button class="control-btn"><i class="fas fa-download"></i> Download</button>
+                        <button class="control-btn"><i class="fas fa-filter"></i> Filter</button>
+                        <button class="control-btn"><i class="fas fa-sliders"></i> Edit Stock Thresholds</button>
+                        <button class="control-btn"><i class="fas fa-coins"></i> Update Product Cost</button>
+                    </div>
+                </div>
+
+                <div class="inventory-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>SKU</th>
+                                <th>Platform</th>
+                                <th>Price</th>
+                                <th>Cost</th>
+                                <th>Stock Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ASYMMETRICAL POLO</td>
+                                <td>17293983715580450</td>
+                                <td>Shopee</td>
+                                <td>₱ 125.00</td>
+                                <td>₱ 100.00</td>
+                                <td><span class="stock-level high">85 units</span></td>
+                            </tr>
+                            <tr>
+                                <td>DIAMOND T-SHIRT</td>
+                                <td>17293983715580451</td>
+                                <td>TikTok Shop</td>
+                                <td>₱ 125.00</td>
+                                <td>₱ 100.00</td>
+                                <td><span class="stock-level medium">45 units</span></td>
+                            </tr>
+                            <tr>
+                                <td>KNITTED POLO</td>
+                                <td>17293983715580452</td>
+                                <td>Shopee</td>
+                                <td>₱ 125.00</td>
+                                <td>₱ 100.00</td>
+                                <td><span class="stock-level low">10 units</span></td>
+                            </tr>
+                            <!-- Add more rows with similar pattern -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    <button class="page-btn active">Back</button>
+                    <button class="page-btn">Next</button>
+                    <span class="page-info">Showing 15 of 45 products</span>
+                </div>
+
+                <!-- Stock Level Thresholds Modal -->
+                <div id="thresholdsModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Edit Stock Level Thresholds</h2>
+                            <button class="close-btn">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="modal-subtitle">Set the thresholds for inventory stock levels</p>
+                            <div class="threshold-input">
+                                <label>Low Stock Threshold</label>
+                                <input type="number" value="30">
+                                <span class="unit-label">units or less</span>
+                                <p class="threshold-description">Items with stock below this value will be marked as "Low Stock"</p>
+                            </div>
+                            <div class="threshold-input">
+                                <label>High Stock Threshold</label>
+                                <input type="number" value="70">
+                                <span class="unit-label">units or less</span>
+                                <p class="threshold-description">Items with stock above this value will be marked as "High Stock"</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="cancel-btn">Cancel</button>
+                            <button class="save-btn">Save Thresholds</button>
+                        </div>
                     </div>
                 </div>
             </div>
