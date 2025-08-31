@@ -13,8 +13,7 @@
 .settings-content {
     padding: 2rem;
     color: #fff;
-    max-width: 1200px;
-    margin: 0 auto;
+    margin: 0;
 }
 
 .settings-title {
@@ -115,7 +114,7 @@
 }
 
 .settings-section {
-    background: #000;
+    background: #000000;
     border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;

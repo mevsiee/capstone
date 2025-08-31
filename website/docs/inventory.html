@@ -56,20 +56,30 @@
         
         <main class="main-content">
             <div class="content-area">
-                <h1 class="page-title">Inventory</h1>
-                
-                <div class="stock-cards">
+                <div class="inventory-content">
+                    <h1 class="page-title">Inventory</h1>
+                    
+                    <div class="stock-cards">
                     <div class="stock-card high">
-                        <h3>High Stock <i class="fas fa-check-circle"></i></h3>
-                        <div class="stock-count">15</div>
+                        <div class="stock-card-content">
+                            <h3>High Stock <i class="fas fa-check-circle"></i></h3>
+                            <p class="stock-description">Items with 70+ units in stock</p>
+                            <div class="stock-count">15</div>
+                        </div>
                     </div>
                     <div class="stock-card medium">
-                        <h3>Medium Stock <i class="fas fa-exclamation-circle"></i></h3>
-                        <div class="stock-count">24</div>
+                        <div class="stock-card-content">
+                            <h3>Medium Stock <i class="fas fa-exclamation-circle"></i></h3>
+                            <p class="stock-description">Items with 30-69 units in stock</p>
+                            <div class="stock-count">24</div>
+                        </div>
                     </div>
                     <div class="stock-card low">
-                        <h3>Low Stock <i class="fas fa-triangle-exclamation"></i></h3>
-                        <div class="stock-count">8</div>
+                        <div class="stock-card-content">
+                            <h3>Low Stock <i class="fas fa-triangle-exclamation"></i></h3>
+                            <p class="stock-description">Items with less than 30 units</p>
+                            <div class="stock-count">8</div>
+                        </div>
                     </div>
                 </div>
 
@@ -222,6 +232,7 @@
                             <button class="cancel-btn">Cancel</button>
                             <button class="save-btn">Update Cost</button>
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>

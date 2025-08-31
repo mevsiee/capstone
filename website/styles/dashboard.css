@@ -8,7 +8,7 @@ body {
   font-family: "Poppins", sans-serif;
   height: 100vh;
   overflow: hidden;
-  background: #000;
+  background: #000000;
 }
 
 /* Dashboard Styles */
@@ -103,7 +103,7 @@ body {
 
 .main-content {
   flex: 1;
-  background: #000;
+  background: #000000;
   overflow-y: auto;
   margin-left: 80px;
   height: calc(100vh - 80px);
@@ -145,7 +145,7 @@ body {
   width: 100%;
   height: calc(100vh - 120px);
   border: none;
-  background: #000;
+  background: #000000;
 }
 
 .placeholder-content i {

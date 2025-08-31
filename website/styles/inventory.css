@@ -1,7 +1,14 @@
 body, html {
     font-family: 'Poppins', sans-serif;
 }
+
 /* Inventory Page Styles */
+.inventory-content {
+    color: #fff;
+    padding: 20px;
+    background: #000000;
+}
+
 .page-title {
     color: #F4B301;
     font-size: 24px;
@@ -17,18 +24,30 @@ body, html {
 }
 
 .stock-card {
-    background: #0D0D0D;
+    border: 1px solid #1A1A1A;
     border-radius: 8px;
+    overflow: hidden;
+    background: linear-gradient(to bottom, rgba(13, 13, 13, 0.8), rgba(13, 13, 13, 0.95));
+    backdrop-filter: blur(10px);
+}
+
+.stock-card-content {
     padding: 16px;
-    min-height: 100px;
 }
 
 .stock-card h3 {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    margin-bottom: 4px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.stock-description {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
     margin-bottom: 12px;
-    font-size: 16px;
 }
 
 .stock-card.high h3 {
@@ -44,7 +63,8 @@ body, html {
 }
 
 .stock-count {
-    font-size: 24px;
+    font-size: 32px;
+    font-weight: 700;
     color: #fff;
 }
 
