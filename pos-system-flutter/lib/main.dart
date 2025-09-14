@@ -10,6 +10,7 @@ import 'package:pos_system/providers/cart_provider.dart';
 import 'package:pos_system/providers/transaction_provider.dart';
 import 'package:pos_system/providers/product_provider.dart';
 import 'package:pos_system/providers/staff_provider.dart';
+import 'package:pos_system/providers/pos_session_provider.dart';
 
 import 'package:pos_system/screens/Authentication/login_screen.dart';
 import 'package:pos_system/screens/Main Screen/home_screen.dart';
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TransactionProvider()),
         ChangeNotifierProvider<ProductProvider>.value(value: productProvider),
         ChangeNotifierProvider(create: (_) => StaffProvider()),
+        ChangeNotifierProvider(create: (_) => PosSessionProvider()),
       ],
       child: MaterialApp(
         title: 'Retail Ordering System for EShop Clothing',

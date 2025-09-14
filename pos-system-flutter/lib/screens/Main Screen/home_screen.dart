@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pos_system/providers/auth_provider.dart';
+import 'package:pos_system/providers/pos_session_provider.dart';
 import 'package:pos_system/widgets/app_header.dart';
 import 'package:pos_system/screens/Transaction/pos_screen.dart';
 import 'package:pos_system/screens/Transaction/transaction_history_screen.dart';
@@ -42,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    final posSessionProvider = Provider.of<PosSessionProvider>(context);
     
     return Scaffold(
       appBar: AppHeader(
@@ -59,16 +61,33 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 unselectedLabelColor: Colors.grey,
                 indicatorColor: Theme.of(context).primaryColor,
                 indicatorWeight: 3,
-                tabs: const [
+                tabs: [
                   Tab(
-                    icon: Icon(Icons.shopping_cart),
+                    icon: Stack(
+                      children: [
+                        const Icon(Icons.shopping_cart),
+                        if (posSessionProvider.isSessionActive)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Colors.green,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                     text: 'New Order',
                   ),
-                  Tab(
+                  const Tab(
                     icon: Icon(Icons.history),
                     text: 'History',
                   ),
-                  Tab(
+                  const Tab(
                     icon: Icon(Icons.inventory_2),
                     text: 'Products',
                   ),
