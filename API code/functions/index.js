@@ -11,7 +11,6 @@ const productAddRoutes = require("./POS/productAdd");
 
 const transactionPostRoutes = require("./POS/transanctionPost");
 const employeeGetRoutes = require("./POS/employeeGet");
-const forecastRoutes = require("./POS/forecastRoutes");
 
 const app = express();
 app.use(cors());
@@ -25,7 +24,6 @@ app.use("/", productAddRoutes);
 
 app.use("/", transactionPostRoutes);
 app.use("/", employeeGetRoutes);
-app.use("/", forecastRoutes);
 
 exports.api = functions.onRequest(
     {region: "asia-southeast1"}, // ✅ Your preferred region

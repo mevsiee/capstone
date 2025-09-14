@@ -212,7 +212,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                       child: transactionProvider.transactions.isEmpty
                           ? const Center(
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
                                     Icons.receipt_long,

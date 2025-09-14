@@ -17,7 +17,8 @@ String generateCustomTransactionId() {
 }
 
 class TransactionProvider with ChangeNotifier {
-  final String _apiUrl = 'http://192.168.244.121:3000/api/transactions';
+  final String _apiUrl =
+      'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/transactions';
   List<Transaction> _transactions = [];
   String? _expandedTransactionId;
 
@@ -148,19 +149,20 @@ class TransactionProvider with ChangeNotifier {
     }
   }
 
-  Future<void> pushCachedTransactionsManually() async {
+  Future<bool> pushCachedTransactionsManually() async {
     final cachedTransactions = await LocalDBHelper.getCachedTransactions();
+    print('🔍 Found ${cachedTransactions.length} cached transactions');
 
     if (cachedTransactions.isEmpty) {
       _showStatus('No cached transactions to sync', color: Colors.blue);
       Future.delayed(const Duration(seconds: 2), () {
         clearStatus();
       });
-      return;
+      print('✅ No transactions to sync. Returning true.');
+      return true;
     }
 
-    _showStatus('Syncing ${cachedTransactions.length} transactions...',
-        color: Colors.blue, isLoading: true);
+    _showStatus('Syncing transactions...', color: Colors.blue, isLoading: true);
 
     bool allSuccessful = true;
     int successCount = 0;
@@ -174,19 +176,19 @@ class TransactionProvider with ChangeNotifier {
         );
 
         if (response.statusCode == 201) {
-          bool alreadyExists = _transactions.any((t) => t.id == tx.id);
-          if (!alreadyExists) {
+          if (!_transactions.any((t) => t.id == tx.id)) {
             _transactions.insert(0, tx);
           }
           successCount++;
         } else {
-          _showStatus('Server error: ${response.body}', color: Colors.red);
+          print('❌ Sync failed: Server responded with ${response.statusCode}');
+          print('Response body: ${response.body}');
           allSuccessful = false;
           break;
         }
-      } catch (e) {
-        _showStatus('Network error: Unable to connect to server',
-            color: Colors.red);
+      } catch (e, stack) {
+        print('🔥 Network error while syncing: $e');
+        print(stack);
         allSuccessful = false;
         break;
       }
@@ -194,11 +196,9 @@ class TransactionProvider with ChangeNotifier {
 
     if (allSuccessful) {
       await LocalDBHelper.clearCachedTransactions();
-      _showStatus('Successfully synced $successCount transactions');
+      _showStatus('✅ Successfully synced $successCount transactions');
     } else {
-      _showStatus(
-          'Partial sync: $successCount of ${cachedTransactions.length} synced',
-          color: Colors.orange);
+      _showStatus('⚠️ Failed to sync all transactions', color: Colors.red);
     }
 
     await _cacheTransactions();
@@ -207,6 +207,9 @@ class TransactionProvider with ChangeNotifier {
     Future.delayed(const Duration(seconds: 4), () {
       clearStatus();
     });
+
+    print('pushCachedTransactionsManually result: $allSuccessful');
+    return allSuccessful;
   }
 
   Future<void> _autoSyncIfNeeded() async {
@@ -229,8 +232,13 @@ class TransactionProvider with ChangeNotifier {
 
     _transactions = [];
     _expandedTransactionId = null;
+
+    // Clear shared prefs
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('transactions');
+
+    // Also clear local DB cache
+    await LocalDBHelper.clearCachedTransactions();
 
     _showStatus('All transactions cleared');
     notifyListeners();

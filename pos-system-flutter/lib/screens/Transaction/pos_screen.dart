@@ -404,15 +404,8 @@ class _PosScreenState extends State<PosScreen>
 
       if (shouldEnd == true) {
         try {
-          // Sync transactions first
-          if (transactionProvider.transactions.isNotEmpty) {
-            await transactionProvider.pushCachedTransactionsManually();
-            // Clear transactions after successful sync
-            await transactionProvider.clearTransactions();
-          }
-
-          // End the session
-          await posSessionProvider.endSession();
+          // ✅ Let `endSession()` handle everything
+          await posSessionProvider.endSession(transactionProvider);
 
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

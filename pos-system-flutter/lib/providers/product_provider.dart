@@ -13,6 +13,7 @@ class ProductProvider with ChangeNotifier {
   bool _isLoading = false;
   String _errorMessage = '';
   String _selectedCategory = 'All';
+  bool _isProductsCached = false; // New flag to track cache status
 
   Database? _db;
   bool _dbInitialized = false;
@@ -23,6 +24,7 @@ class ProductProvider with ChangeNotifier {
   String get errorMessage => _errorMessage;
   String get selectedCategory => _selectedCategory;
   List<String> get categories => _categories;
+  bool get isProductsCached => _isProductsCached; // Getter for cache status
 
   List<Product> get filteredProducts {
     if (_selectedCategory == 'All') return _products;
@@ -63,7 +65,8 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final url = Uri.parse('http://192.168.244.121:3000/api/configurations');
+      final url = Uri.parse(
+          'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/configurations');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -83,14 +86,23 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchProducts() async {
+  Future<void> fetchProducts({bool forceRefresh = false}) async {
+    // Skip fetching if products are cached and no force refresh is requested
+    if (_isProductsCached && !forceRefresh) {
+      await _loadProductsFromDB();
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+
     await initDatabase();
     _isLoading = true;
     _errorMessage = '';
     notifyListeners();
 
     try {
-      final url = Uri.parse('http://192.168.244.121:3000/api/products');
+      final url = Uri.parse(
+          'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/products');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -109,6 +121,7 @@ class ProductProvider with ChangeNotifier {
         }).toList();
 
         await _cacheProductsToDB();
+        _isProductsCached = true; // Set cache flag after successful fetch
       } else {
         _errorMessage = 'Failed to load products from server';
         await _loadProductsFromDB();
@@ -167,6 +180,7 @@ class ProductProvider with ChangeNotifier {
       'colors': jsonEncode(product.colors),
       'sizes': jsonEncode(product.sizes),
     });
+    _isProductsCached = true; // Update cache flag
     notifyListeners();
   }
 
@@ -187,13 +201,14 @@ class ProductProvider with ChangeNotifier {
         where: 'id = ?',
         whereArgs: [updatedProduct.id],
       );
+      _isProductsCached = true; // Update cache flag
       notifyListeners();
     }
   }
 
   Future<void> deleteProduct(String productId) async {
-    final url =
-        Uri.parse('http://192.168.244.121:3000/api/products/$productId');
+    final url = Uri.parse(
+        'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/products/$productId');
 
     try {
       final response = await http.delete(url);
@@ -201,6 +216,7 @@ class ProductProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         _products.removeWhere((p) => p.id == productId);
         await _db?.delete('products', where: 'id = ?', whereArgs: [productId]);
+        _isProductsCached = _products.isNotEmpty; // Update cache flag
         notifyListeners();
       } else {
         throw Exception('Failed to delete product: ${response.statusCode}');

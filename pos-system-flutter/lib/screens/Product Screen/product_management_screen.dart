@@ -15,13 +15,19 @@ class ProductManagementScreen extends StatefulWidget {
 
 class _ProductManagementScreenState extends State<ProductManagementScreen> {
   bool _initialized = false;
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
       final provider = Provider.of<ProductProvider>(context, listen: false);
-      provider.fetchConfigurations(); // 🟢 Fetch dynamic categories
-      provider.fetchProducts();
+      provider.fetchConfigurations(); // Fetch dynamic categories
+      // Only fetch products if not cached
+      if (!provider.isProductsCached) {
+        provider.fetchProducts();
+      } else {
+        provider.fetchProducts(forceRefresh: false); // Load from cache
+      }
     });
   }
 
@@ -29,7 +35,13 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      Provider.of<ProductProvider>(context, listen: false).fetchProducts();
+      final provider = Provider.of<ProductProvider>(context, listen: false);
+      // Only fetch products if not cached
+      if (!provider.isProductsCached) {
+        provider.fetchProducts();
+      } else {
+        provider.fetchProducts(forceRefresh: false); // Load from cache
+      }
       _initialized = true;
     }
   }
@@ -94,7 +106,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
         builder: (_) => const Center(child: CircularProgressIndicator()),
       );
 
-      // 🔥 Call the actual delete API
+      // Call the actual delete API
       await provider.deleteProduct(product.id);
 
       // Close loading dialog
@@ -109,7 +121,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
       );
 
       // Refresh the product list
-      await provider.fetchProducts();
+      await provider.fetchProducts(forceRefresh: true);
     } catch (e) {
       // Close loading dialog
       Navigator.of(context).pop();
@@ -136,6 +148,16 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Product Management'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh Products',
+            onPressed: () {
+              Provider.of<ProductProvider>(context, listen: false)
+                  .fetchProducts(forceRefresh: true);
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -197,7 +219,8 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                                                 ),
                                               );
                                               if (updated != null) {
-                                                provider.fetchProducts();
+                                                provider.fetchProducts(
+                                                    forceRefresh: true);
                                               }
                                             },
                                           ),
@@ -227,7 +250,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
             MaterialPageRoute(builder: (context) => const AddProductScreen()),
           );
           if (result != null) {
-            provider.fetchProducts();
+            provider.fetchProducts(forceRefresh: true);
           }
         },
         child: const Icon(Icons.add),

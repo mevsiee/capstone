@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../providers/transaction_provider.dart';
 
 class PosSessionProvider with ChangeNotifier {
   bool _isSessionActive = false;
@@ -58,24 +59,31 @@ class PosSessionProvider with ChangeNotifier {
     }
   }
 
-  Future<void> endSession() async {
-    try {
-      _isLoading = true;
-      notifyListeners();
+  Future<void> endSession(TransactionProvider transactionProvider) async {
+    _isLoading = true;
+    notifyListeners();
 
+    final success = await transactionProvider.pushCachedTransactionsManually();
+
+    if (!success) {
+      _isLoading = false;
+      notifyListeners();
+      throw Exception(
+          '❌ Cannot end session: Some transactions failed to sync.');
+    }
+
+    try {
       final prefs = await SharedPreferences.getInstance();
       _isSessionActive = false;
       _sessionStartTime = null;
 
       await prefs.remove('pos_session_active');
       await prefs.remove('pos_session_start_time');
-
-      _isLoading = false;
-      notifyListeners();
     } catch (e) {
+      throw Exception('⚠️ Failed to clear session data: $e');
+    } finally {
       _isLoading = false;
       notifyListeners();
-      throw Exception('Failed to end POS session: $e');
     }
   }
 }
