@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function redirectToDashboard() {
-    window.location.href = "/docs/dashboard.html";
+    window.location.href = "dashboard.html";
   }
 
   function handleLoginError(error) {
