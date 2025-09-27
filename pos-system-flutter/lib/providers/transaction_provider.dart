@@ -1,53 +1,106 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:pos_system/models/staff.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'package:pos_system/models/transaction.dart';
 import 'package:pos_system/models/cart_item.dart';
-import 'package:pos_system/data/staff.dart';
+import 'package:pos_system/helpers/local_db_helper.dart';
+
+String generateCustomTransactionId() {
+  final millis = DateTime.now().millisecondsSinceEpoch;
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  final rand = Random();
+  final randomPart =
+      List.generate(5, (_) => chars[rand.nextInt(chars.length)]).join();
+  return 'TRX-$millis-$randomPart';
+}
 
 class TransactionProvider with ChangeNotifier {
+  final String _apiUrl =
+      'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/transactions';
   List<Transaction> _transactions = [];
   String? _expandedTransactionId;
 
+  // Add these properties for UI feedback
+  String _statusMessage = '';
+  bool _isLoading = false;
+  Color _statusColor = Colors.green;
+
   List<Transaction> get transactions => _transactions;
   String? get expandedTransactionId => _expandedTransactionId;
+  String get statusMessage => _statusMessage;
+  bool get isLoading => _isLoading;
+  Color get statusColor => _statusColor;
 
   TransactionProvider() {
-    _loadTransactions();
+    fetchTransactions();
+    _autoSyncIfNeeded();
   }
 
-  Future<void> _loadTransactions() async {
+  void _showStatus(String message,
+      {Color color = Colors.green, bool isLoading = false}) {
+    _statusMessage = message;
+    _statusColor = color;
+    _isLoading = isLoading;
+    notifyListeners();
+  }
+
+  void clearStatus() {
+    _statusMessage = '';
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> fetchTransactions() async {
+    _showStatus('Loading transactions...', color: Colors.blue, isLoading: true);
+
     final prefs = await SharedPreferences.getInstance();
-    final transactionsJson = prefs.getString('transactions');
-    
-    if (transactionsJson != null) {
-      try {
-        final List<dynamic> decoded = json.decode(transactionsJson) as List<dynamic>;
-        _transactions = decoded.map((item) => Transaction.fromJson(item as Map<String, dynamic>)).toList();
-        notifyListeners();
-      } catch (e) {
-        print('Error loading transactions from preferences: $e');
+    final cachedJson = prefs.getString('transactions');
+
+    try {
+      final response = await http.get(Uri.parse(_apiUrl));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List;
+        _transactions = data.map((item) => Transaction.fromJson(item)).toList();
+        await _cacheTransactions();
+        _showStatus('Transactions loaded successfully');
+      } else {
+        await _loadCachedTransactions(cachedJson);
+        _showStatus('Using cached transactions (server unavailable)',
+            color: Colors.orange);
       }
+    } catch (e) {
+      await _loadCachedTransactions(cachedJson);
+      _showStatus('Using cached transactions (network error)',
+          color: Colors.orange);
+    }
+
+    Future.delayed(const Duration(seconds: 3), () {
+      clearStatus();
+    });
+  }
+
+  Future<void> _loadCachedTransactions(String? jsonStr) async {
+    if (jsonStr != null) {
+      final data = json.decode(jsonStr) as List;
+      _transactions = data.map((item) => Transaction.fromJson(item)).toList();
     }
   }
 
-  Future<void> _saveTransactions() async {
+  Future<void> _cacheTransactions() async {
     final prefs = await SharedPreferences.getInstance();
-    final transactionsJson = json.encode(_transactions.map((t) => t.toJson()).toList());
+    final transactionsJson =
+        json.encode(_transactions.map((t) => t.toJson()).toList());
     await prefs.setString('transactions', transactionsJson);
   }
 
   void toggleExpandTransaction(String id) {
-    if (_expandedTransactionId == id) {
-      _expandedTransactionId = null;
-    } else {
-      _expandedTransactionId = id;
-    }
+    _expandedTransactionId = _expandedTransactionId == id ? null : id;
     notifyListeners();
   }
 
-  Future<void> addTransaction({
+  Future<bool> addTransaction({
     required List<CartItem> items,
     required String location,
     required double subtotal,
@@ -56,43 +109,142 @@ class TransactionProvider with ChangeNotifier {
     required String employee,
     String? supervisorId,
   }) async {
+    _showStatus('Processing transaction...',
+        color: Colors.blue, isLoading: true);
+
     final now = DateTime.now();
-    final date = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-    
-    // Find supervisor name if ID is provided
-    String? supervisorName;
-    if (supervisorId != null) {
-      final supervisor = staffMembers.firstWhere(
-        (staff) => staff.id == supervisorId,
-        orElse: () => Staff(id: '', name: 'Unknown', position: ''),
-      );
-      supervisorName = supervisor.name;
-    }
-    
-    final newTransaction = Transaction(
-      id: "TRX-${(_transactions.length + 1).toString().padLeft(3, '0')}",
-      date: date,
+    final transactionId = generateCustomTransactionId();
+    final formattedDate =
+        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+    final transaction = Transaction(
+      id: transactionId,
+      date: formattedDate,
       location: location == 'store' ? 'Store' : 'Warehouse',
       items: items,
       subtotal: subtotal,
       discount: discount,
       total: total,
       employee: employee,
-      supervisorId: supervisorId,
-      supervisorName: supervisorName,
       timestamp: now.toIso8601String(),
     );
 
-    _transactions.insert(0, newTransaction);
-    await _saveTransactions();
-    notifyListeners();
+    try {
+      await LocalDBHelper.insertTransaction(transaction);
+      _transactions.insert(0, transaction);
+      await _cacheTransactions();
+      _showStatus('Transaction saved locally (awaiting sync)',
+          color: Colors.orange);
+      notifyListeners();
+
+      Future.delayed(const Duration(seconds: 3), () {
+        clearStatus();
+      });
+
+      _autoSyncIfNeeded();
+      return true;
+    } catch (e) {
+      _showStatus('Local save failed', color: Colors.red);
+      return false;
+    }
   }
-  
+
+  Future<bool> pushCachedTransactionsManually() async {
+    final cachedTransactions = await LocalDBHelper.getCachedTransactions();
+    print('🔍 Found ${cachedTransactions.length} cached transactions');
+
+    if (cachedTransactions.isEmpty) {
+      _showStatus('No cached transactions to sync', color: Colors.blue);
+      Future.delayed(const Duration(seconds: 2), () {
+        clearStatus();
+      });
+      print('✅ No transactions to sync. Returning true.');
+      return true;
+    }
+
+    _showStatus('Syncing transactions...', color: Colors.blue, isLoading: true);
+
+    bool allSuccessful = true;
+    int successCount = 0;
+
+    for (var tx in cachedTransactions) {
+      try {
+        final response = await http.post(
+          Uri.parse(_apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(tx.toJson()),
+        );
+
+        if (response.statusCode == 201) {
+          if (!_transactions.any((t) => t.id == tx.id)) {
+            _transactions.insert(0, tx);
+          }
+          successCount++;
+        } else {
+          print('❌ Sync failed: Server responded with ${response.statusCode}');
+          print('Response body: ${response.body}');
+          allSuccessful = false;
+          break;
+        }
+      } catch (e, stack) {
+        print('🔥 Network error while syncing: $e');
+        print(stack);
+        allSuccessful = false;
+        break;
+      }
+    }
+
+    if (allSuccessful) {
+      await LocalDBHelper.clearCachedTransactions();
+      _showStatus('✅ Successfully synced $successCount transactions');
+    } else {
+      _showStatus('⚠️ Failed to sync all transactions', color: Colors.red);
+    }
+
+    await _cacheTransactions();
+    notifyListeners();
+
+    Future.delayed(const Duration(seconds: 4), () {
+      clearStatus();
+    });
+
+    print('pushCachedTransactionsManually result: $allSuccessful');
+    return allSuccessful;
+  }
+
+  Future<void> _autoSyncIfNeeded() async {
+    final cachedTransactions = await LocalDBHelper.getCachedTransactions();
+    if (cachedTransactions.length >= 20) {
+      try {
+        final response = await http.get(Uri.parse(_apiUrl));
+        if (response.statusCode == 200) {
+          await pushCachedTransactionsManually();
+        }
+      } catch (_) {
+        // do nothing on failure
+      }
+    }
+  }
+
   Future<void> clearTransactions() async {
+    _showStatus('Clearing all transactions...',
+        color: Colors.blue, isLoading: true);
+
     _transactions = [];
     _expandedTransactionId = null;
+
+    // Clear shared prefs
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('transactions');
+
+    // Also clear local DB cache
+    await LocalDBHelper.clearCachedTransactions();
+
+    _showStatus('All transactions cleared');
     notifyListeners();
+
+    Future.delayed(const Duration(seconds: 2), () {
+      clearStatus();
+    });
   }
 }

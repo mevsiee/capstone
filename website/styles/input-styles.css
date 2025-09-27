@@ -1,0 +1,33 @@
+.dark-input {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+    color: white !important;
+    opacity: 1 !important;
+}
+
+.dark-input.has-value {
+    color: white !important;
+    opacity: 1 !important;
+}
+
+/* Override any potential conflicting styles */
+.dark-input[value]:not([value=""]) {
+    color: white !important;
+    opacity: 1 !important;
+}
+
+.dark-input::placeholder {
+    color: #666;
+    opacity: 1;
+}
+
+.dark-input:focus {
+    border-color: #FFD700;
+    outline: none;
+    color: white !important;
+}

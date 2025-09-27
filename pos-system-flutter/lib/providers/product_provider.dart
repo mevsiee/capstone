@@ -1,54 +1,108 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
 import '../models/product.dart';
 
 class ProductProvider with ChangeNotifier {
   List<Product> _products = [];
-
+  List<String> _categories = ['All'];
   bool _isLoading = false;
   String _errorMessage = '';
   String _selectedCategory = 'All';
+  bool _isProductsCached = false; // New flag to track cache status
 
-  // Public getters
+  Database? _db;
+  bool _dbInitialized = false;
+
+  // Getters
   List<Product> get products => _products;
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
   String get selectedCategory => _selectedCategory;
+  List<String> get categories => _categories;
+  bool get isProductsCached => _isProductsCached; // Getter for cache status
 
-  List<String> get categories => [
-        'All',
-        'Tops',
-        'Bottoms',
-        'Dresses',
-        'Outerwear',
-        'Accessories',
-        'Footwear',
-      ];
-
-  // Filtered product list based on selected category
   List<Product> get filteredProducts {
     if (_selectedCategory == 'All') return _products;
     return _products.where((p) => p.category == _selectedCategory).toList();
   }
 
-  // Update selected category
+  Future<void> initDatabase() async {
+    if (_dbInitialized) return;
+    Directory dir = await getApplicationDocumentsDirectory();
+    final path = join(dir.path, 'products.db');
+
+    _db = await openDatabase(
+      path,
+      version: 1,
+      onCreate: (Database db, int version) async {
+        await db.execute('''
+          CREATE TABLE products (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            category TEXT,
+            price REAL,
+            colors TEXT,
+            sizes TEXT
+          )
+        ''');
+      },
+    );
+    _dbInitialized = true;
+  }
+
   void changeCategory(String category) {
     _selectedCategory = category;
     notifyListeners();
   }
 
-  // Fetch product list from the API
-  Future<void> fetchProducts() async {
+  Future<void> fetchConfigurations() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final url = Uri.parse(
+          'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/configurations');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final List<String> fetchedCategories =
+            List<String>.from(data['categories'] ?? []);
+        _categories = ['All', ...fetchedCategories];
+        _errorMessage = '';
+      } else {
+        _errorMessage = 'Failed to load configurations';
+      }
+    } catch (e) {
+      _errorMessage = 'Error loading configurations: $e';
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> fetchProducts({bool forceRefresh = false}) async {
+    // Skip fetching if products are cached and no force refresh is requested
+    if (_isProductsCached && !forceRefresh) {
+      await _loadProductsFromDB();
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    await initDatabase();
     _isLoading = true;
     _errorMessage = '';
     notifyListeners();
 
     try {
-      final url = Uri.parse('http://10.0.2.2:3000/api/products');
-
+      final url = Uri.parse(
+          'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/products');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -65,43 +119,117 @@ class ProductProvider with ChangeNotifier {
             sizes: List<String>.from(jsonItem['Size'] ?? []),
           );
         }).toList();
+
+        await _cacheProductsToDB();
+        _isProductsCached = true; // Set cache flag after successful fetch
       } else {
-        _errorMessage = 'Failed to load products: ${response.statusCode}';
+        _errorMessage = 'Failed to load products from server';
+        await _loadProductsFromDB();
       }
     } catch (e) {
-      _errorMessage = 'Error loading products: $e';
+      await _loadProductsFromDB();
+      if (_products.isNotEmpty) {
+        _errorMessage = ''; // Local fallback worked, no need to show error
+      } else {
+        _errorMessage = 'Error fetching products: $e';
+      }
     }
 
     _isLoading = false;
     notifyListeners();
   }
 
-  // Add a new product to the list (local only; optional to add POST API)
-  void addProduct(Product product) {
+  Future<void> _cacheProductsToDB() async {
+    if (_db == null) return;
+    await _db!.delete('products');
+    for (var product in _products) {
+      await _db!.insert('products', {
+        'id': product.id,
+        'name': product.name,
+        'category': product.category,
+        'price': product.price,
+        'colors': jsonEncode(product.colors),
+        'sizes': jsonEncode(product.sizes),
+      });
+    }
+  }
+
+  Future<void> _loadProductsFromDB() async {
+    if (_db == null) return;
+    final result = await _db!.query('products');
+    _products = result.map((row) {
+      return Product(
+        id: row['id'] as String,
+        name: row['name'] as String,
+        category: row['category'] as String,
+        price: (row['price'] as num).toDouble(),
+        colors: List<String>.from(jsonDecode(row['colors'] as String)),
+        sizes: List<String>.from(jsonDecode(row['sizes'] as String)),
+      );
+    }).toList();
+  }
+
+  Future<void> addProduct(Product product) async {
+    await initDatabase();
     _products.add(product);
+    await _db?.insert('products', {
+      'id': product.id,
+      'name': product.name,
+      'category': product.category,
+      'price': product.price,
+      'colors': jsonEncode(product.colors),
+      'sizes': jsonEncode(product.sizes),
+    });
+    _isProductsCached = true; // Update cache flag
     notifyListeners();
   }
 
-  // Update an existing product by ID
-  void updateProduct(Product updatedProduct) {
+  Future<void> updateProduct(Product updatedProduct) async {
+    await initDatabase();
     final index = _products.indexWhere((p) => p.id == updatedProduct.id);
     if (index != -1) {
       _products[index] = updatedProduct;
+      await _db?.update(
+        'products',
+        {
+          'name': updatedProduct.name,
+          'category': updatedProduct.category,
+          'price': updatedProduct.price,
+          'colors': jsonEncode(updatedProduct.colors),
+          'sizes': jsonEncode(updatedProduct.sizes),
+        },
+        where: 'id = ?',
+        whereArgs: [updatedProduct.id],
+      );
+      _isProductsCached = true; // Update cache flag
       notifyListeners();
     }
   }
 
-  // Delete product from the list
-  void deleteProduct(String productId) {
-    _products.removeWhere((p) => p.id == productId);
-    notifyListeners();
+  Future<void> deleteProduct(String productId) async {
+    final url = Uri.parse(
+        'https://asia-southeast1-eshop-44c5e.cloudfunctions.net/api/products/$productId');
+
+    try {
+      final response = await http.delete(url);
+
+      if (response.statusCode == 200) {
+        _products.removeWhere((p) => p.id == productId);
+        await _db?.delete('products', where: 'id = ?', whereArgs: [productId]);
+        _isProductsCached = _products.isNotEmpty; // Update cache flag
+        notifyListeners();
+      } else {
+        throw Exception('Failed to delete product: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error deleting product: $e');
+    }
   }
 
-  // Optional: Get product by ID
   Product? getProductById(String id) {
     try {
       return _products.firstWhere((p) => p.id == id);
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }

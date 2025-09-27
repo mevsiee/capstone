@@ -12,11 +12,11 @@ class BulkPricingInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final product = products.firstWhere((p) => p.id == productId);
-    
+
     if (product.bulkPricing == null) {
       return const SizedBox.shrink();
     }
-    
+
     return Padding(
       padding: const EdgeInsets.only(top: 4.0),
       child: InkWell(
@@ -47,7 +47,7 @@ class BulkPricingInfo extends StatelessWidget {
 
   void _showBulkPricingTooltip(BuildContext context, product) {
     final bulkPricing = product.bulkPricing!;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

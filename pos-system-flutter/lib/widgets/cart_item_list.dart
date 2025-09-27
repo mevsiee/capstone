@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:pos_system/models/cart_item.dart';
-import 'package:pos_system/data/products.dart';
 import 'package:pos_system/models/product.dart';
+import 'package:pos_system/providers/product_provider.dart';
 
 class CartItemList extends StatelessWidget {
   final List<CartItem> items;
@@ -17,21 +18,23 @@ class CartItemList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final productProvider = Provider.of<ProductProvider>(context);
+    final allProducts = productProvider.products;
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
-        
-        // Calculate total quantity safely
-        int totalQuantity = 0;
-        for (var i in items.where((i) => i.productId == item.productId)) {
-          totalQuantity += i.quantity;
-        }
-        
-        // Find the product safely
-        final product = products.firstWhere(
+
+        // Calculate total quantity of the same product in the cart
+        int totalQuantity = items
+            .where((i) => i.productId == item.productId)
+            .fold(0, (sum, i) => sum + i.quantity);
+
+        // Fetch the product from the provider
+        final product = allProducts.firstWhere(
           (p) => p.id == item.productId,
           orElse: () => Product(
             id: '',
@@ -42,15 +45,17 @@ class CartItemList extends StatelessWidget {
             price: 0,
           ),
         );
-        
-        // Check for bulk pricing safely
-        final bool hasBulkPricing = product.bulkPricing != null && 
+
+        final bool hasBulkPricing = product.bulkPricing != null &&
             totalQuantity >= product.bulkPricing!.minQuantity;
-        
-        // Calculate the final price (with discount applied)
-        final double finalPrice = item.price;
-        final double displayPrice = finalPrice * item.quantity - item.discount;
-        
+
+        final double finalPrice = hasBulkPricing
+            ? product.bulkPricing!.discountedPrice
+            : product.price;
+
+        final double displayPrice =
+            (finalPrice * item.quantity) - item.discount;
+
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
           child: Padding(
@@ -58,6 +63,7 @@ class CartItemList extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Top row with name and quantity
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -78,8 +84,11 @@ class CartItemList extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
+
+                // Category pill
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(12),
@@ -92,12 +101,15 @@ class CartItemList extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 4),
                 Text(
                   'Size: ${item.size}, Color: ${item.color}',
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8),
+
+                // Price breakdown
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -130,7 +142,7 @@ class CartItemList extends StatelessWidget {
                           ),
                         ],
                       )
-                    else if (hasBulkPricing && product.bulkPricing != null)
+                    else if (hasBulkPricing)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -167,6 +179,8 @@ class CartItemList extends StatelessWidget {
                           fontSize: 16,
                         ),
                       ),
+
+                    // Action buttons
                     Row(
                       children: [
                         IconButton(
@@ -176,7 +190,8 @@ class CartItemList extends StatelessWidget {
                           padding: const EdgeInsets.all(8),
                         ),
                         IconButton(
-                          icon: Icon(Icons.delete, size: 20, color: Colors.red[700]),
+                          icon: Icon(Icons.delete,
+                              size: 20, color: Colors.red[700]),
                           onPressed: () => onRemove(item.id),
                           constraints: const BoxConstraints(),
                           padding: const EdgeInsets.all(8),

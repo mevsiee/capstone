@@ -16,11 +16,13 @@ class CartProvider with ChangeNotifier {
   String? get supervisorId => _supervisorId;
   bool get isEmpty => _items.isEmpty;
 
-  void setLocation(String location) {
-    _location = location;
-    notifyListeners();
+  void setLocation(String? location) {
+    if (location != null) {
+      _location = location;
+      notifyListeners();
+    }
   }
-  
+
   void setSupervisor(String? id) {
     _supervisorId = id;
     notifyListeners();
@@ -36,18 +38,18 @@ class CartProvider with ChangeNotifier {
   }) {
     // Get product from the provider instead of static data
     final product = productProvider.getProductById(productId);
-    
+
     if (product == null) {
       print('Error: Product with ID $productId not found');
       return;
     }
-    
+
     // Check for bulk pricing
     final bulkPricingInfo = _checkBulkPricing(product, quantity);
-    
+
     // Apply discount to the price
     double finalPrice = bulkPricingInfo['price'] as double;
-    
+
     final newItem = CartItem(
       id: const Uuid().v4(),
       productId: productId,
@@ -68,11 +70,11 @@ class CartProvider with ChangeNotifier {
 
   void removeItem(String id) {
     _items.removeWhere((item) => item.id == id);
-    
+
     if (_editingItemId == id) {
       _editingItemId = null;
     }
-    
+
     notifyListeners();
   }
 
@@ -103,13 +105,13 @@ class CartProvider with ChangeNotifier {
       print('Error: Product with ID $productId not found');
       return;
     }
-    
+
     // Check for bulk pricing
     final bulkPricingInfo = _checkBulkPricing(product, quantity);
-    
+
     // Apply discount to the price
     double finalPrice = bulkPricingInfo['price'] as double;
-    
+
     _items[index] = CartItem(
       id: id,
       productId: productId,
@@ -156,14 +158,15 @@ class CartProvider with ChangeNotifier {
 
   // Helper method to check and apply bulk pricing
   Map<String, dynamic> _checkBulkPricing(Product product, int quantity) {
-    if (product.bulkPricing != null && quantity >= product.bulkPricing!.minQuantity) {
+    if (product.bulkPricing != null &&
+        quantity >= product.bulkPricing!.minQuantity) {
       return {
         'price': product.bulkPricing!.discountedPrice,
         'originalPrice': product.price,
         'isBulkPricing': true,
       };
     }
-    
+
     return {
       'price': product.price,
       'originalPrice': product.price,
@@ -172,7 +175,8 @@ class CartProvider with ChangeNotifier {
   }
 
   // Apply bulk pricing across variations for checkout
-  List<CartItem> applyBulkPricingAcrossVariations(ProductProvider productProvider) {
+  List<CartItem> applyBulkPricingAcrossVariations(
+      ProductProvider productProvider) {
     // Group items by productId
     final Map<String, List<CartItem>> productGroups = {};
 
@@ -188,7 +192,7 @@ class CartProvider with ChangeNotifier {
 
     productGroups.forEach((productId, groupItems) {
       final product = productProvider.getProductById(productId);
-      
+
       if (product != null && product.bulkPricing != null) {
         int totalQuantity = 0;
         for (var item in groupItems) {

@@ -7,10 +7,12 @@ class AuthProvider with ChangeNotifier {
 
   User? _user;
   bool _isLoading = false;
+  String _errorMessage = '';
 
   User? get user => _user;
   bool get isLoggedIn => _user != null;
   bool get isLoading => _isLoading;
+  String get errorMessage => _errorMessage;
 
   AuthProvider() {
     checkLoginStatus(); // Check current Firebase session
@@ -23,8 +25,6 @@ class AuthProvider with ChangeNotifier {
       _user = User(
         name: fbUser.displayName ?? "No Name",
         email: fbUser.email ?? "No Email",
-        image: fbUser.photoURL ??
-            "https://api.dicebear.com/7.x/avataaars/svg?seed=default",
       );
     } else {
       _user = null;
@@ -35,6 +35,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> login(String email, String password) async {
     _isLoading = true;
+    _errorMessage = '';
     notifyListeners();
 
     try {
@@ -45,9 +46,18 @@ class AuthProvider with ChangeNotifier {
 
       await checkLoginStatus();
       _isLoading = false;
+      notifyListeners();
       return true;
     } on fb_auth.FirebaseAuthException catch (e) {
       debugPrint("Login failed: ${e.message}");
+
+      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+        _errorMessage = 'Invalid email or password';
+      } else {
+        _errorMessage = e.message ?? 'Login failed';
+      }
+    } catch (e) {
+      _errorMessage = 'An unexpected error occurred';
     }
 
     _isLoading = false;
@@ -59,5 +69,12 @@ class AuthProvider with ChangeNotifier {
     await _firebaseAuth.signOut();
     _user = null;
     notifyListeners();
+  }
+
+  void clearError() {
+    if (_errorMessage.isNotEmpty) {
+      _errorMessage = '';
+      notifyListeners();
+    }
   }
 }
