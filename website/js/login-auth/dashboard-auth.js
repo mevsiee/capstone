@@ -1,6 +1,4 @@
 // /js/dashboard-auth.js
-
-// Firebase config and initialization
 const firebaseConfig = {
   apiKey: "AIzaSyCAg8tRotR85IWP2qehTLKn5mMSAK_Hu1g",
   authDomain: "eshop-44c5e.firebaseapp.com",
@@ -11,34 +9,48 @@ const firebaseConfig = {
   measurementId: "G-NVTV17LBHP"
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+// Prevent duplicate app init on pages that also load other auth scripts
+if (firebase.apps.length === 0) {
+  firebase.initializeApp(firebaseConfig);
+}
 
-// Firebase auth state check
+const auth = firebase.auth();
+const db = firebase.firestore();
+
 document.addEventListener("DOMContentLoaded", () => {
-  auth.onAuthStateChanged((user) => {
+  auth.onAuthStateChanged(async (user) => {
     if (!user) {
-      window.location.href = "login.html";
+      // your actual login page lives at index.html
+      window.location.href = "index.html";
       return;
     }
 
-    // Inject user info into UI
+    // Welcome text (if present on the page)
     const username = user.displayName || user.email || "User";
     const userInfoSpan = document.querySelector(".user-info span");
     if (userInfoSpan) {
       userInfoSpan.textContent = `Welcome ${username}!`;
     }
 
-    // Bind logout button
+    // Show User Management link only for admins
+    try {
+      const snap = await db.collection("Users").doc(user.email).get();
+      if (snap.exists && snap.data().role === "admin") {
+        const link = document.getElementById("userManagementLink");
+        if (link) link.style.display = "block";
+      }
+    } catch (err) {
+      console.error("Error fetching user role:", err);
+    }
+
+    // Logout
     const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
         if (confirm("Are you sure you want to logout?")) {
-          auth.signOut().then(() => {
-            window.location.href = "/docs/index.html";
-          }).catch((error) => {
-            console.error("Logout error:", error);
-          });
+          auth.signOut()
+            .then(() => (window.location.href = "/docs/index.html"))
+            .catch((error) => console.error("Logout error:", error));
         }
       });
     }

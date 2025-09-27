@@ -1,0 +1,116 @@
+/* General page structure */
+.usermanagement-content {
+  padding: 20px;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Page header */
+.usermanagement-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.usermanagement-header .title {
+  font-size: 26px;
+  font-weight: 600;
+  color: #ffc107; /* yellow highlight like Inventory/Analytics */
+  margin-bottom: 5px;
+}
+
+.usermanagement-header .subtitle {
+  font-size: 14px;
+  color: #bbb;
+}
+
+/* Table container */
+.table-container {
+  background: #1c1c1c;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.5);
+  margin: 0;         /* remove auto-centering */
+  width: 100%;       /* take full width */
+}
+
+/* Table styling */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.styled-table thead tr {
+  background-color: #2c2c2c;
+  color: #fff;
+  text-align: left;
+  font-weight: 600;
+}
+
+.styled-table th, .styled-table td {
+  padding: 12px 16px;
+}
+
+.styled-table tbody tr {
+  border-bottom: 1px solid #333;
+}
+
+.styled-table tbody tr:hover {
+  background-color: #2a2a2a;
+  transition: 0.2s ease-in-out;
+}
+
+/* Select dropdown */
+.styled-table select {
+  background: #222;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 5px;
+  padding: 6px 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.styled-table select:focus {
+  outline: none;
+  border-color: #ffc107;
+}
+
+/* Actions column buttons */
+.styled-table td.actions {
+  display: flex;
+  gap: 8px; /* space between Save and Remove */
+}
+
+.styled-table .saveBtn {
+  background-color: #28a745;
+  border: none;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.styled-table .saveBtn:hover {
+  background-color: #218838;
+}
+
+.styled-table .removeBtn {
+  background-color: #dc3545;
+  border: none;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.styled-table .removeBtn:hover {
+  background-color: #b02a37;
+}

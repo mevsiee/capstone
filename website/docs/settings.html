@@ -10,6 +10,14 @@
     <link rel="stylesheet" href="../styles/input-styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDKs (compat, v10.12.2) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <!-- Auth guard + show/hide admin link -->
+    <script src="../js/login-auth/dashboard-auth.js"></script>
 </head>
 <body class="dashboard-body">
     <div class="dashboard-container">
@@ -39,6 +47,12 @@
                         <span>Analytics</span>
                     </a>
                 </li>
+                <li class="menu-item" id="userManagementLink" style="display:none;">
+                    <a href="usermanagement.html">
+                        <i class="fas fa-users"></i>
+                        <span>User Management</span>
+                    </a>
+                </li>
                 <li class="menu-item active">
                     <a href="settings.html">
                         <i class="fas fa-cog"></i>
@@ -60,6 +74,7 @@
                     <h1 class="settings-title">Settings</h1>
                     
                     <div class="settings-sections">
+                        <!-- Account Information Section -->
                         <section class="settings-section">
                             <h2><b>Account Information</b></h2>
                             <p class="section-description">View your account details and preferences</p>
@@ -78,6 +93,8 @@
                                 </div>
                             </div>
                         </section>
+
+                        <!-- Platform Integration Section -->
                         <section class="settings-section">
                             <h2><b>Platform Integration</b></h2>
                             <p class="section-description">View current integrations and permissions</p>
@@ -89,7 +106,7 @@
         </main>
     </div>
     
-        <!-- Application Scripts -->
-        <script src="../js/UI/platformIntegration.js"></script>
+    <!-- Application Scripts -->
+    <script src="../js/UI/platformIntegration.js"></script>
 </body>
 </html>

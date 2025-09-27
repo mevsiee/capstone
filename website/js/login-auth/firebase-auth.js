@@ -18,19 +18,37 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("loginForm");
   const errorDiv = document.getElementById("loginError");
 
+  /**
+   * 🔍 Validate and Sync User
+   * - If user doc exists → update missing fields
+   * - If no doc exists → create with default role/permissions
+   */
   async function validateAndSyncUser(user) {
     if (!user?.email) return false;
 
-    const snapshot = await db.collection("Users")
-      .where("email", "==", user.email)
-      .limit(1)
-      .get();
+    const docRef = db.collection("Users").doc(user.email);
+    const doc = await docRef.get();
 
-    if (snapshot.empty) return false;
+    if (!doc.exists) {
+      // 🚨 New user → create with default role "viewer"
+      await docRef.set({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || "",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        role: "viewer", // 👈 default role
+        permissions: {
+          canViewDashboard: true,
+          canEditInventory: false,
+          canAdjustForecast: false
+        }
+      });
+      console.log("New user added to Firestore with role 'viewer':", user.email);
+      return true;
+    }
 
-    const docRef = snapshot.docs[0].ref;
-    const data = snapshot.docs[0].data();
-
+    // ✅ Existing user → ensure uid/createdAt exist
+    const data = doc.data();
     const updates = {};
     if (!data.uid) updates.uid = user.uid;
     if (!data.createdAt) updates.createdAt = firebase.firestore.FieldValue.serverTimestamp();
@@ -85,6 +103,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  /**
+   * 🔑 Email/Password Sign-In
+   */
   loginForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     errorDiv.textContent = "";
