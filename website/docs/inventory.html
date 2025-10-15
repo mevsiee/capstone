@@ -1,245 +1,480 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory - EShop InventoryIQ</title>
-    <link rel="stylesheet" href="../styles/dashboard.css">
-    <link rel="stylesheet" href="../styles/inventory.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory - EShop InventoryIQ</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../styles/dashboard.css" />
+  <link rel="stylesheet" href="../styles/inventory.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" />
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <style>
+    /* Scoped modal styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-dialog {
+      background: #1e1e1e;
+      color: #eaeaea;
+      max-width: 520px;
+      width: 92%;
+      padding: 20px 24px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .modal-dialog h2 {
+      margin: 0 0 6px;
+      font-size: 1.2rem;
+    }
+
+    .modal-subtitle {
+      margin: 0 0 16px;
+      color: #b0b0b0;
+      font-size: 0.9rem;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 12px 0;
+    }
+
+    .form-row input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #2a2a2a;
+      color: #eaeaea;
+    }
+
+    .units-hint {
+      white-space: nowrap;
+      color: #9aa0a6;
+      font-size: 0.85rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn-cancel,
+    .btn-save {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-cancel {
+      background: #2a2a2a;
+      color: #eaeaea;
+    }
+
+    .btn-save {
+      background: #f5c518;
+      color: #111;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      position: absolute;
+      right: 14px;
+      top: 10px;
+      background: transparent;
+      border: none;
+      color: #bbb;
+      font-size: 20px;
+      cursor: pointer;
+    }
+  </style>
 </head>
+
 <body class="dashboard-body">
-    <div class="dashboard-container">
-        <header class="main-header">
-            <div class="header-content">
-                <h1>EShop InventoryIQ</h1>
-                <h2>Forecasting & Management System</h2>
+  <div
+    id="toast-container"
+    style="position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px;"
+  ></div>
+
+  <div class="dashboard-container">
+    <!-- Header -->
+    <header class="main-header">
+      <div class="header-content">
+        <h1>EShop InventoryIQ</h1>
+        <h2>Forecasting & Management System</h2>
+      </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <ul class="sidebar-menu">
+        <li class="menu-item">
+          <a href="dashboard.html">
+            <i class="fas fa-th-large"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="menu-item active">
+          <a href="inventory.html">
+            <i class="fas fa-box"></i>
+            <span>Inventory</span>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="analytics.html">
+            <i class="fas fa-chart-bar"></i>
+            <span>Analytics</span>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="settings.html">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="#" id="logoutBtn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Log Out</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-area">
+        <div class="inventory-content">
+          <h1 class="page-title">Inventory</h1>
+
+          <!-- Stock Cards -->
+          <div class="stock-cards">
+            <div class="stock-card high">
+              <div class="stock-card-content">
+                <h3>High Stock <i class="fas fa-check-circle"></i></h3>
+                <p class="stock-description">Items with 70+ units in stock</p>
+                <div class="stock-count">15</div>
+              </div>
             </div>
-        </header>
-        <nav class="sidebar">
-            <ul class="sidebar-menu">
-                <li class="menu-item">
-                    <a href="dashboard.html">
-                        <i class="fas fa-th-large"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li class="menu-item active">
-                    <a href="inventory.html">
-                        <i class="fas fa-box"></i>
-                        <span>Inventory</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="analytics.html">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Analytics</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span>Settings</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="#" id="logoutBtn">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Log Out</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        
-        <main class="main-content">
-            <div class="content-area">
-                <div class="inventory-content">
-                    <h1 class="page-title">Inventory</h1>
-                    
-                    <div class="stock-cards">
-                    <div class="stock-card high">
-                        <div class="stock-card-content">
-                            <h3>High Stock <i class="fas fa-check-circle"></i></h3>
-                            <p class="stock-description">Items with 70+ units in stock</p>
-                            <div class="stock-count">15</div>
-                        </div>
-                    </div>
-                    <div class="stock-card medium">
-                        <div class="stock-card-content">
-                            <h3>Medium Stock <i class="fas fa-exclamation-circle"></i></h3>
-                            <p class="stock-description">Items with 30-69 units in stock</p>
-                            <div class="stock-count">24</div>
-                        </div>
-                    </div>
-                    <div class="stock-card low">
-                        <div class="stock-card-content">
-                            <h3>Low Stock <i class="fas fa-triangle-exclamation"></i></h3>
-                            <p class="stock-description">Items with less than 30 units</p>
-                            <div class="stock-count">8</div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="inventory-controls">
-                    <div class="search-bar">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search inventory items">
-                    </div>
-                    <div class="control-buttons">
-                        <button class="control-btn"><i class="fas fa-download"></i> Download</button>
-                        <button class="control-btn"><i class="fas fa-filter"></i> Filter</button>
-                        <button class="control-btn"><i class="fas fa-sliders"></i> Edit Stock Thresholds</button>
-                        <button class="control-btn"><i class="fas fa-coins"></i> Update Product Cost</button>
-                    </div>
-                </div>
-
-                <div class="inventory-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Product Name</th>
-                                <th>SKU</th>
-                                <th>Platform</th>
-                                <th>Price</th>
-                                <th>Cost</th>
-                                <th>Stock Count</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>ASYMMETRICAL POLO</td>
-                                <td>17293983715580450</td>
-                                <td>Shopee</td>
-                                <td>₱ 125.00</td>
-                                <td>₱ 100.00</td>
-                                <td><span class="stock-level high">85 units</span></td>
-                            </tr>
-                            <tr>
-                                <td>DIAMOND T-SHIRT</td>
-                                <td>17293983715580451</td>
-                                <td>TikTok Shop</td>
-                                <td>₱ 125.00</td>
-                                <td>₱ 100.00</td>
-                                <td><span class="stock-level medium">45 units</span></td>
-                            </tr>
-                            <tr>
-                                <td>KNITTED POLO</td>
-                                <td>17293983715580452</td>
-                                <td>Shopee</td>
-                                <td>₱ 125.00</td>
-                                <td>₱ 100.00</td>
-                                <td><span class="stock-level low">10 units</span></td>
-                            </tr>
-                            <!-- Add more rows with similar pattern -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="pagination">
-                    <button class="page-btn active">Back</button>
-                    <button class="page-btn">Next</button>
-                    <span class="page-info">Showing 15 of 45 products</span>
-                </div>
-
-                <!-- Stock Level Thresholds Modal -->
-                <div id="thresholdsModal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2>Edit Stock Level Thresholds</h2>
-                            <button class="close-btn">&times;</button>
-                        </div>
-                        <div class="modal-body">
-                            <p class="modal-subtitle">Set the thresholds for inventory stock levels</p>
-                            <div class="threshold-input">
-                                <label>Low Stock Threshold</label>
-                                <input type="number" value="30">
-                                <span class="unit-label">units or less</span>
-                                <p class="threshold-description">Items with stock below this value will be marked as "Low Stock"</p>
-                            </div>
-                            <div class="threshold-input">
-                                <label>High Stock Threshold</label>
-                                <input type="number" value="70">
-                                <span class="unit-label">units or less</span>
-                                <p class="threshold-description">Items with stock above this value will be marked as "High Stock"</p>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="cancel-btn">Cancel</button>
-                            <button class="save-btn">Save Thresholds</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Update Product Cost Modal -->
-                <div id="updateCostModal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2>Update Product Cost</h2>
-                            <button class="close-btn">&times;</button>
-                        </div>
-                        <div class="modal-body">
-                            <p class="modal-subtitle">Update the cost for selected products</p>
-                            
-                            <div class="product-selection">
-                                <div class="selection-header">
-                                    <label class="checkbox-container">
-                                        <input type="checkbox" id="selectAllProducts">
-                                        <span class="checkmark"></span>
-                                        Select All Products
-                                    </label>
-                                    <span class="selected-count">0 Selected</span>
-                                </div>
-                                <div class="product-list">
-                                    <!-- Products will be populated by JavaScript -->
-                                </div>
-                            </div>
-
-                            <div class="cost-update-section">
-                                <div class="cost-input">
-                                    <label>New Product Cost</label>
-                                    <div class="input-with-currency">
-                                        <span class="currency-symbol">₱</span>
-                                        <input type="number" id="newCost" min="0" step="0.01" placeholder="0.00">
-                                    </div>
-                                </div>
-                                
-                                <div class="bulk-actions">
-                                    <button class="increase-btn">+10%</button>
-                                    <button class="decrease-btn">-10%</button>
-                                    <button class="custom-btn">Custom %</button>
-                                </div>
-
-                                <div class="update-summary">
-                                    <div class="summary-item">
-                                        <span>Current Average Cost:</span>
-                                        <span class="value">₱100.00</span>
-                                    </div>
-                                    <div class="summary-item">
-                                        <span>New Average Cost:</span>
-                                        <span class="value">₱100.00</span>
-                                    </div>
-                                    <div class="summary-item">
-                                        <span>Cost Difference:</span>
-                                        <span class="value neutral">₱0.00</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="cancel-btn">Cancel</button>
-                            <button class="save-btn">Update Cost</button>
-                        </div>
-                    </div>
-                    </div>
-                </div>
+            <div class="stock-card medium">
+              <div class="stock-card-content">
+                <h3>Medium Stock <i class="fas fa-exclamation-circle"></i></h3>
+                <p class="stock-description">Items with 30-69 units in stock</p>
+                <div class="stock-count">24</div>
+              </div>
             </div>
-        </main>
+
+            <div class="stock-card low">
+              <div class="stock-card-content">
+                <h3>Low Stock <i class="fas fa-triangle-exclamation"></i></h3>
+                <p class="stock-description">Items with less than 30 units</p>
+                <div class="stock-count">8</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inventory Controls -->
+          <div class="inventory-controls">
+            <div class="search-bar">
+              <i class="fas fa-search"></i>
+              <input type="text" placeholder="Search inventory items" />
+            </div>
+
+            <div class="control-buttons">
+              <button class="control-btn"><i class="fas fa-download"></i> Download</button>
+              <button class="control-btn"><i class="fas fa-filter"></i> Filter</button>
+              <button class="control-btn"><i class="fas fa-sliders"></i> Edit Stock Thresholds</button>
+              <button class="control-btn"><i class="fas fa-coins"></i> Update Product Cost</button>
+            </div>
+          </div>
+
+          <!-- Inventory Table -->
+          <div class="inventory-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>SKU</th>
+                  <th>Platform</th>
+                  <th>Price</th>
+                  <th>Cost</th>
+                  <th>Stock Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>ASYMMETRICAL POLO</td>
+                  <td>17293983715580450</td>
+                  <td>Shopee</td>
+                  <td>₱ 125.00</td>
+                  <td>₱ 100.00</td>
+                  <td><span class="stock-level high">85 units</span></td>
+                </tr>
+                <tr>
+                  <td>DIAMOND T-SHIRT</td>
+                  <td>17293983715580451</td>
+                  <td>TikTok Shop</td>
+                  <td>₱ 125.00</td>
+                  <td>₱ 100.00</td>
+                  <td><span class="stock-level medium">45 units</span></td>
+                </tr>
+                <tr>
+                  <td>KNITTED POLO</td>
+                  <td>17293983715580452</td>
+                  <td>Shopee</td>
+                  <td>₱ 125.00</td>
+                  <td>₱ 100.00</td>
+                  <td><span class="stock-level low">10 units</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination">
+            <button class="page-btn active">Back</button>
+            <button class="page-btn">Next</button>
+            <span class="page-info">Showing 15 of 45 products</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Firebase Auth -->
+  <script src="../js/login-auth/firebase-auth.js"></script>
+  <script src="../js/inventory.js"></script>
+
+  <!-- Edit Threshold Modal -->
+  <div class="modal-overlay" id="edit-thresholds-overlay" style="display: none;">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="edit-thresholds-title">
+      <button class="modal-close" aria-label="Close">×</button>
+      <h2 id="edit-thresholds-title">Edit Stock Level Thresholds</h2>
+      <p class="modal-subtitle">Set the thresholds for inventory stock levels</p>
+
+      <form id="edit-thresholds-form">
+        <div class="form-row">
+          <label for="low-threshold"><strong>Low Stock Threshold</strong></label>
+          <input id="low-threshold" type="number" min="0" step="1" placeholder="e.g. 30" required />
+          <span class="units-hint">units or less</span>
+        </div>
+
+        <div class="form-row">
+          <label for="high-threshold"><strong>High Stock Threshold</strong></label>
+          <input id="high-threshold" type="number" min="0" step="1" placeholder="e.g. 70" required />
+          <span class="units-hint">units or more</span>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel">Cancel</button>
+          <button type="submit" class="btn-save">Save Thresholds</button>
+        </div>
+      </form>
     </div>
-    
-    <script src="../js/login-auth/firebase-auth.js"></script>
-    <script src="../js/inventory.js"></script>
+  </div>
+
+  <!-- JS: Threshold Logic -->
+  <script>
+    (function () {
+      function parseUnits(text) {
+        var m = (text || "").toString().match(/(\d+)/);
+        return m ? parseInt(m[1], 10) : 0;
+      }
+
+      var overlay = document.getElementById("edit-thresholds-overlay");
+      var lowInput = document.getElementById("low-threshold");
+      var highInput = document.getElementById("high-threshold");
+      var form = document.getElementById("edit-thresholds-form");
+      var closeBtn = overlay.querySelector(".modal-close");
+      var cancelBtn = overlay.querySelector(".btn-cancel");
+
+      var editBtn = Array.from(document.querySelectorAll("button, a")).find(function (el) {
+        return el.textContent && el.textContent.trim().toLowerCase() === "edit stock thresholds";
+      });
+
+      function getInitialThresholds() {
+        var highDescEl = document.querySelector(".stock-card.high .stock-description");
+        var lowDescEl = document.querySelector(".stock-card.low .stock-description");
+        var low = 30, high = 70;
+        if (lowDescEl) {
+          var m = lowDescEl.textContent.match(/(\d+)/);
+          if (m) low = parseInt(m[1], 10);
+        }
+        if (highDescEl) {
+          var m2 = highDescEl.textContent.match(/(\d+)/);
+          if (m2) high = parseInt(m2[1], 10);
+        }
+        return { low, high };
+      }
+
+      function openModal() {
+        var t = getInitialThresholds();
+        lowInput.value = t.low;
+        highInput.value = t.high;
+        overlay.style.display = "flex";
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeModal() {
+        overlay.style.display = "none";
+        document.body.style.overflow = "";
+      }
+
+      function applyThresholds(low, high) {
+        var highDescEl = document.querySelector(".stock-card.high .stock-description");
+        var medDescEl = document.querySelector(".stock-card.medium .stock-description");
+        var lowDescEl = document.querySelector(".stock-card.low .stock-description");
+
+        if (highDescEl) highDescEl.textContent = `Items with ${high}+ units in stock`;
+        if (medDescEl) medDescEl.textContent = `Items with ${low}-${high - 1} units in stock`;
+        if (lowDescEl) lowDescEl.textContent = `Items with less than ${low} units`;
+
+        var labels = document.querySelectorAll("td .stock-level");
+        var highCount = 0, medCount = 0, lowCountNum = 0;
+
+        labels.forEach(function (lbl) {
+          var units = parseUnits(lbl.textContent);
+          lbl.classList.remove("high", "medium", "low");
+          if (units >= high) {
+            lbl.classList.add("high");
+            highCount++;
+          } else if (units < low) {
+            lbl.classList.add("low");
+            lowCountNum++;
+          } else {
+            lbl.classList.add("medium");
+            medCount++;
+          }
+        });
+
+        document.querySelector(".stock-card.high .stock-count").textContent = highCount;
+        document.querySelector(".stock-card.medium .stock-count").textContent = medCount;
+        document.querySelector(".stock-card.low .stock-count").textContent = lowCountNum;
+      }
+
+      if (editBtn) editBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        openModal();
+      });
+
+      overlay.addEventListener("click", function (e) {
+        if (e.target === overlay) closeModal();
+      });
+
+      closeBtn.addEventListener("click", closeModal);
+      cancelBtn.addEventListener("click", closeModal);
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var low = parseInt(lowInput.value, 10);
+        var high = parseInt(highInput.value, 10);
+        if (isNaN(low) || isNaN(high) || high <= low) {
+          alert("Please ensure both values are numbers and that High > Low.");
+          return;
+        }
+        localStorage.setItem("inventory_thresholds", JSON.stringify({ low, high }));
+        applyThresholds(low, high);
+        closeModal();
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var saved = localStorage.getItem("inventory_thresholds");
+        var t = getInitialThresholds();
+        if (saved) {
+          try { t = JSON.parse(saved); } catch (e) { }
+        }
+        applyThresholds(t.low, t.high);
+      });
+    })();
+  </script>
+
+  <!-- JS: Toast + CSV Download -->
+  <script>
+    (function () {
+      function showToast(message, type) {
+        var container = document.getElementById("toast-container");
+        if (!container) return;
+        var toast = document.createElement("div");
+        toast.textContent = message;
+        toast.style.minWidth = "200px";
+        toast.style.padding = "10px 16px";
+        toast.style.borderRadius = "8px";
+        toast.style.color = "#fff";
+        toast.style.fontWeight = "500";
+        toast.style.boxShadow = "0 2px 8px rgba(0,0,0,0.25)";
+        toast.style.opacity = "0";
+        toast.style.transition = "opacity 0.3s ease";
+        toast.style.background = type === "error" ? "#d32f2f" : "#388e3c";
+        container.appendChild(toast);
+
+        setTimeout(() => (toast.style.opacity = "1"), 50);
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          setTimeout(() => toast.remove(), 300);
+        }, 4000);
+      }
+
+      function downloadTableAsCSV() {
+        try {
+          var table = document.querySelector(".inventory-table table");
+          if (!table) throw new Error("Table not found");
+
+          var rows = Array.from(table.querySelectorAll("tr"));
+          var csv = rows.map(row => {
+            var cells = Array.from(row.querySelectorAll("th, td"));
+            return cells.map(cell => {
+              var text = cell.innerText.replace(/\n/g, " ").trim();
+              if (text.includes(",")) text = `"${text}"`;
+              return text;
+            }).join(",");
+          }).join("\n");
+
+          var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+          var url = URL.createObjectURL(blob);
+          var link = document.createElement("a");
+          link.href = url;
+          link.download = "inventory_export.csv";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+
+          showToast("File downloaded successfully", "success");
+        } catch (err) {
+          console.error(err);
+          showToast("Download failed. Please try again.", "error");
+        }
+      }
+
+      var downloadBtn = Array.from(document.querySelectorAll("button, a")).find(el =>
+        el.textContent && el.textContent.trim().toLowerCase() === "download"
+      );
+
+      if (downloadBtn) downloadBtn.addEventListener("click", e => {
+        e.preventDefault();
+        downloadTableAsCSV();
+      });
+    })();
+  </script>
 </body>
 </html>
