@@ -101,8 +101,13 @@ body, html {
 }
 
 .control-buttons {
-    display: flex;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-dropdown {
+  margin: 0;
 }
 
 .control-btn {
@@ -170,31 +175,234 @@ td {
     color: #F44336;
 }
 
-/* Pagination */
-.pagination {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+/* Filter Dropdown */
+.filter-dropdown {
+  position: relative;
+  display: inline-block;
+  font-family: "Poppins", sans-serif;
 }
 
+.filter-btn {
+  background: #1A1A1A; /* match other control buttons */
+  border: 1px solid #222;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #f9f9f9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s;
+  font-family: "Poppins", sans-serif;
+}
+
+.filter-btn:hover {
+  background: #222;
+  border-color: #333;
+}
+
+/* Checkmark hidden by default */
+.filter-option {
+  position: relative;
+  padding: 10px 14px;
+  cursor: pointer;
+  color: #eaeaea;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+  font-family: "Poppins", sans-serif;
+}
+
+.filter-option:hover {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.filter-option.active {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.filter-option .checkmark {
+  visibility: hidden;
+  font-size: 12px;
+  color: #f1c40f;
+}
+
+.filter-option.active .checkmark {
+  visibility: visible;
+}
+
+.filter-btn-text {
+  font-weight: 500;
+}
+
+
+/* Dropdown menu */
+.filter-menu {
+  display: none;
+  position: absolute;
+  top: 42px;
+  left: 0;
+  background: #1b1b1b;
+  border: 1px solid #333;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  width: 220px;
+  z-index: 10;
+  overflow: hidden;
+  font-family: "Poppins", sans-serif;
+}
+
+.filter-menu.active {
+  display: block;
+}
+
+.filter-section {
+  padding: 6px 0;
+}
+
+.filter-label {
+  display: block;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #f0f0f0;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.3px;
+  background: #161616;
+}
+
+.filter-option {
+  position: relative;
+  padding: 10px 14px;
+  cursor: pointer;
+  color: #eaeaea;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.filter-option:hover {
+  background: #333;
+  color: #fff;
+}
+
+.filter-option.active {
+  background: #222;
+  color: #fff;
+}
+
+.filter-option .checkmark {
+  visibility: hidden;
+  font-size: 12px;
+  color: #f1c40f;
+}
+
+.filter-option.active .checkmark {
+  visibility: visible;
+}
+
+/* ✅ Clear Filters button */
+.clear-filters {
+  text-align: center;
+  padding: 10px 0;
+  color: #f1c40f;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.clear-filters:hover {
+  background: #333;
+  color: #fff;
+}
+
+/* Pagination Container */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding: 10px 30px;
+  width: 100%;
+}
+
+/* Left side (buttons) */
+.pagination-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Right side (text) */
+.pagination-right {
+  text-align: right;
+  flex-grow: 1;
+}
+
+/* Pagination Buttons */
 .page-btn {
-    padding: 8px 16px;
-    background: #1A1A1A;
-    border: 1px solid #333;
-    border-radius: 4px;
-    color: #fff;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  font-family: 'Poppins', sans-serif; /* ✅ Figma font */
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: none;
 }
 
-.page-btn.active {
-    background: #F4B301;
-    border-color: #F4B301;
+/* Back Button */
+.page-btn.back {
+  background-color: transparent;
+  color: #fff;
+  border: 2px solid #2f2f2f;
 }
 
+.page-btn.back i {
+  color: #fff;
+}
+
+.page-btn.back:hover {
+  background-color: #1a1a1a;
+  border-color: #444;
+}
+
+/* Next Button */
+.page-btn.next {
+  background-color: #e4aa12;
+  color: #3b2a00;
+  border: 2px solid #e4aa12;
+  box-shadow: 0px 2px 6px rgba(228, 170, 18, 0.25);
+}
+
+.page-btn.next i {
+  color: #3b2a00;
+}
+
+.page-btn.next:hover {
+  background-color: #f1b61c;
+}
+
+/* Disabled State */
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Product Count */
 .page-info {
-    color: #666;
-    margin-left: auto;
+  color: #a5a5a5;
+  font-size: 0.9rem;
+  font-family: 'Poppins', sans-serif; /* ✅ matches rest of UI */
 }
 
 /* Modal */
@@ -304,6 +512,152 @@ td {
     color: #000;
     cursor: pointer;
     font-family: 'Poppins', sans-serif;
+}
+
+/* --- Modal Overlay --- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+/* Active State */
+.modal-overlay.active {
+  display: flex;
+}
+
+/* --- Modal Box --- */
+.modal-content {
+  background-color: #1A1A1A;
+  border: 1px solid #2c2c2c;
+  border-radius: 10px;
+  padding: 30px;
+  width: 480px;
+  max-width: 90%;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* --- Header --- */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.modal-header h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.modal-header .close-btn {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.modal-header .close-btn:hover {
+  color: #fff;
+}
+
+/* --- Subtext --- */
+.modal-subtext {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 20px;
+}
+
+/* --- Inputs --- */
+.threshold-input {
+  margin-bottom: 22px;
+}
+
+.threshold-input label {
+  font-weight: 500;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+  display: block;
+  color: #fff;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #1a1a1a;
+  border: 1px solid #2c2c2c;
+  border-radius: 6px;
+  overflow: hidden;
+  padding: 0 10px;
+}
+
+.input-wrapper input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  padding: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  font-family: 'Poppins', sans-serif;
+}
+
+.input-wrapper .unit-label {
+  color: #aaa;
+  font-size: 0.85rem;
+}
+
+/* --- Hint Text --- */
+.threshold-input .hint {
+  font-size: 0.8rem;
+  color: #777;
+  margin-top: 6px;
+}
+
+/* --- Footer Buttons --- */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.modal-footer .cancel-btn {
+  background: #1a1a1a;
+  color: #fff;
+  border: 1px solid #2f2f2f;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.modal-footer .cancel-btn:hover {
+  background: #2a2a2a;
+}
+
+.modal-footer .save-btn {
+  background: #e4aa12;
+  color: #3b2a00;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.modal-footer .save-btn:hover {
+  background: #f1b61c;
 }
 
 /* Product Cost Update Modal Specific Styles */
@@ -473,4 +827,149 @@ td {
 
 .summary-item .value.negative {
     color: #F44336;
+}
+
+/* Dark mode styling for the update cost select box */
+#productSelector {
+  background-color: #1a1a1a;
+  color: #fff;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+#productSelector:focus {
+  border-color: #f4b301;
+  box-shadow: 0 0 0 2px rgba(244, 179, 1, 0.2);
+}
+
+#productSelector option {
+  background-color: #111;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  padding: 8px;
+}
+
+/* ------------------------------
+   DOWNLOAD INVENTORY MODAL
+------------------------------ */
+#downloadModal .modal-content {
+  max-width: 450px;
+  background-color: #111;
+  padding: 25px;
+  border-radius: 12px;
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+}
+
+#downloadModal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+#downloadModal .modal-header h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+#downloadModal .modal-header .close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+#downloadModal .modal-subtitle {
+  color: #bbb;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+}
+
+/* ------------------------------
+   Checkbox-style (Radio Logic)
+------------------------------ */
+.download-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: #ddd;
+  font-size: 0.95rem;
+}
+
+.checkbox-option input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #888;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.checkbox-option input[type="checkbox"]:checked {
+  border-color: #fbbf24;
+  background-color: #fbbf24;
+}
+
+.checkbox-option input[type="checkbox"]:checked::after {
+  content: "✓";
+  color: #000;
+  position: absolute;
+  top: -1px;
+  left: 3px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+#downloadModal .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+#downloadModal .cancel-btn,
+#downloadModal .save-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+}
+
+#downloadModal .cancel-btn {
+  background-color: #333;
+  color: #fff;
+}
+
+#downloadModal .save-btn {
+  background-color: #fbbf24;
+  color: #000;
+}
+
+#downloadModal .cancel-btn:hover {
+  background-color: #444;
+}
+
+#downloadModal .save-btn:hover {
+  background-color: #facc15;
 }

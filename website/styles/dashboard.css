@@ -163,6 +163,35 @@ body {
   color: #bdc3c7;
 }
 
+/* === Responsive Power BI Dashboard (full-bleed view) === */
+.main-content {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  margin-left: 100px; /* same as sidebar width */
+  height: calc(100vh - 80px); /* remove header height */
+  background: #000;
+}
+
+.content-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.content-area iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  background: #000;
+  box-shadow: none;
+}
+
 /* Responsive Design for Dashboard */
 @media (max-width: 768px) {
   .dashboard-container {
@@ -184,5 +213,14 @@ body {
     margin-right: 10px;
     margin-bottom: 0;
     white-space: nowrap;
+  }
+
+  .main-content {
+    margin-left: 0;
+    height: calc(100vh - 140px);
+  }
+
+  .content-area iframe {
+    border-radius: 0;
   }
 }

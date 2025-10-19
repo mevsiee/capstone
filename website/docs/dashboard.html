@@ -1,91 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="../styles/dashboard.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - EShop InventoryIQ</title>
 
-    <!-- Firebase SDKs (compat, v10.12.2) -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="../styles/dashboard.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-    <!-- Auth guard + show/hide admin link -->
-    <script src="../js/login-auth/dashboard-auth.js"></script>
-
+  <!-- ✅ Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
+
 <body class="dashboard-body">
-    <div class="dashboard-container">
-        <header class="main-header">
-            <div class="header-content">
-                <h1>EShop InventoryIQ</h1>
-                <h2>Forecasting & Management System</h2>
-            </div>
-        </header>
-        <nav class="sidebar">
-            <ul class="sidebar-menu">
-                <li class="menu-item active">
-                    <a href="dashboard.html">
-                        <i class="fas fa-th-large"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="inventory.html">
-                        <i class="fas fa-box"></i>
-                        <span>Inventory</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="analytics.html">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Analytics</span>
-                    </a>
-                </li>
-                 <li class="menu-item" id="userManagementLink" style="display:none;">
-                    <a href="usermanagement.html">
-                        <i class="fas fa-users"></i>
-                        <span>User Management</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span>Settings</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="#" id="logoutBtn">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Log Out</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        
-        <main class="main-content">           
-            <div class="content-area">
-                <div id="main-dashboard" class="content-section active">
-                    <div class="placeholder-content">
-                        <iframe 
-                        title="Unified Dashboard"
-                        width="1140" 
-                        height="541.25" 
-                        src="https://app.powerbi.com/reportEmbed?reportId=2180a83c-4e80-470c-805d-7022e3d44faa&autoAuth=true&ctid=2840082d-702c-4fb1-9885-abddd1ddaa1e" 
-                        frameborder="0" 
-                        allowfullscreen="true">
-                    </iframe>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-    
-    <script src="/js/UI/dashboard.js"></script>
-    <script src="/js/login-auth/dashboard-auth.js"></script>
-    
+  <div class="dashboard-container">
+    <!-- Header -->
+    <header class="main-header">
+      <div class="header-content">
+        <h1>EShop InventoryIQ</h1>
+        <h2>Forecasting & Management System</h2>
+      </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <ul class="sidebar-menu">
+        <li class="menu-item active"><a href="dashboard.html"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+        <li class="menu-item"><a href="inventory.html"><i class="fas fa-box"></i><span>Inventory</span></a></li>
+        <li class="menu-item"><a href="analytics.html"><i class="fas fa-chart-bar"></i><span>Analytics</span></a></li>
+        <li class="menu-item" id="userManagementLink" style="display:none;"><a href="usermanagement.html"><i class="fas fa-users"></i><span>User Management</span></a></li>
+        <li class="menu-item"><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+        <li class="menu-item"><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Log Out</span></a></li>
+      </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-area">
+        <iframe
+          title="Unified Dashboard"
+          width="1140"
+          height="541.25"
+          src="https://app.powerbi.com/reportEmbed?reportId=2180a83c-4e80-470c-805d-7022e3d44faa&autoAuth=true&ctid=2840082d-702c-4fb1-9885-abddd1ddaa1e"
+          frameborder="0"
+          allowfullscreen="true">
+        </iframe>
+      </div>
+    </main>
+  </div>
+
+  <!-- ✅ Script Order -->
+  <script src="../js/login-auth/firebase-auth.js"></script>
+  <script src="../js/login-auth/dashboard-auth.js"></script>
+  <script src="../js/UI/dashboard.js"></script>
 </body>
 </html>

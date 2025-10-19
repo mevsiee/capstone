@@ -1,40 +1,39 @@
-// /js/dashboard-ui.js
+// /js/UI/dashboard.js
 
 document.addEventListener("DOMContentLoaded", () => {
   const menuItems = document.querySelectorAll(".menu-item a");
-  const contentSections = document.querySelectorAll(".content-section");
-  const pageTitle = document.getElementById("pageTitle");
 
-  // Menu navigation
+  // Sidebar navigation
   menuItems.forEach((item) => {
     item.addEventListener("click", function (e) {
-      e.preventDefault();
+      const href = this.getAttribute("href");
 
-      // Remove active from all
-      document.querySelectorAll(".menu-item").forEach((mi) => mi.classList.remove("active"));
+      // Handle logout separately
+      if (this.id === "logoutBtn") {
+        e.preventDefault();
+        handleLogout();
+        return;
+      }
 
-      // Activate selected menu
-      this.parentElement.classList.add("active");
-
-      // Hide all sections, show selected
-      const targetSection = this.getAttribute("data-section");
-      contentSections.forEach((section) => section.classList.remove("active"));
-      document.getElementById(targetSection).classList.add("active");
-
-      // Update page title
-      const sectionTitle = this.querySelector("span").textContent;
-      if (pageTitle) pageTitle.textContent = sectionTitle;
+      // If href points to another HTML page, follow the link
+      if (href && href.endsWith(".html")) {
+        window.location.href = href;
+      }
     });
-  });
-
-  // Smooth transition effect
-  contentSections.forEach((section) => {
-    section.style.transition = "opacity 0.3s ease-in-out";
   });
 });
 
-
-setInterval(() => {
-  const iframe = document.getElementById("lookerReport");
-  iframe.src = iframe.src; // Triggers reload
-}, 30000 ); 
+// Firebase logout function
+function handleLogout() {
+  if (typeof firebase !== "undefined" && firebase.auth) {
+    firebase.auth().signOut().then(() => {
+      alert("You have been logged out successfully.");
+      window.location.href = "../login.html"; // redirect to login page
+    }).catch((error) => {
+      console.error("Logout failed:", error);
+      alert("Logout failed: " + error.message);
+    });
+  } else {
+    console.error("Firebase not initialized.");
+  }
+}

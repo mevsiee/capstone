@@ -1,257 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory - EShop InventoryIQ</title>
-    <link rel="stylesheet" href="../styles/dashboard.css">
-    <link rel="stylesheet" href="../styles/inventory.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Firebase SDKs (compat, v10.12.2) -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory - EShop InventoryIQ</title>
 
-    <!-- Auth guard + show/hide admin link -->
-    <script src="../js/login-auth/dashboard-auth.js"></script>
+  <!-- ✅ Styles -->
+  <link rel="stylesheet" href="../styles/dashboard.css" />
+  <link rel="stylesheet" href="../styles/inventory.css" />
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- ✅ Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <!-- ✅ XLSX Library for Excel Export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
+
 <body class="dashboard-body">
-    <div class="dashboard-container">
-        <header class="main-header">
-            <div class="header-content">
-                <h1>EShop InventoryIQ</h1>
-                <h2>Forecasting & Management System</h2>
+  <div class="dashboard-container">
+    <!-- Header -->
+    <header class="main-header">
+      <div class="header-content">
+        <h1>EShop InventoryIQ</h1>
+        <h2>Forecasting & Management System</h2>
+      </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <ul class="sidebar-menu">
+        <li class="menu-item">
+          <a href="dashboard.html"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+        </li>
+        <li class="menu-item active">
+          <a href="inventory.html"><i class="fas fa-box"></i><span>Inventory</span></a>
+        </li>
+        <li class="menu-item">
+          <a href="analytics.html"><i class="fas fa-chart-bar"></i><span>Analytics</span></a>
+        </li>
+        <li class="menu-item" id="userManagementLink" style="display:none;">
+          <a href="usermanagement.html"><i class="fas fa-users"></i><span>User Management</span></a>
+        </li>
+        <li class="menu-item">
+          <a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a>
+        </li>
+        <li class="menu-item">
+          <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Log Out</span></a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-area">
+        <div class="inventory-content">
+          <h1 class="page-title">Inventory</h1>
+
+          <!-- Stock Cards -->
+          <div class="stock-cards">
+            <div class="stock-card high">
+              <div class="stock-card-content">
+                <h3>High Stock <i class="fas fa-check-circle"></i></h3>
+                <p class="stock-description">Items with 70+ units in stock</p>
+                <div class="stock-count">0</div>
+              </div>
             </div>
-        </header>
-        <nav class="sidebar">
-            <ul class="sidebar-menu">
-                <li class="menu-item">
-                    <a href="dashboard.html">
-                        <i class="fas fa-th-large"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li class="menu-item active">
-                    <a href="inventory.html">
-                        <i class="fas fa-box"></i>
-                        <span>Inventory</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="analytics.html">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Analytics</span>
-                    </a>
-                </li>
-                <li class="menu-item" id="userManagementLink" style="display:none;">
-                    <a href="usermanagement.html">
-                        <i class="fas fa-users"></i>
-                        <span>User Management</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span>Settings</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="#" id="logoutBtn">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Log Out</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        
-        <main class="main-content">
-            <div class="content-area">
-                <div class="inventory-content">
-                    <h1 class="page-title">Inventory</h1>
-                    
-                    <div class="stock-cards">
-                    <div class="stock-card high">
-                        <div class="stock-card-content">
-                            <h3>High Stock <i class="fas fa-check-circle"></i></h3>
-                            <p class="stock-description">Items with 70+ units in stock</p>
-                            <div class="stock-count">15</div>
-                        </div>
-                    </div>
-                    <div class="stock-card medium">
-                        <div class="stock-card-content">
-                            <h3>Medium Stock <i class="fas fa-exclamation-circle"></i></h3>
-                            <p class="stock-description">Items with 30-69 units in stock</p>
-                            <div class="stock-count">24</div>
-                        </div>
-                    </div>
-                    <div class="stock-card low">
-                        <div class="stock-card-content">
-                            <h3>Low Stock <i class="fas fa-triangle-exclamation"></i></h3>
-                            <p class="stock-description">Items with less than 30 units</p>
-                            <div class="stock-count">8</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="inventory-controls">
-                    <div class="search-bar">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search inventory items">
-                    </div>
-                    <div class="control-buttons">
-                        <button class="control-btn"><i class="fas fa-download"></i> Download</button>
-                        <button class="control-btn"><i class="fas fa-filter"></i> Filter</button>
-                        <button class="control-btn"><i class="fas fa-sliders"></i> Edit Stock Thresholds</button>
-                        <button class="control-btn"><i class="fas fa-coins"></i> Update Product Cost</button>
-                    </div>
-                </div>
-
-                <div class="inventory-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Product Name</th>
-                                <th>SKU</th>
-                                <th>Platform</th>
-                                <th>Price</th>
-                                <th>Cost</th>
-                                <th>Stock Count</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>ASYMMETRICAL POLO</td>
-                                <td>17293983715580450</td>
-                                <td>Shopee</td>
-                                <td>₱ 125.00</td>
-                                <td>₱ 100.00</td>
-                                <td><span class="stock-level high">85 units</span></td>
-                            </tr>
-                            <tr>
-                                <td>DIAMOND T-SHIRT</td>
-                                <td>17293983715580451</td>
-                                <td>TikTok Shop</td>
-                                <td>₱ 125.00</td>
-                                <td>₱ 100.00</td>
-                                <td><span class="stock-level medium">45 units</span></td>
-                            </tr>
-                            <tr>
-                                <td>KNITTED POLO</td>
-                                <td>17293983715580452</td>
-                                <td>Shopee</td>
-                                <td>₱ 125.00</td>
-                                <td>₱ 100.00</td>
-                                <td><span class="stock-level low">10 units</span></td>
-                            </tr>
-                            <!-- Add more rows with similar pattern -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="pagination">
-                    <button class="page-btn active">Back</button>
-                    <button class="page-btn">Next</button>
-                    <span class="page-info">Showing 15 of 45 products</span>
-                </div>
-
-                <!-- Stock Level Thresholds Modal -->
-                <div id="thresholdsModal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2>Edit Stock Level Thresholds</h2>
-                            <button class="close-btn">&times;</button>
-                        </div>
-                        <div class="modal-body">
-                            <p class="modal-subtitle">Set the thresholds for inventory stock levels</p>
-                            <div class="threshold-input">
-                                <label>Low Stock Threshold</label>
-                                <input type="number" value="30">
-                                <span class="unit-label">units or less</span>
-                                <p class="threshold-description">Items with stock below this value will be marked as "Low Stock"</p>
-                            </div>
-                            <div class="threshold-input">
-                                <label>High Stock Threshold</label>
-                                <input type="number" value="70">
-                                <span class="unit-label">units or less</span>
-                                <p class="threshold-description">Items with stock above this value will be marked as "High Stock"</p>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="cancel-btn">Cancel</button>
-                            <button class="save-btn">Save Thresholds</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Update Product Cost Modal -->
-                <div id="updateCostModal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2>Update Product Cost</h2>
-                            <button class="close-btn">&times;</button>
-                        </div>
-                        <div class="modal-body">
-                            <p class="modal-subtitle">Update the cost for selected products</p>
-                            
-                            <div class="product-selection">
-                                <div class="selection-header">
-                                    <label class="checkbox-container">
-                                        <input type="checkbox" id="selectAllProducts">
-                                        <span class="checkmark"></span>
-                                        Select All Products
-                                    </label>
-                                    <span class="selected-count">0 Selected</span>
-                                </div>
-                                <div class="product-list">
-                                    <!-- Products will be populated by JavaScript -->
-                                </div>
-                            </div>
-
-                            <div class="cost-update-section">
-                                <div class="cost-input">
-                                    <label>New Product Cost</label>
-                                    <div class="input-with-currency">
-                                        <span class="currency-symbol">₱</span>
-                                        <input type="number" id="newCost" min="0" step="0.01" placeholder="0.00">
-                                    </div>
-                                </div>
-                                
-                                <div class="bulk-actions">
-                                    <button class="increase-btn">+10%</button>
-                                    <button class="decrease-btn">-10%</button>
-                                    <button class="custom-btn">Custom %</button>
-                                </div>
-
-                                <div class="update-summary">
-                                    <div class="summary-item">
-                                        <span>Current Average Cost:</span>
-                                        <span class="value">₱100.00</span>
-                                    </div>
-                                    <div class="summary-item">
-                                        <span>New Average Cost:</span>
-                                        <span class="value">₱100.00</span>
-                                    </div>
-                                    <div class="summary-item">
-                                        <span>Cost Difference:</span>
-                                        <span class="value neutral">₱0.00</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="cancel-btn">Cancel</button>
-                            <button class="save-btn">Update Cost</button>
-                        </div>
-                    </div>
-                    </div>
-                </div>
+            <div class="stock-card medium">
+              <div class="stock-card-content">
+                <h3>Medium Stock <i class="fas fa-exclamation-circle"></i></h3>
+                <p class="stock-description">Items with 30–69 units in stock</p>
+                <div class="stock-count">0</div>
+              </div>
             </div>
-        </main>
-    </div>
-    
-    <script src="../js/login-auth/firebase-auth.js"></script>
-    <script src="../js/inventory.js"></script>
+            <div class="stock-card low">
+              <div class="stock-card-content">
+                <h3>Low Stock <i class="fas fa-triangle-exclamation"></i></h3>
+                <p class="stock-description">Items with less than 30 units</p>
+                <div class="stock-count">0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div class="inventory-controls">
+            <div class="search-bar">
+              <i class="fas fa-search"></i>
+              <input type="text" placeholder="Search inventory items" />
+            </div>
+
+            <div class="control-buttons">
+              <button id="downloadBtn" class="control-btn"><i class="fas fa-download"></i> Download</button>
+
+              <!-- Filter Dropdown (Platform + Stock Level) -->
+              <div class="filter-dropdown">
+                <button class="filter-btn">
+                  <i class="fas fa-filter"></i>
+                  <span class="filter-btn-text">Filter</span>
+                  <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="filter-menu">
+                  <div class="filter-section">
+                    <span class="filter-label">Platform</span>
+                    <div class="filter-option" data-type="platform" data-value="ecommerce">
+                      E-commerce
+                      <i class="fas fa-check checkmark"></i>
+                    </div>
+                    <div class="filter-option" data-type="platform" data-value="retail">
+                      Retail
+                      <i class="fas fa-check checkmark"></i>
+                    </div>
+                  </div>
+                  <hr />
+                  <div class="filter-section">
+                    <span class="filter-label">Stock Level</span>
+                    <div class="filter-option" data-type="stock" data-value="high">
+                      High
+                      <i class="fas fa-check checkmark"></i>
+                    </div>
+                    <div class="filter-option" data-type="stock" data-value="medium">
+                      Medium
+                      <i class="fas fa-check checkmark"></i>
+                    </div>
+                    <div class="filter-option" data-type="stock" data-value="low">
+                      Low
+                      <i class="fas fa-check checkmark"></i>
+                    </div>
+                  </div>
+                  <hr />
+                  <div class="clear-filters">Clear Filters</div>
+                </div>
+              </div>
+
+              <button class="control-btn"><i class="fas fa-sliders"></i> Edit Stock Thresholds</button>
+              <button class="control-btn"><i class="fas fa-coins"></i> Update Product Cost</button>
+            </div>
+          </div>
+
+          <!-- Inventory Table -->
+          <div class="inventory-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Size</th>
+                  <th>Color</th>
+                  <th>Platform</th>
+                  <th>Price</th>
+                  <th>Cost</th>
+                  <th>Stock Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="7" style="text-align:center;">Loading data...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination-container">
+            <div class="pagination-left">
+              <button id="backBtn" class="page-btn back">
+                <i class="fas fa-arrow-left"></i> Back
+              </button>
+
+              <button id="nextBtn" class="page-btn next">
+                Next <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+
+            <div class="pagination-right">
+              <span id="product-count" class="page-info">Showing 0–0 of 0 products</span>
+            </div>
+          </div>
+
+          <!-- Edit Stock Thresholds Modal -->
+          <div id="thresholdsModal" class="modal">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h2>Edit Stock Level Thresholds</h2>
+                <button class="close-btn"><i class="fas fa-times"></i></button>
+              </div>
+
+              <p class="modal-subtitle">Adjust the inventory thresholds for low and high stock indicators.</p>
+
+              <div class="threshold-inputs">
+                <div class="threshold-input">
+                  <label for="lowThreshold">Low Stock Threshold</label>
+                  <input id="lowThreshold" type="number" min="0" placeholder="e.g. 30" />
+                  <span class="unit-label">units or less = Low Stock</span>
+                </div>
+
+                <div class="threshold-input">
+                  <label for="highThreshold">High Stock Threshold</label>
+                  <input id="highThreshold" type="number" min="0" placeholder="e.g. 70" />
+                  <span class="unit-label">units or more = High Stock</span>
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button class="cancel-btn">Cancel</button>
+                <button class="save-btn">Save Thresholds</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Update Product Cost Modal -->
+          <div id="updateCostModal" class="modal-overlay">
+            <div class="modal-content">
+              <!-- Header -->
+              <div class="modal-header">
+                <h2>Update Product Cost</h2>
+                <button class="close-btn">&times;</button>
+              </div>
+
+              <p class="modal-subtext">
+                Modify the cost of a single product or all products. Changes will update the database directly.
+              </p>
+
+              <!-- Product Selector -->
+              <div class="threshold-input">
+                <label for="productSelector">Select Product</label>
+                <div class="input-wrapper">
+                  <select id="productSelector" style="width: 100%; background: transparent; border: none; color: #fff; padding: 10px; font-family: 'Poppins', sans-serif;">
+                    <option value="">Select a product...</option>
+                  </select>
+                </div>
+                <p class="hint">Choose the product to update (or select “All Products” to apply globally).</p>
+              </div>
+
+              <!-- Cost Input -->
+              <div class="threshold-input">
+                <label for="newCost">New Cost</label>
+                <div class="input-wrapper">
+                  <span class="unit-label">₱</span>
+                  <input type="number" id="newCost" placeholder="Enter new cost" />
+                </div>
+                <p class="hint">This will replace the current cost in the database.</p>
+              </div>
+
+              <!-- Footer -->
+              <div class="modal-footer">
+                <button class="cancel-btn">Cancel</button>
+                <button class="save-btn">Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Download Inventory Modal -->
+        <div id="downloadModal" class="modal-overlay">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Download Inventory</h2>
+              <button class="close-btn"><i class="fas fa-times"></i></button>
+            </div>
+
+            <p class="modal-subtitle">
+              Select which records to include in the exported Excel file.
+            </p>
+
+            <div class="download-options">
+              <label class="checkbox-option">
+                <input type="checkbox" id="downloadAll" class="download-option" value="all" checked />
+                <span>All Records</span>
+              </label>
+
+              <label class="checkbox-option">
+                <input type="checkbox" id="downloadCurrent" class="download-option" value="current" />
+                <span>Currently Displayed</span>
+              </label>
+            </div>
+
+            <div class="modal-footer">
+              <button class="cancel-btn">Cancel</button>
+              <button class="save-btn">Download</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ✅ Script Order -->
+  <script src="../js/login-auth/firebase-auth.js"></script>
+  <script src="../js/login-auth/dashboard-auth.js"></script>
+  <script src="../js/UI/inventory.js"></script>
 </body>
 </html>
