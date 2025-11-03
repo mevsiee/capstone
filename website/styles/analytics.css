@@ -1,182 +1,308 @@
-.analytics-content {
-    color: #fff;
-    padding: 20px;
-    background: #000000;
+/* =====================================================================
+   EShop InventoryIQ - Analytics & Forecasting Dashboard
+   Clean Grid System | Dark Mode | Gold Accents | Fully Aligned Layout
+===================================================================== */
+
+/* 1️⃣ Base Reset & Typography */
+body {
+  background: #0d0d0d;
+  color: #f4f4f4;
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
 }
 
+.analytics-content {
+  padding: 1.5rem 2rem;
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6,
+.kpi-label, .breakdown-label,
+.side-title, .card-title, .slider-group label {
+  font-weight: 600;
+  text-transform: none;
+  color: #fff;
+}
+
+/* 2️⃣ Header & Tabs */
 .analytics-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
 }
 
 .title {
-    color: #F4B301;
-    font-size: 24px;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #fff;
 }
 
-.export-container {
-    display: flex;
-    gap: 10px;
+/* Tab contents width fix */
+.tab-content {
+  width: 100%;
+  display: none;
+}
+.tab-content.active {
+  display: block;
+  width: 100%;
 }
 
-.export-button {
-    padding: 8px 16px;
-    background: #1A1A1A;
-    border: 1px solid #333;
-    color: #fff;
-    cursor: pointer;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: Poppins;
+.export-container .export-button {
+  background: #1a1a1a;
+  border: 1px solid #2d2d2d;
+  color: #fff;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-
-.export-button:hover {
-    background: #2A2A2A;
-}
-
-.export-button i {
-    font-size: 14px;
+.export-container .export-button:hover {
+  border-color: #f4b301;
 }
 
 .tab-container {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .tab-button {
-    padding: 8px 16px;
-    background: #1A1A1A;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    border-radius: 4px;
+  background: #1a1a1a;
+  color: #fff;
+  border: 1px solid #2d2d2d;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
-
 .tab-button.active {
-    background: #F4B301;
-    color: #000;
+  background: #f4b301;
+  color: #000;
 }
 
-.content-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 20px;
-    margin-bottom: 30px;
+/* 3️⃣ Cards (Universal) */
+.card {
+  background: #1a1a1a;
+  border: 1px solid #2d2d2d;
+  border-radius: 10px;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
-.chart-panel {
-    background: #0D0D0D;
-    padding: 20px;
-    border-radius: 8px;
-    height: 400px;
+.summary-card {
+  margin-bottom: 1.2rem;
 }
 
-.stats-panel {
-    background: #0D0D0D;
-    padding: 20px;
-    border-radius: 8px;
+.summary-card h3 {
+  font-size: 1.05rem;
+  color: #fff;
+  margin-bottom: 0.4rem;
+}
+.summary-card p {
+  color: #cfcfcf;
 }
 
-.stat-group {
-    margin-bottom: 30px;
+/* 4️⃣ KPI Section */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
 }
 
-.stat-label {
-    color: #666;
-    margin-bottom: 10px;
-    font-size: 14px;
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 96px;
+}
+.kpi-label {
+  font-size: 0.9rem;
+  color: #c9c9c9;
+}
+.kpi-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #f4b301;
 }
 
-.stat-value {
-    font-size: 24px;
-    color: #F4B301;
-    margin-bottom: 5px;
+/* 5️⃣ Main Analytics Grid (Chart + Right Column) */
+.main-grid {
+  display: grid;
+  grid-template-columns: 69% 29%; /* slightly narrower right column */
+  gap: 1.5rem;
+  width: 100%;
+  margin-bottom: 1.5rem;
+  align-items: start;
 }
 
-.stat-growth {
-    color: #4CAF50;
-    font-size: 14px;
+/* Chart Card */
+.chart-card {
+  height: 420px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.progress-circle {
-    width: 160px;
-    height: 160px;
-    margin: 20px auto;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    background: conic-gradient(#F4B301 50%, #333 50%);
-    border-radius: 50%;
+.chart-card canvas {
+  width: 100% !important;
+  height: 320px !important;
+  display: block;
+  object-fit: contain;
 }
 
-.circle-text {
-    font-size: 32px;
-    font-weight: bold;
-    color: #fff;
+/* Right Column (Model Validation + What-If) */
+.right-stack {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 1.25rem; /* noticeable spacing between the two cards */
+  height: auto;
 }
 
-.circle-label {
-    font-size: 14px;
-    color: #666;
+/* Right Side Cards */
+.side-card {
+  flex: 1;
+  background: #1a1a1a;
+  border: 1px solid #2d2d2d;
+  border-radius: 10px;
+  padding: 1.25rem 1rem; /* slightly tighter padding */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 0.9rem; /* smaller for alignment balance */
+  line-height: 1.4;
+}
+.side-card .side-title {
+  font-size: 0.95rem;
+  border-bottom: 1px solid #2b2b2b;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.6rem;
+  color: #f4f4f4;
 }
 
-.scenarios-panel {
-    background: #0D0D0D;
-    padding: 20px;
-    border-radius: 8px;
+/* 6️⃣ Lists & Sliders */
+.validation-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.validation-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed #2b2b2b;
+  color: #e5e5e5;
+  font-size: 0.85rem;
+}
+.validation-list li:last-child {
+  border-bottom: none;
+}
+.validation-list li span {
+  color: #f4b301;
 }
 
-.scenarios-title {
-    font-size: 18px;
-    color: #fff;
-    margin-bottom: 10px;
+/* Slider Groups */
+.slider-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+}
+.slider-group label {
+  flex: 1 0 160px;
+  color: #e5e5e5;
+}
+.slider-group input[type="range"] {
+  flex: 1;
+  accent-color: #f4b301;
+}
+.slider-group span {
+  width: 50px;
+  text-align: right;
+  color: #f4b301;
 }
 
-.scenarios-subtitle {
-    color: #666;
-    font-size: 14px;
-    margin-bottom: 30px;
+/* 7️⃣ Breakdown Section */
+.breakdown-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem; /* slightly increased for clarity */
+  width: 100%;
+  margin-top: 1.75rem; /* more visible separation from top stack */
 }
 
-.slider-container {
-    margin-bottom: 20px;
+.breakdown-card {
+  padding: 1rem;
+  border-radius: 10px;
 }
 
-.slider-label {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    color: #fff;
+.breakdown-label {
+  font-size: 0.9rem;
+  color: #c9c9c9;
+  margin-bottom: 0.2rem;
+}
+.breakdown-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f4b301;
 }
 
-.slider {
-    width: 100%;
-    height: 4px;
-    background: #333;
-    appearance: none;
-    border-radius: 2px;
-    margin: 10px 0;
+/* 8️⃣ Tab Control */
+.tab-content {
+  display: none;
+  width: 100%;
+}
+.tab-content.active {
+  display: block;
 }
 
-.slider::-webkit-slider-thumb {
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    background: #F4B301;
-    border-radius: 50%;
-    cursor: pointer;
+/* 9️⃣ Layout Refinements */
+.kpi-row, .main-grid, .breakdown-row {
+  margin-bottom: 1.25rem;
+}
+canvas {
+  background: transparent;
+}
+.side-card + .side-card {
+  margin-top: 1.25rem; /* improved spacing stack */
 }
 
-.range-values {
-    display: flex;
-    justify-content: space-between;
-    color: #666;
-    font-size: 14px;
+/* Alignment edge constraint */
+#sales-tab,
+#orders-tab {
+  margin: 0 auto;
+  max-width: 1400px;
+}
+
+/* Subtle hover feedback */
+.card:hover {
+  border-color: #f4b301;
+  box-shadow: 0 0 8px rgba(244, 179, 1, 0.15);
+}
+
+/* 🔟 Responsive Fixes */
+@media (max-width: 1400px) {
+  .main-grid {
+    grid-template-columns: 65% 35%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+  .right-stack {
+    flex-direction: row;
+    height: auto;
+  }
+  .side-card {
+    flex: 1;
+  }
 }

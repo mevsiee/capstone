@@ -1,0 +1,15 @@
+{
+  "period": "Q3",
+  "currency": "PHP",
+  "total_projected_sales": 248100.00,
+  "growth_rate_percent": 9.2,
+  "expected_growth_gauge": 50,
+  "highest_growth_category": {
+    "name": "Polo Button Down (Shopee)",
+    "projected_growth_percent": 22.5
+  },
+  "series": [
+    { "label": "Shopee", "monthly": [12000, 15000, 18000, 16000, 22000, 25000, 28000, 30000, 33000, 36000, 39000, 42000] },
+    { "label": "TikTok", "monthly": [8000, 9000, 11000, 13000, 17000, 20000, 21000, 22000, 25000, 27000, 30000, 33000] }
+  ]
+}
