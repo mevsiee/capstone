@@ -5,8 +5,9 @@ body, html {
 /* Inventory Page Styles */
 .inventory-content {
     color: #fff;
-    padding: 20px;
+    padding: 20px 50px;
     background: #000000;
+    margin-top: 40px;
 }
 
 .page-title {
@@ -135,9 +136,26 @@ body, html {
     overflow-x: auto;
 }
 
+.inventory-table td[colspan] {
+    text-align: center;
+    font-size: 16px;
+    color: #bbb;
+    height: 60px; /* ✅ keep consistent row height */
+    white-space: nowrap; /* optional, prevents text wrapping */
+}
+
+.inventory-table th:nth-child(1) { width: 32%; }
+.inventory-table th:nth-child(2) { width: 30%; }
+.inventory-table th:nth-child(3) { width: 20%; }
+.inventory-table th:nth-child(4) { width: 13%; }
+.inventory-table th:nth-child(5) { width: 8%; }
+.inventory-table th:nth-child(6) { width: 8%; }
+.inventory-table th:nth-child(7) { width: 9%; }
+
 table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
 }
 
 th {
@@ -855,6 +873,39 @@ td {
   padding: 8px;
 }
 
+/* Force dark theme for dropdown options */
+select, option {
+  background-color: #111 !important;
+  color: #fff !important;
+}
+
+/* Specific fix for Chrome/Edge/WebKit */
+select::-webkit-scrollbar {
+  width: 8px;
+  background-color: #111;
+}
+
+select::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 4px;
+}
+
+/* For Firefox */
+select {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #111;
+  color: #fff;
+  border: 1px solid #333;
+}
+
+/* Dropdown arrow fix */
+select:focus {
+  outline: none;
+  border-color: #f4b301;
+}
+
 /* ------------------------------
    DOWNLOAD INVENTORY MODAL
 ------------------------------ */
@@ -972,4 +1023,122 @@ td {
 
 #downloadModal .save-btn:hover {
   background-color: #facc15;
+}
+
+/* Responsive Inventory Controls */
+@media screen and (max-width: 1200px) {
+  .inventory-controls {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .search-bar {
+    max-width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .control-buttons {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .control-btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  /* Adjust table font sizes */
+  .inventory-table {
+    font-size: 0.9rem;
+  }
+
+  th, td {
+    padding: 12px 8px;
+  }
+
+  .stock-level {
+    padding: 3px 8px;
+    font-size: 0.85rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .inventory-content {
+    padding: 15px 20px;
+  }
+
+  .stock-cards {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .page-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .control-btn {
+    flex: 1;
+    min-width: calc(50% - 5px);
+    justify-content: center;
+  }
+
+  .filter-dropdown {
+    flex: 1;
+    min-width: calc(50% - 5px);
+  }
+
+  .filter-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Smaller table text */
+  .inventory-table {
+    font-size: 0.85rem;
+  }
+
+  th, td {
+    padding: 8px 6px;
+  }
+
+  .stock-level {
+    padding: 2px 6px;
+    font-size: 0.8rem;
+  }
+
+  /* Adjust column widths for mobile */
+  .inventory-table th:nth-child(1) { width: 30%; }
+  .inventory-table th:nth-child(2) { width: 12%; }
+  .inventory-table th:nth-child(3) { width: 12%; }
+  .inventory-table th:nth-child(4) { width: 12%; }
+  .inventory-table th:nth-child(5) { width: 10%; }
+  .inventory-table th:nth-child(6) { width: 10%; }
+  .inventory-table th:nth-child(7) { width: 14%; }
+}
+
+/* Optimize modals for mobile */
+@media screen and (max-width: 576px) {
+  .modal-content {
+    padding: 20px;
+    margin: 15px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .modal-subtext {
+    font-size: 0.85rem;
+  }
+
+  .threshold-input label {
+    font-size: 0.9rem;
+  }
+
+  .input-wrapper input {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
 }

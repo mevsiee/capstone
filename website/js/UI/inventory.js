@@ -558,6 +558,101 @@ function populateProductSelector() {
   });
 }
 
+// ------------------------------
+// EDIT STOCK MODAL (Platform → Product)
+// ------------------------------
+const editStockBtn = document.querySelector(".control-btn:nth-child(5)")
+const editStockModal = document.getElementById("editStockModal")
+const editStockClose = editStockModal?.querySelector(".close-btn")
+const editStockCancel = editStockModal?.querySelector(".cancel-btn")
+const editStockSave = editStockModal?.querySelector(".save-btn")
+const platformSelector = document.getElementById("stockPlatformSelector")
+const stockProductSelector = document.getElementById("stockProductSelector")
+const newStockCount = document.getElementById("newStockCount")
+
+// Open modal
+editStockBtn?.addEventListener("click", () => {
+  platformSelector.value = ""
+  stockProductSelector.innerHTML = '<option value="">Select a platform first...</option>'
+  stockProductSelector.disabled = true
+  newStockCount.value = ""
+  editStockModal.classList.add("active")
+})
+
+// Close modal
+function closeStockModal() {
+  editStockModal.classList.remove("active")
+  newStockCount.value = ""
+}
+editStockClose?.addEventListener("click", closeStockModal)
+editStockCancel?.addEventListener("click", closeStockModal)
+
+// Platform changes → populate product list
+platformSelector?.addEventListener("change", () => {
+  const selectedPlatform = platformSelector.value
+
+  if (!selectedPlatform) {
+    stockProductSelector.innerHTML = '<option value="">Select a platform first...</option>'
+    stockProductSelector.disabled = true
+    return
+  }
+
+  const filtered = inventoryData.filter(
+    item => item.platform.toLowerCase() === selectedPlatform.toLowerCase()
+  )
+
+  stockProductSelector.innerHTML = '<option value="">Select a product...</option>'
+  stockProductSelector.disabled = false
+
+  filtered
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(item => {
+      const option = document.createElement("option")
+      option.value = `${item.name}|${item.platform}`
+      option.textContent = `${item.name} (Current: ${item.stock})`
+      stockProductSelector.appendChild(option)
+    })
+})
+
+// Save stock update
+editStockSave?.addEventListener("click", async () => {
+  const selectedValue = stockProductSelector.value
+  const newStock = parseInt(newStockCount.value)
+
+  if (!selectedValue) {
+    alert("Please select a product")
+    return
+  }
+
+  if (isNaN(newStock) || newStock < 0) {
+    alert("Please enter a valid stock count")
+    return
+  }
+
+  const [product, platform] = selectedValue.split("|")
+
+  try {
+    const res = await fetch("/api/update-stock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product, platform, newStock })
+    })
+
+    const result = await res.json()
+
+    if (res.ok) {
+      alert("Stock count updated successfully!")
+      closeStockModal()
+      fetchInventoryData()
+    } else {
+      alert(result.message || "Failed to update stock count")
+    }
+  } catch (err) {
+    console.error("Error updating stock:", err)
+    alert("An error occurred while updating stock count")
+  }
+})
+
   // ------------------------------
   // INIT
   // ------------------------------
