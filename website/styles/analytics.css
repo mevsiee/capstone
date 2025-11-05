@@ -1,21 +1,16 @@
-/* =====================================================================
-   EShop InventoryIQ - Analytics & Forecasting Dashboard
-   Clean Grid System | Dark Mode | Gold Accents | Fully Aligned Layout
-===================================================================== */
-
-/* 1️⃣ Base Reset & Typography */
 body {
   background: #0d0d0d;
-  color: #f4f4f4;
+  color: #fff;
   font-family: "Poppins", sans-serif;
   margin: 0;
   padding: 0;
-  overflow-y: auto;
 }
 
+/* ===== Analytics Content ===== */
 .analytics-content {
-  padding: 1.5rem 2rem;
-  box-sizing: border-box;
+  padding: 20px 50px;
+  background: #000000;
+  margin-top: 40px;
 }
 
 h1, h2, h3, h4, h5, h6,
@@ -26,21 +21,39 @@ h1, h2, h3, h4, h5, h6,
   color: #fff;
 }
 
-/* 2️⃣ Header & Tabs */
+/* ===== Header & Controls Layout ===== */
 .analytics-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.25rem;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.analytics-header-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: #fff;
+  font-size: 24px;
+  color: #F4B301;
 }
 
-/* Tab contents width fix */
+/* ===== Export Buttons ===== */
+.export-container {
+  display: flex;
+  gap: 10px;
+}
+
+/* ===== Tabs ===== */
+.tab-container {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+  margin-right: 20px;
+  margin-bottom: 24px;
+}
+
 .tab-content {
   width: 100%;
   display: none;
@@ -50,47 +63,40 @@ h1, h2, h3, h4, h5, h6,
   width: 100%;
 }
 
-.export-container .export-button {
-  background: #1a1a1a;
-  border: 1px solid #2d2d2d;
-  color: #fff;
-  padding: 0.45rem 0.9rem;
-  border-radius: 6px;
-  margin-left: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.export-container .export-button:hover {
-  border-color: #f4b301;
-}
-
-.tab-container {
+/* ===== Buttons ===== */
+.tab-button, .export-button {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.tab-button {
-  background: #1a1a1a;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #1A1A1A;
+  border: 1px solid #333;
+  border-radius: 4px;
   color: #fff;
-  border: 1px solid #2d2d2d;
-  padding: 0.4rem 0.9rem;
-  border-radius: 999px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 130px;
+  justify-content: center;
+}
+.export-container .export-button:hover, .tab-button:hover {
+  background: #252525;
+  border-color: #444;
 }
 .tab-button.active {
-  background: #f4b301;
+  background-color: #F4B301;
   color: #000;
+  font-weight: 600;
+  border-color: #F4B301;
 }
 
-/* 3️⃣ Cards (Universal) */
+/* ===== Card Universal ===== */
 .card {
-  background: #1a1a1a;
+  background: #1A1A1A;
   border: 1px solid #2d2d2d;
-  border-radius: 10px;
-  padding: 1rem;
-  box-sizing: border-box;
+  border-radius: 8px;
+  padding: 16px;
 }
 
 .summary-card {
@@ -106,7 +112,7 @@ h1, h2, h3, h4, h5, h6,
   color: #cfcfcf;
 }
 
-/* 4️⃣ KPI Section */
+/* ===== KPI Section ===== */
 .kpi-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -133,59 +139,157 @@ h1, h2, h3, h4, h5, h6,
 /* 5️⃣ Main Analytics Grid (Chart + Right Column) */
 .main-grid {
   display: grid;
-  grid-template-columns: 69% 29%; /* slightly narrower right column */
+  grid-template-columns: 2fr 1fr;
   gap: 1.5rem;
-  width: 100%;
-  margin-bottom: 1.5rem;
   align-items: start;
+  width: 100%;
+  max-width: 100%; /* Prevent overflow */
 }
 
-/* Chart Card */
+/* Left side: chart + forecast breakdown */
+.chart-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* Forecast Chart Card */
 .chart-card {
-  height: 420px;
+  min-height: 420px;
+  background: #1A1A1A;
+  border: 1px solid #2d2d2d;
+  border-radius: 8px;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  width: 100%;
+}
+
+/* Right Column (Validation + Sliders) */
+.right-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  height: 100%;
+}
+
+/* Make right column cards consistent */
+.side-card {
+  background: #1A1A1A;
+  border: 1px solid #2d2d2d;
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  min-height: 220px;
+  width: 100%;
+}
+
+/* Add this if missing to wrap main-grid properly */
+.analytics-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Ensure spacing between the right-side cards */
+.side-card + .side-card {
+  margin-top: 1.5rem !important;
+}
+
+/* Chart Column (spans 2/3 width) */
+.chart-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  grid-column: span 2;
+}
+
+/* ===== Chart Card ===== */
+.chart-card {
+  min-height: 420px;
+  background: #1A1A1A;
+  border: 1px solid #2d2d2d;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .chart-card canvas {
   width: 100% !important;
-  height: 320px !important;
-  display: block;
+  height: 280px !important;
   object-fit: contain;
+  margin-bottom: 1rem;
 }
 
-/* Right Column (Model Validation + What-If) */
+/* ===== Inside-chart forecast breakdown ===== */
+.forecast-breakdown {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  padding: 0 0.5rem;
+  gap: 1rem;
+}
+.breakdown-item {
+  flex: 1;
+  text-align: center;
+}
+.breakdown-item .breakdown-label {
+  font-size: 0.85rem;
+  color: #c9c9c9;
+  margin-bottom: 0.2rem;
+}
+.breakdown-item .breakdown-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f4b301;
+}
+
+/* ===== Right Column ===== */
 .right-stack {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 1.25rem; /* noticeable spacing between the two cards */
-  height: auto;
+  gap: 1.5rem; /* ✅ consistent spacing */
+  height: 100%;
 }
 
-/* Right Side Cards */
+/* Side Cards */
 .side-card {
   flex: 1;
   background: #1a1a1a;
   border: 1px solid #2d2d2d;
   border-radius: 10px;
-  padding: 1.25rem 1rem; /* slightly tighter padding */
+  padding: 1.25rem 1.25rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  font-size: 0.9rem; /* smaller for alignment balance */
+  justify-content: flex-start;
+  font-size: 0.9rem;
   line-height: 1.4;
+  min-height: 220px;
 }
+
 .side-card .side-title {
   font-size: 0.95rem;
   border-bottom: 1px solid #2b2b2b;
   padding-bottom: 0.4rem;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.75rem;
   color: #f4f4f4;
 }
 
-/* 6️⃣ Lists & Sliders */
+/* Remove old stacking margin */
+.side-card + .side-card {
+  margin-top: 0;
+}
+
+/* ===== Validation List ===== */
 .validation-list {
   list-style: none;
   margin: 0;
@@ -195,8 +299,8 @@ h1, h2, h3, h4, h5, h6,
   display: flex;
   justify-content: space-between;
   padding: 0.3rem 0;
-  border-bottom: 1px dashed #2b2b2b;
-  color: #e5e5e5;
+  border-bottom: 1px solid #2d2d2d;
+  color: #fff;
   font-size: 0.85rem;
 }
 .validation-list li:last-child {
@@ -206,7 +310,7 @@ h1, h2, h3, h4, h5, h6,
   color: #f4b301;
 }
 
-/* Slider Groups */
+/* ===== Sliders ===== */
 .slider-group {
   display: flex;
   align-items: center;
@@ -224,25 +328,22 @@ h1, h2, h3, h4, h5, h6,
   accent-color: #f4b301;
 }
 .slider-group span {
-  width: 50px;
-  text-align: right;
   color: #f4b301;
 }
 
-/* 7️⃣ Breakdown Section */
+/* ===== Breakdown Section ===== */
 .breakdown-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.2rem; /* slightly increased for clarity */
+  gap: 1.2rem;
   width: 100%;
-  margin-top: 1.75rem; /* more visible separation from top stack */
+  margin-top: 1.75rem;
 }
 
 .breakdown-card {
   padding: 1rem;
   border-radius: 10px;
 }
-
 .breakdown-label {
   font-size: 0.9rem;
   color: #c9c9c9;
@@ -254,43 +355,34 @@ h1, h2, h3, h4, h5, h6,
   color: #f4b301;
 }
 
-/* 8️⃣ Tab Control */
-.tab-content {
-  display: none;
-  width: 100%;
-}
-.tab-content.active {
-  display: block;
-}
-
-/* 9️⃣ Layout Refinements */
+/* ===== Refinements ===== */
 .kpi-row, .main-grid, .breakdown-row {
   margin-bottom: 1.25rem;
 }
 canvas {
   background: transparent;
 }
-.side-card + .side-card {
-  margin-top: 1.25rem; /* improved spacing stack */
-}
 
-/* Alignment edge constraint */
+/* ===== Layout Container Alignment ===== */
 #sales-tab,
 #orders-tab {
   margin: 0 auto;
   max-width: 1400px;
 }
 
-/* Subtle hover feedback */
+/* ===== Hover Effect ===== */
 .card:hover {
   border-color: #f4b301;
   box-shadow: 0 0 8px rgba(244, 179, 1, 0.15);
 }
 
-/* 🔟 Responsive Fixes */
+/* ===== Responsive Fixes ===== */
 @media (max-width: 1400px) {
   .main-grid {
-    grid-template-columns: 65% 35%;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .chart-column {
+    grid-column: span 2;
   }
 }
 
@@ -303,6 +395,47 @@ canvas {
     height: auto;
   }
   .side-card {
+    flex: 1;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .analytics-content {
+    padding: 15px 20px;
+  }
+  
+  .main-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .title {
+    font-size: 20px;
+  }
+
+  .export-button, .tab-button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  .kpi-row, .breakdown-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .analytics-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .export-container {
+    margin-left: 0;
+  }
+
+  .export-container .export-button {
     flex: 1;
   }
 }

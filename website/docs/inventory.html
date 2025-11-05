@@ -143,7 +143,6 @@
 
               <button class="control-btn"><i class="fas fa-sliders"></i> Edit Stock Thresholds</button>
               <button class="control-btn"><i class="fas fa-coins"></i> Update Product Cost</button>
-              <button class="control-btn"><i class="fas fa-edit"></i> Update Product Stock</button>
             </div>
           </div>
 
@@ -257,67 +256,7 @@
               </div>
             </div>
           </div>
-
-          <!-- Edit Stock Modal -->
-          <div id="editStockModal" class="modal-overlay">
-            <div class="modal-content">
-              <!-- Header -->
-              <div class="modal-header">
-                <h2>Update Stock Count</h2>
-                <button class="close-btn">&times;</button>
-              </div>
-
-              <p class="modal-subtext">
-                Select a product to update its stock count.
-              </p>
-
-              <!-- Platform Selector -->
-              <div class="threshold-input">
-                <label for="stockPlatformSelector">Select Platform</label>
-                <div class="input-wrapper">
-                  <select
-                    id="stockPlatformSelector"
-                    style="width: 100%; background: transparent; border: none; color: #fff; padding: 10px; font-family: 'Poppins', sans-serif;">
-                    <option value="">Select a platform...</option>
-                    <option value="ecommerce">E-commerce</option>
-                    <option value="retail">Retail</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Product Selector -->
-              <div class="threshold-input">
-                <label for="stockProductSelector">Select Product</label>
-                <div class="input-wrapper">
-                  <select
-                    id="stockProductSelector"
-                    disabled
-                    style="width: 100%; background: transparent; border: none; color: #fff; padding: 10px; font-family: 'Poppins', sans-serif;">
-                    <option value="">Select a platform first...</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Stock Input -->
-              <div class="threshold-input">
-                <label for="newStockCount">New Stock Count</label>
-                <div class="input-wrapper">
-                  <input
-                    type="number"
-                    id="newStockCount"
-                    min="0"
-                    placeholder="Enter new stock count"
-                  />
-                </div>
-              </div>
-
-              <!-- Footer -->
-              <div class="modal-footer">
-                <button class="cancel-btn">Cancel</button>
-                <button class="save-btn">Save Changes</button>
-              </div>
-            </div>
-          </div>
+        </div>
 
         <!-- Download Inventory Modal -->
         <div id="downloadModal" class="modal-overlay">
