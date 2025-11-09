@@ -1,0 +1,649 @@
+{
+    "error": "",
+    "message": "",
+    "request_id": "req_20251109071213",
+    "response": {
+        "order_list": [
+            {
+                "actual_shipping_fee_confirmed": true,
+                "buyer_cancel_reason": "",
+                "buyer_cpf_id": null,
+                "buyer_user_id": 100001,
+                "buyer_username": "user_1",
+                "cancel_by": "",
+                "cancel_reason": "",
+                "cod": true,
+                "create_time": 1731139200,
+                "currency": "PHP",
+                "days_to_ship": 2,
+                "estimated_shipping_fee": 80.0,
+                "fulfillment_flag": "fulfilled_by_local_seller",
+                "goods_to_declare": false,
+                "item_list": [
+                    {
+                        "add_on_deal": false,
+                        "add_on_deal_id": 0,
+                        "image_info": {
+                            "image_url": "https://example.com/product_1002.jpg"
+                        },
+                        "is_b2c_owned_item": false,
+                        "is_prescription_item": false,
+                        "item_id": 1002,
+                        "item_name": "BUTTON DOWN SPECIAL SHIRT",
+                        "item_sku": "SKU-1002",
+                        "main_item": false,
+                        "model_discounted_price": 209.0,
+                        "model_id": 2003,
+                        "model_name": "Default",
+                        "model_original_price": 259.0,
+                        "model_quantity_purchased": 1,
+                        "model_sku": "MDL-2003",
+                        "order_item_id": 1002,
+                        "product_location_id": [
+                            "PH001LOC"
+                        ],
+                        "promotion_group_id": 0,
+                        "promotion_id": 0,
+                        "promotion_type": "",
+                        "weight": 0.25,
+                        "wholesale": false
+                    },
+                    {
+                        "add_on_deal": false,
+                        "add_on_deal_id": 0,
+                        "image_info": {
+                            "image_url": "https://example.com/product_1003.jpg"
+                        },
+                        "is_b2c_owned_item": false,
+                        "is_prescription_item": false,
+                        "item_id": 1003,
+                        "item_name": "KNITTED POLO SHIRT",
+                        "item_sku": "SKU-1003",
+                        "main_item": false,
+                        "model_discounted_price": 209.0,
+                        "model_id": 2004,
+                        "model_name": "Default",
+                        "model_original_price": 259.0,
+                        "model_quantity_purchased": 1,
+                        "model_sku": "MDL-2004",
+                        "order_item_id": 1003,
+                        "product_location_id": [
+                            "PH001LOC"
+                        ],
+                        "promotion_group_id": 0,
+                        "promotion_id": 0,
+                        "promotion_type": "",
+                        "weight": 0.25,
+                        "wholesale": false
+                    }
+                ],
+                "message_to_seller": "",
+                "note": "",
+                "note_update_time": 0,
+                "order_sn": "SP2025001",
+                "order_status": "READY_TO_SHIP",
+                "package_list": [
+                    {
+                        "item_list": [
+                            {
+                                "item_id": 1002,
+                                "model_id": 2003,
+                                "model_quantity": 1,
+                                "order_item_id": 1002,
+                                "product_location_id": "PH001LOC",
+                                "promotion_group_id": 0
+                            },
+                            {
+                                "item_id": 1003,
+                                "model_id": 2004,
+                                "model_quantity": 1,
+                                "order_item_id": 1003,
+                                "product_location_id": "PH001LOC",
+                                "promotion_group_id": 0
+                            }
+                        ],
+                        "logistics_status": "LOGISTICS_READY_TO_SHIP",
+                        "package_number": "PKG-SP2025001",
+                        "parcel_chargeable_weight_gram": 500,
+                        "shipping_carrier": "J&T Express",
+                        "logistics_channel_id": 18080,
+                        "allow_self_design_awb": true,
+                        "sorting_group": "Metro Manila"
+                    }
+                ],
+                "pay_time": 1731142800,
+                "payment_method": "Cash on Delivery",
+                "pickup_done_time": 1731146400,
+                "recipient_address": {
+                    "city": "Quezon City",
+                    "district": "Project 6",
+                    "full_address": "123 Example Street, Project 6, Quezon City",
+                    "name": "Customer 1",
+                    "phone": "0917xxxx001",
+                    "region": "PH",
+                    "state": "Metro Manila",
+                    "zipcode": "1100"
+                },
+                "region": "PH",
+                "reverse_shipping_fee": 0,
+                "ship_by_date": 1731235200,
+                "shipping_carrier": "J&T Express",
+                "split_up": false,
+                "total_amount": 549.0,
+                "update_time": 1731240000
+            },
+            {
+                "actual_shipping_fee_confirmed": true,
+                "buyer_cancel_reason": "",
+                "buyer_cpf_id": null,
+                "buyer_user_id": 100002,
+                "buyer_username": "user_2",
+                "cancel_by": "",
+                "cancel_reason": "",
+                "cod": true,
+                "create_time": 1731139200,
+                "currency": "PHP",
+                "days_to_ship": 2,
+                "estimated_shipping_fee": 80.0,
+                "fulfillment_flag": "fulfilled_by_local_seller",
+                "goods_to_declare": false,
+                "item_list": [
+                    {
+                        "add_on_deal": false,
+                        "add_on_deal_id": 0,
+                        "image_info": {
+                            "image_url": "https://example.com/product_1004.jpg"
+                        },
+                        "is_b2c_owned_item": false,
+                        "is_prescription_item": false,
+                        "item_id": 1004,
+                        "item_name": "BUTTON DOWN SPECIAL SHIRT",
+                        "item_sku": "SKU-1004",
+                        "main_item": false,
+                        "model_discounted_price": 219.0,
+                        "model_id": 2006,
+                        "model_name": "Default",
+                        "model_original_price": 269.0,
+                        "model_quantity_purchased": 1,
+                        "model_sku": "MDL-2006",
+                        "order_item_id": 1004,
+                        "product_location_id": [
+                            "PH001LOC"
+                        ],
+                        "promotion_group_id": 0,
+                        "promotion_id": 0,
+                        "promotion_type": "",
+                        "weight": 0.25,
+                        "wholesale": false
+                    },
+                    {
+                        "add_on_deal": false,
+                        "add_on_deal_id": 0,
+                        "image_info": {
+                            "image_url": "https://example.com/product_1005.jpg"
+                        },
+                        "is_b2c_owned_item": false,
+                        "is_prescription_item": false,
+                        "item_id": 1005,
+                        "item_name": "TEXTURED T-SHIRT",
+                        "item_sku": "SKU-1005",
+                        "main_item": false,
+                        "model_discounted_price": 219.0,
+                        "model_id": 2007,
+                        "model_name": "Default",
+                        "model_original_price": 269.0,
+                        "model_quantity_purchased": 1,
+                        "model_sku": "MDL-2007",
+                        "order_item_id": 1005,
+                        "product_location_id": [
+                            "PH001LOC"
+                        ],
+                        "promotion_group_id": 0,
+                        "promotion_id": 0,
+                        "promotion_type": "",
+                        "weight": 0.25,
+                        "wholesale": false
+                    }
+                ],
+                "message_to_seller": "",
+                "note": "",
+                "note_update_time": 0,
+                "order_sn": "SP2025002",
+                "order_status": "COMPLETED",
+                "package_list": [
+                    {
+                        "item_list": [
+                            {
+                                "item_id": 1004,
+                                "model_id": 2006,
+                                "model_quantity": 1,
+                                "order_item_id": 1004,
+                                "product_location_id": "PH001LOC",
+                                "promotion_group_id": 0
+                            },
+                            {
+                                "item_id": 1005,
+                                "model_id": 2007,
+                                "model_quantity": 1,
+                                "order_item_id": 1005,
+                                "product_location_id": "PH001LOC",
+                                "promotion_group_id": 0
+                            }
+                        ],
+                        "logistics_status": "LOGISTICS_DELIVERY_DONE",
+                        "package_number": "PKG-SP2025002",
+                        "parcel_chargeable_weight_gram": 500,
+                        "shipping_carrier": "J&T Express",
+                        "logistics_channel_id": 18080,
+                        "allow_self_design_awb": true,
+                        "sorting_group": "Metro Manila"
+                    }
+                ],
+                "pay_time": 1731142800,
+                "payment_method": "Cash on Delivery",
+                "pickup_done_time": 1731146400,
+                "recipient_address": {
+                    "city": "Quezon City",
+                    "district": "Project 6",
+                    "full_address": "123 Example Street, Project 6, Quezon City",
+                    "name": "Customer 2",
+                    "phone": "0917xxxx002",
+                    "region": "PH",
+                    "state": "Metro Manila",
+                    "zipcode": "1100"
+                },
+                "region": "PH",
+                "reverse_shipping_fee": 0,
+                "ship_by_date": 1731235200,
+                "shipping_carrier": "J&T Express",
+                "split_up": false,
+                "total_amount": 599.0,
+                "update_time": 1731240000
+            },
+            {
+                "actual_shipping_fee_confirmed": true,
+                "buyer_cancel_reason": "",
+                "buyer_cpf_id": null,
+                "buyer_user_id": 100003,
+                "buyer_username": "user_3",
+                "cancel_by": "",
+                "cancel_reason": "",
+                "cod": true,
+                "create_time": 1731139200,
+                "currency": "PHP",
+                "days_to_ship": 2,
+                "estimated_shipping_fee": 80.0,
+                "fulfillment_flag": "fulfilled_by_local_seller",
+                "goods_to_declare": false,
+                "item_list": [
+                    {
+                        "add_on_deal": false,
+                        "add_on_deal_id": 0,
+                        "image_info": {
+                            "image_url": "https://example.com/product_1006.jpg"
+                        },
+                        "is_b2c_owned_item": false,
+                        "is_prescription_item": false,
+                        "item_id": 1006,
+                        "item_name": "BUTTON DOWN SPECIAL SHIRT",
+                        "item_sku": "SKU-1006",
+                        "main_item": false,
+                        "model_discounted_price": 229.0,
+                        "model_id": 2009,
+                        "model_name": "Default",
+                        "model_original_price": 279.0,
+                        "model_quantity_purchased": 1,
+                        "model_sku": "MDL-2009",
+                        "order_item_id": 1006,
+                        "product_location_id": [
+                            "PH001LOC"
+                        ],
+                        "promotion_group_id": 0,
+                        "promotion_id": 0,
+                        "promotion_type": "",
+                        "weight": 0.25,
+                        "wholesale": false
+                    },
+                    {
+                        "add_on_deal": false,
+                        "add_on_deal_id": 0,
+                        "image_info": {
+                            "image_url": "https://example.com/product_1007.jpg"
+                        },
+                        "is_b2c_owned_item": false,
+                        "is_prescription_item": false,
+                        "item_id": 1007,
+                        "item_name": "OPEN COLLAR SOFT FABRIC SHIRT",
+                        "item_sku": "SKU-1007",
+                        "main_item": false,
+                        "model_discounted_price": 229.0,
+                        "model_id": 2010,
+                        "model_name": "Default",
+                        "model_original_price": 279.0,
+                        "model_quantity_purchased": 1,
+                        "model_sku": "MDL-2010",
+                        "order_item_id": 1007,
+                        "product_location_id": [
+                            "PH001LOC"
+                        ],
+                        "promotion_group_id": 0,
+                        "promotion_id": 0,
+                        "promotion_type": "",
+                        "weight": 0.25,
+                        "wholesale": false
+                    }
+                ],
+                "message_to_seller": "",
+                "note": "",
+                "note_update_time": 0,
+                "order_sn": "SP2025003",
+                "order_status": "READY_TO_SHIP",
+                "package_list": [
+                    {
+                        "item_list": [
+                            {
+                                "item_id": 1006,
+                                "model_id": 2009,
+                                "model_quantity": 1,
+                                "order_item_id": 1006,
+                                "product_location_id": "PH001LOC",
+                                "promotion_group_id": 0
+                            },
+                            {
+                                "item_id": 1007,
+                                "model_id": 2010,
+                                "model_quantity": 1,
+                                "order_item_id": 1007,
+                                "product_location_id": "PH001LOC",
+                                "promotion_group_id": 0
+                            }
+                        ],
+                        "logistics_status": "LOGISTICS_READY_TO_SHIP",
+                        "package_number": "PKG-SP2025003",
+                        "parcel_chargeable_weight_gram": 500,
+                        "shipping_carrier": "J&T Express",
+                        "logistics_channel_id": 18080,
+                        "allow_self_design_awb": true,
+                        "sorting_group": "Metro Manila"
+                    }
+                ],
+                "pay_time": 1731142800,
+                "payment_method": "Cash on Delivery",
+                "pickup_done_time": 1731146400,
+                "recipient_address": {
+                    "city": "Quezon City",
+                    "district": "Project 6",
+                    "full_address": "123 Example Street, Project 6, Quezon City",
+                    "name": "Customer 3",
+                    "phone": "0917xxxx003",
+                    "region": "PH",
+                    "state": "Metro Manila",
+                    "zipcode": "1100"
+                },
+                "region": "PH",
+                "reverse_shipping_fee": 0,
+                "ship_by_date": 1731235200,
+                "shipping_carrier": "J&T Express",
+                "split_up": false,
+                "total_amount": 649.0,
+                "update_time": 1731240000
+            },
+            {
+                "actual_shipping_fee_confirmed": true,
+                "buyer_cancel_reason": "",
+                "buyer_cpf_id": null,
+                "buyer_user_id": 100004,
+                "buyer_username": "user_4",
+                "cancel_by": "",
+                "cancel_reason": "",
+                "cod": true,
+                "create_time": 1731139200,
+                "currency": "PHP",
+                "days_to_ship": 2,
+                "estimated_shipping_fee": 80.0,
+                "fulfillment_flag": "fulfilled_by_local_seller",
+                "goods_to_declare": false,
+                "item_list": [
+                    {
+                        "add_on_deal": false,
+                        "add_on_deal_id": 0,
+                        "image_info": {
+                            "image_url": "https://example.com/product_1008.jpg"
+                        },
+                        "is_b2c_owned_item": false,
+                        "is_prescription_item": false,
+                        "item_id": 1008,
+                        "item_name": "BUTTON DOWN SPECIAL SHIRT",
+                        "item_sku": "SKU-1008",
+                        "main_item": false,
+                        "model_discounted_price": 239.0,
+                        "model_id": 2012,
+                        "model_name": "Default",
+                        "model_original_price": 289.0,
+                        "model_quantity_purchased": 1,
+                        "model_sku": "MDL-2012",
+                        "order_item_id": 1008,
+                        "product_location_id": [
+                            "PH001LOC"
+                        ],
+                        "promotion_group_id": 0,
+                        "promotion_id": 0,
+                        "promotion_type": "",
+                        "weight": 0.25,
+                        "wholesale": false
+                    },
+                    {
+                        "add_on_deal": false,
+                        "add_on_deal_id": 0,
+                        "image_info": {
+                            "image_url": "https://example.com/product_1009.jpg"
+                        },
+                        "is_b2c_owned_item": false,
+                        "is_prescription_item": false,
+                        "item_id": 1009,
+                        "item_name": "COTTON MINI WAFFLE TEE",
+                        "item_sku": "SKU-1009",
+                        "main_item": false,
+                        "model_discounted_price": 239.0,
+                        "model_id": 2013,
+                        "model_name": "Default",
+                        "model_original_price": 289.0,
+                        "model_quantity_purchased": 1,
+                        "model_sku": "MDL-2013",
+                        "order_item_id": 1009,
+                        "product_location_id": [
+                            "PH001LOC"
+                        ],
+                        "promotion_group_id": 0,
+                        "promotion_id": 0,
+                        "promotion_type": "",
+                        "weight": 0.25,
+                        "wholesale": false
+                    }
+                ],
+                "message_to_seller": "",
+                "note": "",
+                "note_update_time": 0,
+                "order_sn": "SP2025004",
+                "order_status": "COMPLETED",
+                "package_list": [
+                    {
+                        "item_list": [
+                            {
+                                "item_id": 1008,
+                                "model_id": 2012,
+                                "model_quantity": 1,
+                                "order_item_id": 1008,
+                                "product_location_id": "PH001LOC",
+                                "promotion_group_id": 0
+                            },
+                            {
+                                "item_id": 1009,
+                                "model_id": 2013,
+                                "model_quantity": 1,
+                                "order_item_id": 1009,
+                                "product_location_id": "PH001LOC",
+                                "promotion_group_id": 0
+                            }
+                        ],
+                        "logistics_status": "LOGISTICS_DELIVERY_DONE",
+                        "package_number": "PKG-SP2025004",
+                        "parcel_chargeable_weight_gram": 500,
+                        "shipping_carrier": "J&T Express",
+                        "logistics_channel_id": 18080,
+                        "allow_self_design_awb": true,
+                        "sorting_group": "Metro Manila"
+                    }
+                ],
+                "pay_time": 1731142800,
+                "payment_method": "Cash on Delivery",
+                "pickup_done_time": 1731146400,
+                "recipient_address": {
+                    "city": "Quezon City",
+                    "district": "Project 6",
+                    "full_address": "123 Example Street, Project 6, Quezon City",
+                    "name": "Customer 4",
+                    "phone": "0917xxxx004",
+                    "region": "PH",
+                    "state": "Metro Manila",
+                    "zipcode": "1100"
+                },
+                "region": "PH",
+                "reverse_shipping_fee": 0,
+                "ship_by_date": 1731235200,
+                "shipping_carrier": "J&T Express",
+                "split_up": false,
+                "total_amount": 699.0,
+                "update_time": 1731240000
+            },
+            {
+                "actual_shipping_fee_confirmed": true,
+                "buyer_cancel_reason": "",
+                "buyer_cpf_id": null,
+                "buyer_user_id": 100005,
+                "buyer_username": "user_5",
+                "cancel_by": "",
+                "cancel_reason": "",
+                "cod": true,
+                "create_time": 1731139200,
+                "currency": "PHP",
+                "days_to_ship": 2,
+                "estimated_shipping_fee": 80.0,
+                "fulfillment_flag": "fulfilled_by_local_seller",
+                "goods_to_declare": false,
+                "item_list": [
+                    {
+                        "add_on_deal": false,
+                        "add_on_deal_id": 0,
+                        "image_info": {
+                            "image_url": "https://example.com/product_1010.jpg"
+                        },
+                        "is_b2c_owned_item": false,
+                        "is_prescription_item": false,
+                        "item_id": 1010,
+                        "item_name": "BUTTON DOWN SPECIAL SHIRT",
+                        "item_sku": "SKU-1010",
+                        "main_item": false,
+                        "model_discounted_price": 249.0,
+                        "model_id": 2015,
+                        "model_name": "Default",
+                        "model_original_price": 299.0,
+                        "model_quantity_purchased": 1,
+                        "model_sku": "MDL-2015",
+                        "order_item_id": 1010,
+                        "product_location_id": [
+                            "PH001LOC"
+                        ],
+                        "promotion_group_id": 0,
+                        "promotion_id": 0,
+                        "promotion_type": "",
+                        "weight": 0.25,
+                        "wholesale": false
+                    },
+                    {
+                        "add_on_deal": false,
+                        "add_on_deal_id": 0,
+                        "image_info": {
+                            "image_url": "https://example.com/product_1011.jpg"
+                        },
+                        "is_b2c_owned_item": false,
+                        "is_prescription_item": false,
+                        "item_id": 1011,
+                        "item_name": "KIDS WAFFLE T-SHIRT",
+                        "item_sku": "SKU-1011",
+                        "main_item": false,
+                        "model_discounted_price": 249.0,
+                        "model_id": 2016,
+                        "model_name": "Default",
+                        "model_original_price": 299.0,
+                        "model_quantity_purchased": 1,
+                        "model_sku": "MDL-2016",
+                        "order_item_id": 1011,
+                        "product_location_id": [
+                            "PH001LOC"
+                        ],
+                        "promotion_group_id": 0,
+                        "promotion_id": 0,
+                        "promotion_type": "",
+                        "weight": 0.25,
+                        "wholesale": false
+                    }
+                ],
+                "message_to_seller": "",
+                "note": "",
+                "note_update_time": 0,
+                "order_sn": "SP2025005",
+                "order_status": "READY_TO_SHIP",
+                "package_list": [
+                    {
+                        "item_list": [
+                            {
+                                "item_id": 1010,
+                                "model_id": 2015,
+                                "model_quantity": 1,
+                                "order_item_id": 1010,
+                                "product_location_id": "PH001LOC",
+                                "promotion_group_id": 0
+                            },
+                            {
+                                "item_id": 1011,
+                                "model_id": 2016,
+                                "model_quantity": 1,
+                                "order_item_id": 1011,
+                                "product_location_id": "PH001LOC",
+                                "promotion_group_id": 0
+                            }
+                        ],
+                        "logistics_status": "LOGISTICS_READY_TO_SHIP",
+                        "package_number": "PKG-SP2025005",
+                        "parcel_chargeable_weight_gram": 500,
+                        "shipping_carrier": "J&T Express",
+                        "logistics_channel_id": 18080,
+                        "allow_self_design_awb": true,
+                        "sorting_group": "Metro Manila"
+                    }
+                ],
+                "pay_time": 1731142800,
+                "payment_method": "Cash on Delivery",
+                "pickup_done_time": 1731146400,
+                "recipient_address": {
+                    "city": "Quezon City",
+                    "district": "Project 6",
+                    "full_address": "123 Example Street, Project 6, Quezon City",
+                    "name": "Customer 5",
+                    "phone": "0917xxxx005",
+                    "region": "PH",
+                    "state": "Metro Manila",
+                    "zipcode": "1100"
+                },
+                "region": "PH",
+                "reverse_shipping_fee": 0,
+                "ship_by_date": 1731235200,
+                "shipping_carrier": "J&T Express",
+                "split_up": false,
+                "total_amount": 749.0,
+                "update_time": 1731240000
+            }
+        ]
+    }
+}
