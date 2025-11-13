@@ -20,7 +20,6 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
-// ✅ Test DB connection
 pool.connect()
   .then(client => {
     console.log("✅ Connected to Neon successfully!");
@@ -39,29 +38,28 @@ app.get("/api/inventory", async (req, res) => {
       SELECT 
         'E-Commerce' AS platform,
         p.product_name AS product_name,
-        pv.product_size AS size,
-        pv.product_variation AS color,
+        pv.size AS size,
+        pv.variation AS color,
         COALESCE(pv.original_price, 0) AS price,
-        COALESCE(p.product_cost, 0) AS cost,
-        0 AS stock_count
+        COALESCE(p.cost, 0) AS cost,
+        COALESCE(pv.stock, 0) AS stock_count
       FROM product_dimension p
       JOIN product_variation_dimension pv 
         ON p.product_id = pv.product_id
 
       UNION ALL
 
-      -- 🟩 RETAIL PRODUCTS
+      -- 🟩 RETAIL DATA (aggregated)
       SELECT 
         'Retail' AS platform,
-        rd.product_name AS product_name,
-        rv.product_size AS size,
-        rv.product_color AS color,
-        0 AS price,
-        COALESCE(rd.product_cost, 0) AS cost,
-        COALESCE(rv.product_stock, 0) AS stock_count
-      FROM retail_product_dimension rd
-      JOIN retail_product_variation_dimension rv 
-        ON rd.product_id = rv.product_id
+        rr.item AS product_name,
+        rr.size AS size,
+        'N/A' AS color,
+        ROUND(AVG(rr.price), 2) AS price,
+        ROUND(AVG(rr.price), 2) AS cost,
+        SUM(rr.quantity) AS stock_count
+      FROM retail_raw rr
+      GROUP BY rr.item, rr.size
 
       ORDER BY product_name ASC;
     `;
@@ -75,7 +73,7 @@ app.get("/api/inventory", async (req, res) => {
 });
 
 // 🟨 Update product cost API endpoint
-app.use(express.json()); // <-- Ensure this is before any POST routes
+app.use(express.json());
 
 app.post("/api/update-cost", express.json(), async (req, res) => {
   const { product, newCost } = req.body;

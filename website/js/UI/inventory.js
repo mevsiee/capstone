@@ -19,9 +19,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // ------------------------------
   // FETCH INVENTORY DATA
   // ------------------------------
-  async function fetchInventoryData() {
+    async function fetchInventoryData() {
     try {
-      const res = await fetch("/api/inventory");
+      // ✅ Explicitly target your backend server on port 5000
+      const res = await fetch("http://localhost:5000/api/inventory");
+
       if (!res.ok) throw new Error("Failed to fetch inventory data");
       const data = await res.json();
 
@@ -46,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Unable to load inventory data from database.");
     }
   }
+
 
   // ------------------------------
   // STOCK LOGIC
