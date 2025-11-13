@@ -5,12 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Analytics - EShop InventoryIQ</title>
 
+  <!-- ✅ Shared styles -->
   <link rel="stylesheet" href="../styles/dashboard.css" />
   <link rel="stylesheet" href="../styles/analytics.css" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- ✅ Firebase SDKs (UNCHANGED) -->
+  <!-- ✅ Icons & Fonts -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- ✅ Firebase SDKs (keep auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -18,37 +27,61 @@
 
 <body class="dashboard-body">
   <div class="dashboard-container">
+    <!-- Header -->
     <header class="main-header">
       <div class="header-content">
         <h1>EShop InventoryIQ</h1>
-        <h2>Forecasting & Management System</h2>
+        <h2>Forecasting &amp; Management System</h2>
       </div>
     </header>
 
+    <!-- Sidebar -->
     <nav class="sidebar">
       <ul class="sidebar-menu">
-        <li class="menu-item"><a href="dashboard.html"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
-        <li class="menu-item"><a href="inventory.html"><i class="fas fa-box"></i><span>Inventory</span></a></li>
-        <li class="menu-item active"><a href="analytics.html"><i class="fas fa-chart-bar"></i><span>Analytics</span></a></li>
-        <li class="menu-item" id="userManagementLink" style="display:none;"><a href="usermanagement.html"><i class="fas fa-users"></i><span>User Management</span></a></li>
-        <li class="menu-item"><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
-        <li class="menu-item"><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Log Out</span></a></li>
+        <li class="menu-item">
+          <a href="dashboard.html"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+        </li>
+        <li class="menu-item">
+          <a href="inventory.html"><i class="fas fa-box"></i><span>Inventory</span></a>
+        </li>
+        <li class="menu-item active">
+          <a href="analytics.html"><i class="fas fa-chart-bar"></i><span>Analytics</span></a>
+        </li>
+        <li class="menu-item" id="userManagementLink" style="display:none;">
+          <a href="usermanagement.html"><i class="fas fa-users"></i><span>User Management</span></a>
+        </li>
+        <li class="menu-item">
+          <a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a>
+        </li>
+        <li class="menu-item">
+          <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Log Out</span></a>
+        </li>
       </ul>
     </nav>
 
+    <!-- Main Content -->
     <main class="main-content">
       <div class="content-area">
-        <div class="analytics-content">
+        <section class="analytics-content">
+          <!-- Header + Export -->
           <div class="analytics-header-wrapper">
             <div class="analytics-header">
-              <h1 class="title">Analytics and Forecasting</h1>
+              <div>
+                <h1 class="title">Forecasting and Analytics</h1>
+                <p class="subtitle">
+                  AI-powered sales and order forecasts with model validation and what-if analysis.
+                </p>
+              </div>
               <div class="export-container">
-                <button class="export-button"><i class="fas fa-file-excel"></i> Export Excel</button>
-                <button class="export-button"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                <button class="export-button" id="exportExcelBtn">
+                  <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+                <button class="export-button" id="exportPdfBtn">
+                  <i class="fas fa-file-pdf"></i> Export PDF
+                </button>
               </div>
             </div>
           </div>
-
 
           <!-- Tabs -->
           <div class="tab-container">
@@ -56,7 +89,9 @@
             <button class="tab-button" data-tab="orders">Order Forecast</button>
           </div>
 
-          <!-- ===== SALES TAB ===== -->
+          <!-- ========================= -->
+          <!--        SALES TAB          -->
+          <!-- ========================= -->
           <section id="sales-tab" class="tab-content active">
             <!-- Executive summary -->
             <div class="card summary-card">
@@ -67,152 +102,285 @@
             <!-- KPI row -->
             <div class="kpi-row">
               <div class="card kpi-card">
-                <span class="kpi-label">Current Quarter<br>Total Sales</span>
+                <span class="kpi-label">Current Quarter<br />Total Sales</span>
                 <span class="kpi-value" id="salesCurrent">₱ 0</span>
               </div>
               <div class="card kpi-card">
-                <span class="kpi-label">Next Quarter<br>Projected Sales</span>
+                <span class="kpi-label">Next Quarter<br />Projected Sales</span>
                 <span class="kpi-value" id="salesNext">₱ 0</span>
               </div>
               <div class="card kpi-card">
-                <span class="kpi-label">Rate Percentage<br>(Growth/Loss)</span>
-                <span class="kpi-value" id="salesGrowth">0%</span>
+                <span class="kpi-label">Rate Percentage<br />(Growth/Loss)</span>
+                <span class="kpi-value positive" id="salesGrowth">+0.0%</span>
               </div>
             </div>
 
-            <!-- Main grid: chart + breakdown left | validation + what-if right -->
-            <div class="main-grid">
-              <!-- Chart + Breakdown LEFT -->
-              <div class="chart-column">
-                <div class="card chart-card combined-chart">
-                  <div class="card-title">Projected Sales Forecast for the Next Quarter</div>
+            <!-- Main grid: chart + side panels -->
+            <div class="analytics-main-grid">
+              <!-- Chart LEFT -->
+              <div class="card chart-card">
+                <div class="card-header">
+                  <h3>Quarterly Sales Forecast</h3>
+                  <span class="card-subtitle">Current vs projected across key channels</span>
+                </div>
+                <div class="chart-wrapper">
                   <canvas id="salesChart"></canvas>
-
-                  <div class="forecast-breakdown">
-                    <div class="breakdown-item">
-                      <div class="breakdown-label">Retail Forecasted Amount</div>
-                      <div class="breakdown-value" id="salesRetail">₱ 0</div>
-                    </div>
-                    <div class="breakdown-item">
-                      <div class="breakdown-label">Shopee Forecasted Amount</div>
-                      <div class="breakdown-value" id="salesShopee">₱ 0</div>
-                    </div>
-                    <div class="breakdown-item">
-                      <div class="breakdown-label">Tiktok Forecasted Amount</div>
-                      <div class="breakdown-value" id="salesTiktok">₱ 0</div>
-                    </div>
-                  </div>
                 </div>
               </div>
 
               <!-- Validation + What-If RIGHT -->
               <div class="right-stack">
+                <!-- Model Validation -->
                 <div class="card side-card">
                   <div class="side-title">Model Validation</div>
                   <ul class="validation-list">
-                    <li>MAE (Mean Absolute Error) value <span id="salesMAE">--</span></li>
-                    <li>RMSE (Root Mean Squared Error) value <span id="salesRMSE">--</span></li>
-                    <li>MAPE (Mean Absolute Percentage Error) value <span id="salesMAPE">--</span></li>
+                    <li>
+                      MAE (Mean Absolute Error) value
+                      <span id="salesMAE">--</span>
+                    </li>
+                    <li>
+                      RMSE (Root Mean Squared Error) value
+                      <span id="salesRMSE">--</span>
+                    </li>
+                    <li>
+                      MAPE (Mean Absolute Percentage Error) value
+                      <span id="salesMAPE">--</span>
+                    </li>
                   </ul>
                 </div>
 
+                <!-- What-If Analysis -->
                 <div class="card side-card">
-                  <div class="side-title">Price Elasticity Analysis (What-If)</div>
-                  <p class="muted">Simulate order volume changes based on pricing & advertising adjustments.</p>
+                  <div class="side-title">Price &amp; Marketing What-If Analysis</div>
+                  <p class="side-description">
+                    Adjust the sliders to simulate the effect of discounting and increased
+                    advertising spend on projected sales.
+                  </p>
+
                   <div class="slider-group">
-                    <label>Price Adjustment (%)</label>
-                    <input type="range" id="priceSlider" class="slider" min="-30" max="30" value="0" />
-                    <span id="priceValue">0%</span>
+                    <div class="slider-row">
+                      <div class="slider-label">
+                        <span>Price Adjustment</span>
+                        <span id="priceValue">0%</span>
+                      </div>
+                      <input
+                        type="range"
+                        id="priceSlider"
+                        min="-20"
+                        max="20"
+                        value="0"
+                        step="1"
+                      />
+                      <small class="slider-caption">
+                        Negative values simulate discounts; positive values simulate price increases.
+                      </small>
+                    </div>
+
+                    <div class="slider-row">
+                      <div class="slider-label">
+                        <span>Advertising Spend</span>
+                        <span id="adValue">0%</span>
+                      </div>
+                      <input
+                        type="range"
+                        id="adSlider"
+                        min="0"
+                        max="30"
+                        value="0"
+                        step="1"
+                      />
+                      <small class="slider-caption">
+                        Simulates incremental digital marketing investments versus the baseline.
+                      </small>
+                    </div>
                   </div>
-                  <div class="slider-group">
-                    <label>Advertising Adjustment (%)</label>
-                    <input type="range" id="adSlider" class="slider" min="-30" max="30" value="0" />
-                    <span id="adValue">0%</span>
+
+                  <div class="impact-summary">
+                    <div class="impact-title">Projected Revenue Impact</div>
+                    <div class="impact-figure" id="salesImpact">₱ 0</div>
+                    <div class="impact-subtitle" id="salesImpactPct">
+                      0.0% vs baseline forecast
+                    </div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Platform breakdown -->
+            <div class="card breakdown-card">
+              <div class="card-header">
+                <h3>Channel Contribution Breakdown</h3>
+                <span class="card-subtitle">
+                  Distribution of projected sales across major platforms.
+                </span>
+              </div>
+              <div class="breakdown-grid">
+                <div class="breakdown-item">
+                  <span class="breakdown-label">Retail Stores</span>
+                  <span class="breakdown-value" id="salesRetail">₱ 0</span>
+                </div>
+                <div class="breakdown-item">
+                  <span class="breakdown-label">Shopee</span>
+                  <span class="breakdown-value" id="salesShopee">₱ 0</span>
+                </div>
+                <div class="breakdown-item">
+                  <span class="breakdown-label">TikTok Shop</span>
+                  <span class="breakdown-value" id="salesTiktok">₱ 0</span>
                 </div>
               </div>
             </div>
           </section>
 
-          <!-- ===== ORDERS TAB ===== -->
+          <!-- ========================= -->
+          <!--        ORDERS TAB         -->
+          <!-- ========================= -->
           <section id="orders-tab" class="tab-content">
+            <!-- Executive summary -->
             <div class="card summary-card">
               <h3>Executive Summary and Recommendations</h3>
               <p id="ordersSummary">Loading forecast insights...</p>
             </div>
 
+            <!-- KPI row -->
             <div class="kpi-row">
               <div class="card kpi-card">
-                <span class="kpi-label">Current Quarter<br>Total Orders</span>
+                <span class="kpi-label">Current Quarter<br />Total Orders</span>
                 <span class="kpi-value" id="ordersCurrent">0</span>
               </div>
               <div class="card kpi-card">
-                <span class="kpi-label">Next Quarter<br>Projected Orders</span>
+                <span class="kpi-label">Next Quarter<br />Projected Orders</span>
                 <span class="kpi-value" id="ordersNext">0</span>
               </div>
               <div class="card kpi-card">
-                <span class="kpi-label">Rate Percentage<br>(Growth/Loss)</span>
-                <span class="kpi-value" id="ordersGrowth">0%</span>
+                <span class="kpi-label">Rate Percentage<br />(Growth/Loss)</span>
+                <span class="kpi-value positive" id="ordersGrowth">+0.0%</span>
               </div>
             </div>
 
-            <div class="main-grid">
+            <!-- Main grid: chart + side panels -->
+            <div class="analytics-main-grid">
+              <!-- Chart LEFT -->
               <div class="card chart-card">
-                <div class="card-title">
-                  Graph for Orders Forecast (Current Quarter - shown as solid lines and next quarter - shown as broken lines)
-                  <div class="subnote">ECommerce (Tiktok Shopee Combined) and Retail</div>
+                <div class="card-header">
+                  <h3>Quarterly Orders Forecast</h3>
+                  <span class="card-subtitle">Current vs projected order volume</span>
                 </div>
-                <canvas id="ordersChart"></canvas>
+                <div class="chart-wrapper">
+                  <canvas id="ordersChart"></canvas>
+                </div>
               </div>
 
+              <!-- Validation + What-If RIGHT -->
               <div class="right-stack">
+                <!-- Model Validation -->
                 <div class="card side-card">
                   <div class="side-title">Model Validation</div>
                   <ul class="validation-list">
-                    <li>MAE (Mean Absolute Error) value <span id="ordersMAE">--</span></li>
-                    <li>RMSE (Root Mean Squared Error) value <span id="ordersRMSE">--</span></li>
-                    <li>MAPE (Mean Absolute Percentage Error) value <span id="ordersMAPE">--</span></li>
+                    <li>
+                      MAE (Mean Absolute Error) value
+                      <span id="ordersMAE">--</span>
+                    </li>
+                    <li>
+                      RMSE (Root Mean Squared Error) value
+                      <span id="ordersRMSE">--</span>
+                    </li>
+                    <li>
+                      MAPE (Mean Absolute Percentage Error) value
+                      <span id="ordersMAPE">--</span>
+                    </li>
                   </ul>
                 </div>
 
+                <!-- What-If Analysis -->
                 <div class="card side-card">
-                  <div class="side-title">Order Demand Analysis (Linear Programming Optimization)</div>
+                  <div class="side-title">Demand &amp; Inventory What-If Analysis</div>
+                  <p class="side-description">
+                    Adjust demand and inventory efficiency to see how order volume responds
+                    under different operational scenarios.
+                  </p>
+
                   <div class="slider-group">
-                    <label>Target Orders to Accomplish</label>
-                    <input type="range" id="demandSlider" class="slider" min="-30" max="30" value="0" />
-                    <span id="demandValue">0%</span>
+                    <div class="slider-row">
+                      <div class="slider-label">
+                        <span>Demand Level</span>
+                        <span id="demandValue">0%</span>
+                      </div>
+                      <input
+                        type="range"
+                        id="demandSlider"
+                        min="-20"
+                        max="20"
+                        value="0"
+                        step="1"
+                      />
+                      <small class="slider-caption">
+                        Higher values simulate stronger market demand and campaign success.
+                      </small>
+                    </div>
+
+                    <div class="slider-row">
+                      <div class="slider-label">
+                        <span>Inventory Availability</span>
+                        <span id="inventoryValue">0%</span>
+                      </div>
+                      <input
+                        type="range"
+                        id="inventorySlider"
+                        min="-20"
+                        max="20"
+                        value="0"
+                        step="1"
+                      />
+                      <small class="slider-caption">
+                        Reflects fulfillment capacity and stock efficiency versus the baseline.
+                      </small>
+                    </div>
                   </div>
-                  <div class="slider-group">
-                    <label>Product Stock Level (%)</label>
-                    <input type="range" id="inventorySlider" class="slider" min="-20" max="20" value="0" />
-                    <span id="inventoryValue">0%</span>
+
+                  <div class="impact-summary">
+                    <div class="impact-title">Projected Orders Impact</div>
+                    <div class="impact-figure" id="ordersImpact">0</div>
+                    <div class="impact-subtitle" id="ordersImpactPct">
+                      0.0% vs baseline forecast
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div class="breakdown-row">
-              <div class="card breakdown-card">
-                <div class="breakdown-label">Retail Forecasted Amount</div>
-                <div class="breakdown-value" id="ordersRetail">8,200</div>
+            <!-- Platform breakdown -->
+            <div class="card breakdown-card">
+              <div class="card-header">
+                <h3>Channel Contribution Breakdown</h3>
+                <span class="card-subtitle">
+                  Distribution of projected order volume across key platforms.
+                </span>
               </div>
-              <div class="card breakdown-card">
-                <div class="breakdown-label">Shopee Forecasted Amount</div>
-                <div class="breakdown-value" id="ordersShopee">7,500</div>
-              </div>
-              <div class="card breakdown-card">
-                <div class="breakdown-label">Tiktok Forecasted Amount</div>
-                <div class="breakdown-value" id="ordersTiktok">5,250</div>
+              <div class="breakdown-grid">
+                <div class="breakdown-item">
+                  <span class="breakdown-label">Retail Stores</span>
+                  <span class="breakdown-value" id="ordersRetail">0</span>
+                </div>
+                <div class="breakdown-item">
+                  <span class="breakdown-label">Shopee</span>
+                  <span class="breakdown-value" id="ordersShopee">0</span>
+                </div>
+                <div class="breakdown-item">
+                  <span class="breakdown-label">TikTok Shop</span>
+                  <span class="breakdown-value" id="ordersTiktok">0</span>
+                </div>
               </div>
             </div>
           </section>
-        </div>
+        </section>
       </div>
     </main>
   </div>
 
-  <!-- ✅ Script Order (UNCHANGED) -->
+  <!-- ✅ Chart.js for graphs -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- ✅ Auth + page logic -->
   <script src="../js/login-auth/firebase-auth.js"></script>
   <script src="../js/login-auth/dashboard-auth.js"></script>
   <script src="../js/UI/analytics.js"></script>
