@@ -146,19 +146,30 @@ body {
     margin-bottom: 25px;
 }
 
+/* LEFT-ALIGN ALL KPI CARD TEXT — FIX */
 .kpi-card {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;   /* ⬅ LEFT ALIGN */
+    text-align: left;          /* ⬅ LEFT ALIGN TEXT */
+    padding: 20px 25px;        /* adds clean spacing like the model validation */
 }
 
+/* Label styling */
 .kpi-label {
-    font-size: 0.85rem;
-    color: #aaa;
+    font-size: 0.9rem;
+    color: #b5b5b5;
+    margin-bottom: 6px;
 }
 
+/* Value styling */
 .kpi-value {
-    margin-top: 10px;
-    font-size: 1.7rem;
+    font-size: 2rem;
     font-weight: 700;
+    line-height: 1.2;
+    margin-top: 0;
+    white-space: nowrap;
 }
 
 .kpi-value.positive {
@@ -173,25 +184,60 @@ body {
 
 .analytics-main-grid {
     display: grid;
-    grid-template-columns: 1.3fr 0.9fr;
+    grid-template-columns: 1.6fr 0.8fr;
     gap: 20px;
     width: 100%;
     margin-bottom: 25px;
 }
 
+/* Expand and center the chart */
 .chart-card {
-    padding-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .chart-wrapper {
     width: 100%;
-    height: 320px;
+    height: 500px;     /* bigger chart */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0;
 }
 
+
 .chart-wrapper canvas {
-    width: 100%;
-    height: 100%;
+    width: 95% !important;    /* more centered look */
+    height: 100% !important;  /* full height */
 }
+
+/* LEFT ALIGN TEXT INSIDE CHART CARD */
+.chart-card h3,
+.chart-card p,
+.chart-card .chart-legend {
+    text-align: left !important;
+    width: 100%;
+    margin-left: 20px;      /* optional: visually matches padding of KPI cards */
+}
+
+/* Chart legend container fix */
+.chart-legend {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* Keep the chart centered below the text */
+.chart-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
 
 /* ==== SIDE STACK (Validation + Sliders) ==== */
 

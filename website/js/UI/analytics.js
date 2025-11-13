@@ -1,12 +1,15 @@
 /* ============================================================
-   ANALYTICS.JS  (CSV-DRIVEN VERSION)
-   - Loads forecast_retail.csv, forecast_shopee.csv, forecast_tiktok.csv
-   - Computes current vs next quarter totals
-   - Fills all KPI cards, chart, breakdown and what-if analysis
-   - Still works with Firebase auth + tabs
+   ANALYTICS.JS  (DENORMALIZED + FORECAST CSV VERSION)
+
+   - Uses denormalized_table_2025.csv for "current" (history) from
+     Jan 1, 2025 up to the last recorded date per platform.
+   - Uses forecast_retail.csv, forecast_shopee.csv, forecast_tiktok.csv
+     for the NEXT 3 MONTHS AFTER the last recorded month of each platform.
+   - Fills all KPI cards, chart, breakdown and what-if analysis.
+   - Still works with Firebase auth + tabs.
    ============================================================ */
 
-console.log("📊 analytics.js (CSV version) loaded");
+console.log("📊 analytics.js (denormalized + forecast CSV version) loaded");
 
 // ---------- GLOBAL STATE ----------
 let baselineSalesCurrent = 0;
@@ -75,18 +78,49 @@ function setText(id, value) {
   if (el) el.textContent = value;
 }
 
+function setHTML(id, value) {
+  document.getElementById(id).innerHTML = value;
+}
+
+
 function sumField(rows, field) {
   return rows.reduce((acc, r) => acc + (Number(r[field]) || 0), 0);
 }
 
+// robust date parser that supports:
+// - "M/D/YYYY"
+// - "YYYY-MM-DD" or "YYYY-MM"
 function parseDate(ds) {
-  // ds like "10/1/2025"
-  const [m, d, y] = ds.split("/").map(Number);
-  return new Date(y, m - 1, d);
+  if (!ds) return new Date(NaN);
+
+  if (typeof ds === "string") {
+    const s = ds.trim();
+    if (s.includes("-")) {
+      // assume YYYY-MM or YYYY-MM-DD
+      const parts = s.split("-");
+      const y = Number(parts[0]);
+      const m = Number(parts[1]);
+      const d = parts[2] ? Number(parts[2]) : 1;
+      return new Date(y, m - 1, d);
+    } else if (s.includes("/")) {
+      // assume M/D/YYYY
+      const [m, d, y] = s.split("/").map(Number);
+      return new Date(y, m - 1, d || 1);
+    }
+  }
+
+  // fallback
+  return new Date(ds);
 }
 
-// ---------- CSV LOADING ----------
-function parseCsv(path, platformName) {
+function formatMonthKey(dateObj) {
+  const y = dateObj.getFullYear();
+  const m = dateObj.getMonth() + 1;
+  return `${y}-${String(m).padStart(2, "0")}-01`;
+}
+
+// ---------- CSV LOADING (FORECAST) ----------
+function parseForecastCsv(path, platformName) {
   return new Promise((resolve, reject) => {
     Papa.parse(path, {
       download: true,
@@ -115,69 +149,165 @@ function parseCsv(path, platformName) {
   });
 }
 
+// ---------- CSV LOADING (DENORMALIZED HISTORY) ----------
+function normalizePlatformName(raw) {
+  const p = (raw || "").toLowerCase();
+  if (p.includes("shopee")) return "shopee";
+  if (p.includes("tiktok")) return "tiktok";
+  // everything else treated as retail
+  return "retail";
+}
+
+/**
+ * denormalized_table_2025.csv → monthly sales history rows
+ * Only "Completed" orders from 2025 onward are used.
+ * Aggregates by (platform, month).
+ */
+function parseDenormalizedHistory(path) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(path, {
+      download: true,
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const raw = results.data || [];
+
+        const byKey = {};
+        raw.forEach((row) => {
+          const status = (row.order_status || "").trim();
+          if (status !== "Completed") return;
+
+          // order_date like "5/8/2025"
+          const orderDateStr = row.order_date || "";
+          const dt = parseDate(orderDateStr);
+          if (!dt || isNaN(dt.getTime())) return;
+          if (dt.getFullYear() < 2025) return; // only 2025 onward
+
+          const platform = normalizePlatformName(row.platform_name);
+          const monthKey = formatMonthKey(dt);
+
+          // prefer order_amount; fallback to product_subtotal_after
+          let amount =
+            Number(row.order_amount) ||
+            Number(row.product_subtotal_after) ||
+            0;
+
+          const key = `${platform}|${monthKey}`;
+          if (!byKey[key]) {
+            byKey[key] = {
+              platform,
+              ds: monthKey,
+              y: 0,
+            };
+          }
+          byKey[key].y += amount;
+        });
+
+        const historyRows = Object.values(byKey);
+        resolve(historyRows);
+      },
+      error: (err) => reject(err),
+    });
+  });
+}
+
+// ---------- LOAD ALL DATA ----------
 async function loadCsvForecasts() {
   try {
-    const [retailRows, shopeeRows, tiktokRows] = await Promise.all([
-      parseCsv("../data/forecast_retail.csv", "retail"),
-      parseCsv("../data/forecast_shopee.csv", "shopee"),
-      parseCsv("../data/forecast_tiktok.csv", "tiktok"),
-    ]);
+    // 1) History from denormalized table
+    const historyRows = await parseDenormalizedHistory(
+      "../data/denormalized_table_2025.csv"
+    );
 
-    const allRows = [...retailRows, ...shopeeRows, ...tiktokRows];
+    // 2) Forecast CSVs (next 3 months per platform)
+    const [retailForecast, shopeeForecast, tiktokForecast] =
+      await Promise.all([
+        parseForecastCsv("../data/forecast_retail.csv", "retail"),
+        parseForecastCsv("../data/forecast_shopee.csv", "shopee"),
+        parseForecastCsv("../data/forecast_tiktok.csv", "tiktok"),
+      ]);
 
-    if (!allRows.length) {
-      console.warn("No rows found in CSVs.");
-      return;
+    // 3) Determine last history month per platform
+    const lastHistoryPerPlatform = {};
+    historyRows.forEach((row) => {
+      const d = parseDate(row.ds);
+      const plat = row.platform;
+      if (!lastHistoryPerPlatform[plat]) {
+        lastHistoryPerPlatform[plat] = d;
+      } else if (d > lastHistoryPerPlatform[plat]) {
+        lastHistoryPerPlatform[plat] = d;
+      }
+    });
+
+    // 4) Filter forecast rows to ONLY months AFTER last history month
+    function filterForecastForPlatform(forecastRows, platformKey) {
+      const lastHistDate = lastHistoryPerPlatform[platformKey];
+      if (!lastHistDate) return forecastRows; // fallback
+      return forecastRows.filter((r) => parseDate(r.ds) > lastHistDate);
     }
 
+    const filteredRetailForecast = filterForecastForPlatform(
+      retailForecast,
+      "retail"
+    );
+    const filteredShopeeForecast = filterForecastForPlatform(
+      shopeeForecast,
+      "shopee"
+    );
+    const filteredTiktokForecast = filterForecastForPlatform(
+      tiktokForecast,
+      "tiktok"
+    );
+
+    // 5) Split history by platform
+    const historyRetail = historyRows.filter(
+      (r) => r.platform === "retail"
+    );
+    const historyShopee = historyRows.filter(
+      (r) => r.platform === "shopee"
+    );
+    const historyTiktok = historyRows.filter(
+      (r) => r.platform === "tiktok"
+    );
+
+    // 6) Build metrics object from history + forecast
     const metrics = computeMetricsFromRows({
-      retailRows,
-      shopeeRows,
-      tiktokRows,
-      allRows,
+      historyByPlatform: {
+        retail: historyRetail,
+        shopee: historyShopee,
+        tiktok: historyTiktok,
+      },
+      forecastByPlatform: {
+        retail: filteredRetailForecast,
+        shopee: filteredShopeeForecast,
+        tiktok: filteredTiktokForecast,
+      },
     });
 
     populateSalesTab(metrics);
     populateOrdersTab(metrics);
     initSliders();
   } catch (err) {
-    console.error("❌ Error loading CSV forecasts:", err);
-    alert("Failed to load forecast CSV data. Check console for details.");
+    console.error("❌ Error loading data:", err);
+    alert("Failed to load analytics CSV data. Check console for details.");
   }
 }
 
 // ---------- METRIC COMPUTATION ----------
-function computePlatformMetrics(rows) {
-  if (!rows.length) {
-    return {
-      currentSales: 0,
-      nextSales: 0,
-      mae: 0,
-      rmse: 0,
-      mape: 0,
-    };
-  }
-
-  // sort by date
-  const sorted = [...rows].sort(
-    (a, b) => parseDate(a.ds) - parseDate(b.ds)
-  );
-
-  // Last 3 months = "forecast", previous months = "history"
-  const forecastCount = Math.min(3, sorted.length);
-  const forecastRows = sorted.slice(-forecastCount);
-  const historyRows = sorted.slice(0, sorted.length - forecastCount);
-  const historyTail = historyRows.slice(-3); // last up to 3 history months
-
-  const currentSales = sumField(historyTail, "y");
+function computePlatformMetrics(historyRows, forecastRows) {
+  const currentSales = sumField(historyRows, "y");
   const nextSales = sumField(forecastRows, "y");
 
+  const combined = [...historyRows, ...forecastRows];
+  const len = combined.length || 1;
+
   const mae =
-    rows.reduce((acc, r) => acc + (r.mae || 0), 0) / rows.length;
+    combined.reduce((acc, r) => acc + (r.mae || 0), 0) / len;
   const rmse =
-    rows.reduce((acc, r) => acc + (r.rmse || 0), 0) / rows.length;
+    combined.reduce((acc, r) => acc + (r.rmse || 0), 0) / len;
   const mape =
-    rows.reduce((acc, r) => acc + (r.mape || 0), 0) / rows.length;
+    combined.reduce((acc, r) => acc + (r.mape || 0), 0) / len;
 
   return {
     currentSales,
@@ -188,51 +318,55 @@ function computePlatformMetrics(rows) {
   };
 }
 
-function computeChartSeries(allRows) {
-  const sorted = [...allRows].sort(
+function computeChartSeries(historyRowsAll, forecastRowsAll) {
+  const allRows = [...historyRowsAll, ...forecastRowsAll].sort(
     (a, b) => parseDate(a.ds) - parseDate(b.ds)
   );
-  const uniqueDates = [
-    ...new Set(sorted.map((r) => r.ds)),
-  ];
 
-  // Last 3 distinct dates = "forecast months"
-  const forecastDates = new Set(uniqueDates.slice(-3));
+  const labels = [...new Set(allRows.map((r) => r.ds))];
 
   const historyTotals = {};
-  const forecastTotals = {};
-
-  sorted.forEach((row) => {
-    const key = row.ds;
-    const bucket = forecastDates.has(key)
-      ? forecastTotals
-      : historyTotals;
-    bucket[key] = (bucket[key] || 0) + row.y;
+  historyRowsAll.forEach((row) => {
+    historyTotals[row.ds] =
+      (historyTotals[row.ds] || 0) + (row.y || 0);
   });
 
-  const currentSeries = uniqueDates.map(
-    (d) => (historyTotals[d] !== undefined ? historyTotals[d] : null)
+  const forecastTotals = {};
+  forecastRowsAll.forEach((row) => {
+    forecastTotals[row.ds] =
+      (forecastTotals[row.ds] || 0) + (row.y || 0);
+  });
+
+  const currentSeries = labels.map((d) =>
+    historyTotals[d] !== undefined ? historyTotals[d] : null
   );
-  const forecastSeries = uniqueDates.map(
-    (d) => (forecastTotals[d] !== undefined ? forecastTotals[d] : null)
+  const forecastSeries = labels.map((d) =>
+    forecastTotals[d] !== undefined ? forecastTotals[d] : null
   );
 
   return {
-    labels: uniqueDates,
+    labels,
     currentSeries,
     forecastSeries,
   };
 }
 
 function computeMetricsFromRows({
-  retailRows,
-  shopeeRows,
-  tiktokRows,
-  allRows,
+  historyByPlatform,
+  forecastByPlatform,
 }) {
-  const retail = computePlatformMetrics(retailRows);
-  const shopee = computePlatformMetrics(shopeeRows);
-  const tiktok = computePlatformMetrics(tiktokRows);
+  const retail = computePlatformMetrics(
+    historyByPlatform.retail,
+    forecastByPlatform.retail
+  );
+  const shopee = computePlatformMetrics(
+    historyByPlatform.shopee,
+    forecastByPlatform.shopee
+  );
+  const tiktok = computePlatformMetrics(
+    historyByPlatform.tiktok,
+    forecastByPlatform.tiktok
+  );
 
   const totalCurrent =
     retail.currentSales + shopee.currentSales + tiktok.currentSales;
@@ -258,18 +392,30 @@ function computeMetricsFromRows({
       ? ((totalNext - totalCurrent) / totalCurrent) * 100
       : 0;
 
-  // Overall validation: simple average across all rows
+  // Overall validation based on forecast rows only
+  const allForecastRows = [
+    ...forecastByPlatform.retail,
+    ...forecastByPlatform.shopee,
+    ...forecastByPlatform.tiktok,
+  ];
+  const denom = allForecastRows.length || 1;
   const allMae =
-    allRows.reduce((acc, r) => acc + (r.mae || 0), 0) /
-    allRows.length;
+    allForecastRows.reduce((acc, r) => acc + (r.mae || 0), 0) /
+    denom;
   const allRmse =
-    allRows.reduce((acc, r) => acc + (r.rmse || 0), 0) /
-    allRows.length;
+    allForecastRows.reduce((acc, r) => acc + (r.rmse || 0), 0) /
+    denom;
   const allMape =
-    allRows.reduce((acc, r) => acc + (r.mape || 0), 0) /
-    allRows.length;
+    allForecastRows.reduce((acc, r) => acc + (r.mape || 0), 0) /
+    denom;
 
-  const chartData = computeChartSeries(allRows);
+  const historyAll = [
+    ...historyByPlatform.retail,
+    ...historyByPlatform.shopee,
+    ...historyByPlatform.tiktok,
+  ];
+
+  const chartData = computeChartSeries(historyAll, allForecastRows);
 
   return {
     totalCurrent,
@@ -312,10 +458,14 @@ function populateSalesTab(m) {
   // KPIs
   setText("salesCurrent", formatPeso(m.totalCurrent));
   setText("salesNext", formatPeso(m.totalNext));
-  setText(
+  // SALES GROWTH
+    const salesArrow = m.growthRate > 0 ? "▲" : m.growthRate < 0 ? "▼" : "";
+    const salesColor = m.growthRate > 0 ? "green" : m.growthRate < 0 ? "red" : "#b5b5b5";
+
+    setHTML(
     "salesGrowth",
-    `${m.growthRate >= 0 ? "+" : ""}${growth}%`
-  );
+    `<span style="color:${salesColor}; font-weight:700;">${salesArrow} ${Math.abs(m.growthRate).toFixed(1)}%</span>`
+    );
 
   // Model validation
   setText("salesMAE", m.mae.toFixed(2));
@@ -406,10 +556,15 @@ function populateOrdersTab(m) {
 
   setText("ordersCurrent", ordersCurrent.toLocaleString());
   setText("ordersNext", ordersNext.toLocaleString());
-  setText(
+    // ORDERS GROWTH
+    const ordersArrow = growth > 0 ? "▲" : growth < 0 ? "▼" : "";
+    const ordersColor = growth > 0 ? "green" : growth < 0 ? "red" : "#b5b5b5";
+
+    setHTML(
     "ordersGrowth",
-    `${growth >= 0 ? "+" : ""}${growth.toFixed(1)}%`
-  );
+    `<span style="color:${ordersColor}; font-weight:700;">${ordersArrow} ${Math.abs(growth).toFixed(1)}%</span>`
+    );
+
 
   setText("ordersMAE", m.mae.toFixed(2));
   setText("ordersRMSE", m.rmse.toFixed(2));
