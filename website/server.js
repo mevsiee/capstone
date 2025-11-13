@@ -34,7 +34,6 @@ pool.connect()
 app.get("/api/inventory", async (req, res) => {
   try {
     const query = `
-      -- 🟧 E-COMMERCE PRODUCTS
       SELECT 
         'E-Commerce' AS platform,
         p.product_name AS product_name,
@@ -42,26 +41,12 @@ app.get("/api/inventory", async (req, res) => {
         pv.variation AS color,
         COALESCE(pv.original_price, 0) AS price,
         COALESCE(p.cost, 0) AS cost,
-        COALESCE(pv.stock, 0) AS stock_count
+        COALESCE(pv.stock, 0) AS stock_count       -- <--- THIS IS CORRECT
       FROM product_dimension p
       JOIN product_variation_dimension pv 
-        ON p.product_id = pv.product_id
-
-      UNION ALL
-
-      -- 🟩 RETAIL DATA (aggregated)
-      SELECT 
-        'Retail' AS platform,
-        rr.item AS product_name,
-        rr.size AS size,
-        'N/A' AS color,
-        ROUND(AVG(rr.price), 2) AS price,
-        ROUND(AVG(rr.price), 2) AS cost,
-        SUM(rr.quantity) AS stock_count
-      FROM retail_raw rr
-      GROUP BY rr.item, rr.size
-
-      ORDER BY product_name ASC;
+          ON p.product_id = pv.product_id
+      WHERE p.product_status = 'A'
+      ORDER BY p.product_name ASC;
     `;
 
     const result = await pool.query(query);
