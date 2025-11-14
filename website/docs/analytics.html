@@ -67,9 +67,9 @@
           <div class="analytics-header-wrapper">
             <div class="analytics-header">
               <div>
-                <h1 class="title">Forecasting and Analytics</h1>
+                <h1 class="title">Analytics and Forecasting</h1>
                 <p class="subtitle">
-                  AI-powered sales and order forecasts with model validation and what-if analysis.
+                  AI-powered sales and order forecasts with model validation, budget allocation, and what-if analysis.
                 </p>
               </div>
               <div class="export-container">
@@ -85,8 +85,8 @@
 
           <!-- Tabs -->
           <div class="tab-container">
-            <button class="tab-button active" data-tab="sales">Sales Forecast</button>
-            <button class="tab-button" data-tab="orders">Order Forecast</button>
+            <button class="tab-button active" data-tab="sales">Total Sales</button>
+            <button class="tab-button" data-tab="orders">Total Orders</button>
           </div>
 
           <!-- ========================= -->
@@ -101,17 +101,17 @@
 
             <!-- KPI row -->
             <div class="kpi-row">
-              <div class="card kpi-card">
-                <span class="kpi-label">Current Quarter<br />Total Sales</span>
+              <div class="card kpi-card kpi-card-green">
+                <span class="kpi-label">Total Sales for Current Quarter</span>
                 <span class="kpi-value" id="salesCurrent">₱ 0</span>
               </div>
-              <div class="card kpi-card">
-                <span class="kpi-label">Next Quarter<br />Projected Sales</span>
+              <div class="card kpi-card kpi-card-blue">
+                <span class="kpi-label">Forecasted Total Sales for Next Quarter</span>
                 <span class="kpi-value" id="salesNext">₱ 0</span>
               </div>
-              <div class="card kpi-card">
-                <span class="kpi-label">Rate Percentage<br />(Growth/Loss)</span>
-                <span class="kpi-value positive" id="salesGrowth">+0.0%</span>
+              <div class="card kpi-card kpi-card-gold">
+                <span class="kpi-label">Projected Change in Sales (%)</span>
+                <span class="kpi-value" id="salesGrowth">0.0%</span>
               </div>
             </div>
 
@@ -120,113 +120,118 @@
               <!-- Chart LEFT -->
               <div class="card chart-card">
                 <div class="card-header">
-                  <h3>Quarterly Sales Forecast</h3>
-                  <span class="card-subtitle">Current vs projected across key channels</span>
+                  <h3>Projected Sales for Upcoming Quarter</h3>
+                  <span class="card-subtitle">
+                    A comprehensive outlook on revenue trajectories across e-commerce and retail channels.
+                  </span>
                 </div>
                 <div class="chart-wrapper">
                   <canvas id="salesChart"></canvas>
                 </div>
               </div>
 
-              <!-- Validation + What-If RIGHT -->
+              <!-- Validation + Optimal Budget RIGHT -->
               <div class="right-stack">
                 <!-- Model Validation -->
                 <div class="card side-card">
                   <div class="side-title">Model Validation</div>
+                  <p class="side-description">
+                    Accuracy of expected performance for the next quarter based on historical data and forecast model.
+                  </p>
                   <ul class="validation-list">
                     <li>
-                      MAE (Mean Absolute Error) value
+                      <span>Mean Absolute Error</span>
                       <span id="salesMAE">--</span>
                     </li>
                     <li>
-                      RMSE (Root Mean Squared Error) value
+                      <span>Root Mean Squared Error</span>
                       <span id="salesRMSE">--</span>
                     </li>
                     <li>
-                      MAPE (Mean Absolute Percentage Error) value
+                      <span>Mean Absolute Percentage Error</span>
                       <span id="salesMAPE">--</span>
                     </li>
                   </ul>
                 </div>
 
-                <!-- What-If Analysis -->
-                <div class="card side-card">
-                  <div class="side-title">Price &amp; Marketing What-If Analysis</div>
+                <!-- Optimal Budget Allocation -->
+                <div class="card side-card allocation-card">
+                  <div class="side-title">Optimal Budget Allocation</div>
                   <p class="side-description">
-                    Adjust the sliders to simulate the effect of discounting and increased
-                    advertising spend on projected sales.
+                    Automatically recommends how to distribute next-quarter marketing budget across channels
+                    based on projected sales and profit margins.
                   </p>
 
-                  <div class="slider-group">
-                    <div class="slider-row">
-                      <div class="slider-label">
-                        <span>Price Adjustment</span>
-                        <span id="priceValue">0%</span>
-                      </div>
-                      <input
-                        type="range"
-                        id="priceSlider"
-                        min="-20"
-                        max="20"
-                        value="0"
-                        step="1"
-                      />
-                      <small class="slider-caption">
-                        Negative values simulate discounts; positive values simulate price increases.
-                      </small>
-                    </div>
+                  <ul class="allocation-list">
+                    <li>
+                      <span class="allocation-label">Retail Profit Margin</span>
+                      <span class="allocation-value" id="retailMargin">30%</span>
+                      <span class="allocation-budget" id="retailBudget">₱ 0</span>
+                    </li>
+                    <li>
+                      <span class="allocation-label">Shopee Profit Margin</span>
+                      <span class="allocation-value" id="shopeeMargin">22%</span>
+                      <span class="allocation-budget" id="shopeeBudget">₱ 0</span>
+                    </li>
+                    <li>
+                      <span class="allocation-label">TikTok Profit Margin</span>
+                      <span class="allocation-value" id="tiktokMargin">25%</span>
+                      <span class="allocation-budget" id="tiktokBudget">₱ 0</span>
+                    </li>
+                  </ul>
 
-                    <div class="slider-row">
-                      <div class="slider-label">
-                        <span>Advertising Spend</span>
-                        <span id="adValue">0%</span>
-                      </div>
-                      <input
-                        type="range"
-                        id="adSlider"
-                        min="0"
-                        max="30"
-                        value="0"
-                        step="1"
-                      />
-                      <small class="slider-caption">
-                        Simulates incremental digital marketing investments versus the baseline.
-                      </small>
-                    </div>
+                  <div class="allocation-total">
+                    <span>Total Recommended Budget</span>
+                    <span id="totalBudget">₱ 0</span>
                   </div>
 
-                  <div class="impact-summary">
-                    <div class="impact-title">Projected Revenue Impact</div>
-                    <div class="impact-figure" id="salesImpact">₱ 0</div>
-                    <div class="impact-subtitle" id="salesImpactPct">
-                      0.0% vs baseline forecast
-                    </div>
-                  </div>
+                  <button class="export-button allocation-recalc" id="recalcAllocationBtn">
+                    <i class="fas fa-rotate"></i> Recalculate Allocation
+                  </button>
                 </div>
               </div>
             </div>
 
-            <!-- Platform breakdown -->
+            <!-- Platform projection + allocation + profit text -->
             <div class="card breakdown-card">
               <div class="card-header">
-                <h3>Channel Contribution Breakdown</h3>
+                <h3>Channel Sales Projection &amp; Allocation</h3>
                 <span class="card-subtitle">
-                  Distribution of projected sales across major platforms.
+                  Base forecast versus allocation-adjusted outlook per platform.
                 </span>
               </div>
-              <div class="breakdown-grid">
-                <div class="breakdown-item">
-                  <span class="breakdown-label">Retail Stores</span>
-                  <span class="breakdown-value" id="salesRetail">₱ 0</span>
+
+              <div class="platform-allocation-grid">
+                <div class="platform-card">
+                  <div class="platform-title">Shopee Sales Projection</div>
+                  <div class="platform-metric-label">Base Forecast</div>
+                  <div class="platform-metric-value" id="salesShopeeBase">₱ 0</div>
+                  <div class="platform-metric-label">After Allocation</div>
+                  <div class="platform-metric-value accent" id="salesShopeeAfter">₱ 0</div>
                 </div>
-                <div class="breakdown-item">
-                  <span class="breakdown-label">Shopee</span>
-                  <span class="breakdown-value" id="salesShopee">₱ 0</span>
+
+                <div class="platform-card">
+                  <div class="platform-title">TikTok Sales Projection</div>
+                  <div class="platform-metric-label">Base Forecast</div>
+                  <div class="platform-metric-value" id="salesTiktokBase">₱ 0</div>
+                  <div class="platform-metric-label">After Allocation</div>
+                  <div class="platform-metric-value accent" id="salesTiktokAfter">₱ 0</div>
                 </div>
-                <div class="breakdown-item">
-                  <span class="breakdown-label">TikTok Shop</span>
-                  <span class="breakdown-value" id="salesTiktok">₱ 0</span>
+
+                <div class="platform-card">
+                  <div class="platform-title">Retail Sales Projection</div>
+                  <div class="platform-metric-label">Base Forecast</div>
+                  <div class="platform-metric-value" id="salesRetailBase">₱ 0</div>
+                  <div class="platform-metric-label">After Allocation</div>
+                  <div class="platform-metric-value accent" id="salesRetailAfter">₱ 0</div>
                 </div>
+              </div>
+
+              <div class="allocation-result">
+                <div class="allocation-result-title">Profit Allocation Prescription Result</div>
+                <p id="allocationResultText">
+                  Allocation recommendation will appear here once the forecast loads.
+                </p>
               </div>
             </div>
           </section>
@@ -243,17 +248,17 @@
 
             <!-- KPI row -->
             <div class="kpi-row">
-              <div class="card kpi-card">
-                <span class="kpi-label">Current Quarter<br />Total Orders</span>
+              <div class="card kpi-card kpi-card-green">
+                <span class="kpi-label">Total Orders for Current Quarter</span>
                 <span class="kpi-value" id="ordersCurrent">0</span>
               </div>
-              <div class="card kpi-card">
-                <span class="kpi-label">Next Quarter<br />Projected Orders</span>
+              <div class="card kpi-card kpi-card-blue">
+                <span class="kpi-label">Forecasted Total Orders for Next Quarter</span>
                 <span class="kpi-value" id="ordersNext">0</span>
               </div>
-              <div class="card kpi-card">
-                <span class="kpi-label">Rate Percentage<br />(Growth/Loss)</span>
-                <span class="kpi-value positive" id="ordersGrowth">+0.0%</span>
+              <div class="card kpi-card kpi-card-gold">
+                <span class="kpi-label">Projected Change in Orders (%)</span>
+                <span class="kpi-value" id="ordersGrowth">0.0%</span>
               </div>
             </div>
 
@@ -263,7 +268,7 @@
               <div class="card chart-card">
                 <div class="card-header">
                   <h3>Quarterly Orders Forecast</h3>
-                  <span class="card-subtitle">Current vs projected order volume</span>
+                  <span class="card-subtitle">Current vs projected order volume.</span>
                 </div>
                 <div class="chart-wrapper">
                   <canvas id="ordersChart"></canvas>
@@ -275,28 +280,30 @@
                 <!-- Model Validation -->
                 <div class="card side-card">
                   <div class="side-title">Model Validation</div>
+                  <p class="side-description">
+                    Accuracy indicators for order-volume forecasts, derived from the same model as sales.
+                  </p>
                   <ul class="validation-list">
                     <li>
-                      MAE (Mean Absolute Error) value
+                      <span>Mean Absolute Error</span>
                       <span id="ordersMAE">--</span>
                     </li>
                     <li>
-                      RMSE (Root Mean Squared Error) value
+                      <span>Root Mean Squared Error</span>
                       <span id="ordersRMSE">--</span>
                     </li>
                     <li>
-                      MAPE (Mean Absolute Percentage Error) value
+                      <span>Mean Absolute Percentage Error</span>
                       <span id="ordersMAPE">--</span>
                     </li>
                   </ul>
                 </div>
 
-                <!-- What-If Analysis -->
+                <!-- What-If Analysis (kept for orders) -->
                 <div class="card side-card">
                   <div class="side-title">Demand &amp; Inventory What-If Analysis</div>
                   <p class="side-description">
-                    Adjust demand and inventory efficiency to see how order volume responds
-                    under different operational scenarios.
+                    Adjust demand and inventory efficiency to see how order volume responds under different scenarios.
                   </p>
 
                   <div class="slider-group">
@@ -348,7 +355,7 @@
               </div>
             </div>
 
-            <!-- Platform breakdown -->
+            <!-- Platform breakdown for orders -->
             <div class="card breakdown-card">
               <div class="card-header">
                 <h3>Channel Contribution Breakdown</h3>

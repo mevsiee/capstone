@@ -1,12 +1,5 @@
 /* ============================================================
    ANALYTICS.JS  (DENORMALIZED + FORECAST CSV VERSION)
-
-   - Uses denormalized_table_2025.csv for "current" (history) from
-     Jan 1, 2025 up to the last recorded date per platform.
-   - Uses forecast_retail.csv, forecast_shopee.csv, forecast_tiktok.csv
-     for the NEXT 3 MONTHS AFTER the last recorded month of each platform.
-   - Fills all KPI cards, chart, breakdown and what-if analysis.
-   - Still works with Firebase auth + tabs.
    ============================================================ */
 
 console.log("📊 analytics.js (denormalized + forecast CSV version) loaded");
@@ -25,6 +18,7 @@ let platformNextSales = {
 
 let salesChartInstance = null;
 let ordersChartInstance = null;
+let lastMetrics = null; // store metrics object for allocation recalculation
 
 // simple helper for Peso formatting
 function formatPeso(value) {
@@ -79,9 +73,9 @@ function setText(id, value) {
 }
 
 function setHTML(id, value) {
-  document.getElementById(id).innerHTML = value;
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = value;
 }
-
 
 function sumField(rows, field) {
   return rows.reduce((acc, r) => acc + (Number(r[field]) || 0), 0);
@@ -96,20 +90,17 @@ function parseDate(ds) {
   if (typeof ds === "string") {
     const s = ds.trim();
     if (s.includes("-")) {
-      // assume YYYY-MM or YYYY-MM-DD
       const parts = s.split("-");
       const y = Number(parts[0]);
       const m = Number(parts[1]);
       const d = parts[2] ? Number(parts[2]) : 1;
       return new Date(y, m - 1, d);
     } else if (s.includes("/")) {
-      // assume M/D/YYYY
       const [m, d, y] = s.split("/").map(Number);
       return new Date(y, m - 1, d || 1);
     }
   }
 
-  // fallback
   return new Date(ds);
 }
 
@@ -154,7 +145,6 @@ function normalizePlatformName(raw) {
   const p = (raw || "").toLowerCase();
   if (p.includes("shopee")) return "shopee";
   if (p.includes("tiktok")) return "tiktok";
-  // everything else treated as retail
   return "retail";
 }
 
@@ -178,16 +168,14 @@ function parseDenormalizedHistory(path) {
           const status = (row.order_status || "").trim();
           if (status !== "Completed") return;
 
-          // order_date like "5/8/2025"
           const orderDateStr = row.order_date || "";
           const dt = parseDate(orderDateStr);
           if (!dt || isNaN(dt.getTime())) return;
-          if (dt.getFullYear() < 2025) return; // only 2025 onward
+          if (dt.getFullYear() < 2025) return;
 
           const platform = normalizePlatformName(row.platform_name);
           const monthKey = formatMonthKey(dt);
 
-          // prefer order_amount; fallback to product_subtotal_after
           let amount =
             Number(row.order_amount) ||
             Number(row.product_subtotal_after) ||
@@ -215,12 +203,10 @@ function parseDenormalizedHistory(path) {
 // ---------- LOAD ALL DATA ----------
 async function loadCsvForecasts() {
   try {
-    // 1) History from denormalized table
     const historyRows = await parseDenormalizedHistory(
       "../data/denormalized_table_2025.csv"
     );
 
-    // 2) Forecast CSVs (next 3 months per platform)
     const [retailForecast, shopeeForecast, tiktokForecast] =
       await Promise.all([
         parseForecastCsv("../data/forecast_retail.csv", "retail"),
@@ -228,7 +214,6 @@ async function loadCsvForecasts() {
         parseForecastCsv("../data/forecast_tiktok.csv", "tiktok"),
       ]);
 
-    // 3) Determine last history month per platform
     const lastHistoryPerPlatform = {};
     historyRows.forEach((row) => {
       const d = parseDate(row.ds);
@@ -240,10 +225,9 @@ async function loadCsvForecasts() {
       }
     });
 
-    // 4) Filter forecast rows to ONLY months AFTER last history month
     function filterForecastForPlatform(forecastRows, platformKey) {
       const lastHistDate = lastHistoryPerPlatform[platformKey];
-      if (!lastHistDate) return forecastRows; // fallback
+      if (!lastHistDate) return forecastRows;
       return forecastRows.filter((r) => parseDate(r.ds) > lastHistDate);
     }
 
@@ -260,7 +244,6 @@ async function loadCsvForecasts() {
       "tiktok"
     );
 
-    // 5) Split history by platform
     const historyRetail = historyRows.filter(
       (r) => r.platform === "retail"
     );
@@ -271,7 +254,6 @@ async function loadCsvForecasts() {
       (r) => r.platform === "tiktok"
     );
 
-    // 6) Build metrics object from history + forecast
     const metrics = computeMetricsFromRows({
       historyByPlatform: {
         retail: historyRetail,
@@ -284,6 +266,8 @@ async function loadCsvForecasts() {
         tiktok: filteredTiktokForecast,
       },
     });
+
+    lastMetrics = metrics;
 
     populateSalesTab(metrics);
     populateOrdersTab(metrics);
@@ -376,7 +360,6 @@ function computeMetricsFromRows({
   baselineSalesCurrent = totalCurrent;
   baselineSalesNext = totalNext;
 
-  // Orders: simple placeholder assumption (will replace when we have actual orders)
   const AVERAGE_ORDER_VALUE = 500;
   baselineOrdersCurrent = totalCurrent / AVERAGE_ORDER_VALUE;
   baselineOrdersNext = totalNext / AVERAGE_ORDER_VALUE;
@@ -392,7 +375,6 @@ function computeMetricsFromRows({
       ? ((totalNext - totalCurrent) / totalCurrent) * 100
       : 0;
 
-  // Overall validation based on forecast rows only
   const allForecastRows = [
     ...forecastByPlatform.retail,
     ...forecastByPlatform.shopee,
@@ -431,9 +413,112 @@ function computeMetricsFromRows({
   };
 }
 
+// ---------- BUDGET ALLOCATION & PROFIT TEXT ----------
+function updateBudgetAllocation(m) {
+  if (!m) return;
+
+  // assumed profit margins (you can tweak these)
+  const profitMargins = {
+    retail: 0.30,
+    shopee: 0.22,
+    tiktok: 0.25,
+  };
+
+  const totalNext = baselineSalesNext || 0;
+  const budgetRatio = 0.2; // 20% of projected sales as total marketing budget
+  const totalBudget = totalNext * budgetRatio;
+
+  const platforms = ["retail", "shopee", "tiktok"];
+  const scores = {};
+  let totalScore = 0;
+
+  platforms.forEach((p) => {
+    const sales = platformNextSales[p] || 0;
+    const margin = profitMargins[p] || 0;
+    const score = Math.max(sales, 0) * margin;
+    scores[p] = score;
+    totalScore += score;
+  });
+
+  const budgets = {};
+  const allocPercents = {};
+
+  platforms.forEach((p) => {
+    const bud =
+      totalScore > 0 ? (totalBudget * scores[p]) / totalScore : 0;
+    budgets[p] = bud;
+    allocPercents[p] =
+      totalBudget > 0 ? (bud / totalBudget) * 100 : 0;
+  });
+
+  // Update margin labels (static for now, but separated in case you want to change later)
+  setText("retailMargin", Math.round(profitMargins.retail * 100) + "%");
+  setText("shopeeMargin", Math.round(profitMargins.shopee * 100) + "%");
+  setText("tiktokMargin", Math.round(profitMargins.tiktok * 100) + "%");
+
+  // Update budget amounts
+  setText("retailBudget", formatPeso(budgets.retail || 0));
+  setText("shopeeBudget", formatPeso(budgets.shopee || 0));
+  setText("tiktokBudget", formatPeso(budgets.tiktok || 0));
+  setText("totalBudget", formatPeso(totalBudget || 0));
+
+  // Base and after-allocation sales for each platform
+  const baseSales = {
+    shopee: platformNextSales.shopee || 0,
+    tiktok: platformNextSales.tiktok || 0,
+    retail: platformNextSales.retail || 0,
+  };
+
+  setText("salesShopeeBase", formatPeso(baseSales.shopee));
+  setText("salesTiktokBase", formatPeso(baseSales.tiktok));
+  setText("salesRetailBase", formatPeso(baseSales.retail));
+
+  const equalShare = 100 / 3;
+
+  function adjustedSales(platformKey) {
+    const alloc = allocPercents[platformKey] || 0;
+    const diff = (alloc - equalShare) / 100; // positive if over-weighted
+    const impactFactor = 1 + diff * 0.8; // softened impact factor
+    return baseSales[platformKey] * impactFactor;
+  }
+
+  setText(
+    "salesShopeeAfter",
+    formatPeso(adjustedSales("shopee"))
+  );
+  setText(
+    "salesTiktokAfter",
+    formatPeso(adjustedSales("tiktok"))
+  );
+  setText(
+    "salesRetailAfter",
+    formatPeso(adjustedSales("retail"))
+  );
+
+  // Profit allocation narrative
+  const leadingPlatform = Object.entries(budgets).sort(
+    (a, b) => b[1] - a[1]
+  )[0][0];
+
+  const platformNames = {
+    retail: "Retail Stores",
+    shopee: "Shopee",
+    tiktok: "TikTok Shop",
+  };
+  const leadLabel = platformNames[leadingPlatform] || "TikTok Shop";
+
+  const resultText =
+    `Based on forecasted sales, assumed profit margins, and a ${Math.round(
+      budgetRatio * 100
+    )}% marketing budget, ${leadLabel} receives ` +
+    `the largest share of recommended spend. Prioritize incremental campaigns on ${leadLabel} while ` +
+    `using the other channels to support reach, diversification, and operational stability.`;
+
+  setText("allocationResultText", resultText);
+}
+
 // ---------- POPULATE SALES TAB ----------
 function populateSalesTab(m) {
-  // Executive summary
   const growth = m.growthRate.toFixed(1);
   const leadingPlatform = Object.entries(platformNextSales).sort(
     (a, b) => b[1] - a[1]
@@ -449,33 +534,35 @@ function populateSalesTab(m) {
 
   setText(
     "salesSummary",
-    `Sales are projected to grow by ${growth}% in the next period. ` +
-      `${leadLabel} is expected to contribute the largest share of forecasted revenue ` +
-      `based on current model outputs. Consider reinforcing marketing and stock allocations ` +
-      `towards this channel while monitoring model error metrics (MAE/RMSE/MAPE) for stability.`
+    `The forecast for total sales indicates upcoming ${m.growthRate >= 0 ? "growth" : "contraction"} over the next quarter. ` +
+      `${leadLabel} is expected to contribute the largest share of forecasted revenue based on current model outputs. ` +
+      `Use these projections to fine-tune inventory, marketing mix, and pricing while monitoring error metrics (MAE/RMSE/MAPE) for stability.`
   );
 
   // KPIs
   setText("salesCurrent", formatPeso(m.totalCurrent));
   setText("salesNext", formatPeso(m.totalNext));
-  // SALES GROWTH
-    const salesArrow = m.growthRate > 0 ? "▲" : m.growthRate < 0 ? "▼" : "";
-    const salesColor = m.growthRate > 0 ? "green" : m.growthRate < 0 ? "red" : "#b5b5b5";
 
-    setHTML(
+  // SALES GROWTH with arrow and color
+  const salesArrow =
+    m.growthRate > 0 ? "▲" : m.growthRate < 0 ? "▼" : "";
+  const salesColor =
+    m.growthRate > 0 ? "#3fd965" : m.growthRate < 0 ? "#ff4e4e" : "#b5b5b5";
+
+  setHTML(
     "salesGrowth",
-    `<span style="color:${salesColor}; font-weight:700;">${salesArrow} ${Math.abs(m.growthRate).toFixed(1)}%</span>`
-    );
+    `<span style="color:${salesColor}; font-weight:700;">${salesArrow} ${Math.abs(
+      m.growthRate
+    ).toFixed(1)}%</span>`
+  );
 
   // Model validation
   setText("salesMAE", m.mae.toFixed(2));
   setText("salesRMSE", m.rmse.toFixed(2));
   setText("salesMAPE", m.mape.toFixed(2) + "%");
 
-  // Channel breakdown (next period forecast)
-  setText("salesRetail", formatPeso(platformNextSales.retail));
-  setText("salesShopee", formatPeso(platformNextSales.shopee));
-  setText("salesTiktok", formatPeso(platformNextSales.tiktok));
+  // Update allocation-related UI
+  updateBudgetAllocation(m);
 
   // Chart
   renderSalesChart(m.chartData);
@@ -538,7 +625,6 @@ function renderSalesChart(chartData) {
 
 // ---------- POPULATE ORDERS TAB ----------
 function populateOrdersTab(m) {
-  // simple derived orders from sales (placeholder for when we have real order CSV)
   const ordersCurrent = Math.round(baselineOrdersCurrent);
   const ordersNext = Math.round(baselineOrdersNext);
   const growth =
@@ -556,15 +642,17 @@ function populateOrdersTab(m) {
 
   setText("ordersCurrent", ordersCurrent.toLocaleString());
   setText("ordersNext", ordersNext.toLocaleString());
-    // ORDERS GROWTH
-    const ordersArrow = growth > 0 ? "▲" : growth < 0 ? "▼" : "";
-    const ordersColor = growth > 0 ? "green" : growth < 0 ? "red" : "#b5b5b5";
 
-    setHTML(
+  const ordersArrow = growth > 0 ? "▲" : growth < 0 ? "▼" : "";
+  const ordersColor =
+    growth > 0 ? "#3fd965" : growth < 0 ? "#ff4e4e" : "#b5b5b5";
+
+  setHTML(
     "ordersGrowth",
-    `<span style="color:${ordersColor}; font-weight:700;">${ordersArrow} ${Math.abs(growth).toFixed(1)}%</span>`
-    );
-
+    `<span style="color:${ordersColor}; font-weight:700;">${ordersArrow} ${Math.abs(
+      growth
+    ).toFixed(1)}%</span>`
+  );
 
   setText("ordersMAE", m.mae.toFixed(2));
   setText("ordersRMSE", m.rmse.toFixed(2));
@@ -573,15 +661,21 @@ function populateOrdersTab(m) {
   const AVERAGE_ORDER_VALUE = 500;
   setText(
     "ordersRetail",
-    Math.round(platformNextSales.retail / AVERAGE_ORDER_VALUE).toLocaleString()
+    Math.round(
+      (platformNextSales.retail || 0) / AVERAGE_ORDER_VALUE
+    ).toLocaleString()
   );
   setText(
     "ordersShopee",
-    Math.round(platformNextSales.shopee / AVERAGE_ORDER_VALUE).toLocaleString()
+    Math.round(
+      (platformNextSales.shopee || 0) / AVERAGE_ORDER_VALUE
+    ).toLocaleString()
   );
   setText(
     "ordersTiktok",
-    Math.round(platformNextSales.tiktok / AVERAGE_ORDER_VALUE).toLocaleString()
+    Math.round(
+      (platformNextSales.tiktok || 0) / AVERAGE_ORDER_VALUE
+    ).toLocaleString()
   );
 
   renderOrdersChart(m.chartData, AVERAGE_ORDER_VALUE);
@@ -649,11 +743,9 @@ function renderOrdersChart(chartData, aov) {
   });
 }
 
-// ---------- SLIDERS / WHAT-IF ----------
+// ---------- SLIDERS / WHAT-IF (orders tab only) ----------
 function initSliders() {
   const bindings = [
-    { id: "priceSlider", valueId: "priceValue", type: "sales" },
-    { id: "adSlider", valueId: "adValue", type: "sales" },
     { id: "demandSlider", valueId: "demandValue", type: "orders" },
     { id: "inventorySlider", valueId: "inventoryValue", type: "orders" },
   ];
@@ -668,27 +760,7 @@ function initSliders() {
     slider.addEventListener("input", () => {
       valueEl.textContent = `${slider.value}%`;
 
-      if (type === "sales") {
-        const price = Number(
-          document.getElementById("priceSlider").value
-        );
-        const ad = Number(document.getElementById("adSlider").value);
-        const factor = 1 + (price + ad) / 200; // simple combined effect
-
-        const adjusted = baselineSalesNext * factor;
-        const pct =
-          baselineSalesNext > 0
-            ? ((adjusted - baselineSalesNext) /
-                baselineSalesNext) *
-              100
-            : 0;
-
-        setText("salesImpact", formatPeso(adjusted));
-        setText(
-          "salesImpactPct",
-          `${pct.toFixed(1)}% vs baseline forecast`
-        );
-      } else if (type === "orders") {
+      if (type === "orders") {
         const demand = Number(
           document.getElementById("demandSlider").value
         );
@@ -715,8 +787,6 @@ function initSliders() {
   });
 
   // initialize with baseline impact
-  setText("salesImpact", formatPeso(baselineSalesNext));
-  setText("salesImpactPct", "0.0% vs baseline forecast");
   setText(
     "ordersImpact",
     Math.round(baselineOrdersNext).toLocaleString()
@@ -748,4 +818,11 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFirebaseAuth();
   setupTabs();
   loadCsvForecasts();
+
+  const recalcBtn = document.getElementById("recalcAllocationBtn");
+  if (recalcBtn) {
+    recalcBtn.addEventListener("click", () => {
+      if (lastMetrics) updateBudgetAllocation(lastMetrics);
+    });
+  }
 });

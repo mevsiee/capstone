@@ -1,6 +1,5 @@
 /* ============================================================
-   ANALYTICS PAGE — FULL REACT-STYLE DARK UI
-   Clean, modern, full-width content inside your website layout
+   ANALYTICS PAGE — DARK DASHBOARD UI
    ============================================================ */
 
 body {
@@ -146,24 +145,39 @@ body {
     margin-bottom: 25px;
 }
 
-/* LEFT-ALIGN ALL KPI CARD TEXT — FIX */
+/* LEFT-ALIGN ALL KPI CARD TEXT */
 .kpi-card {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;   /* ⬅ LEFT ALIGN */
-    text-align: left;          /* ⬅ LEFT ALIGN TEXT */
-    padding: 20px 25px;        /* adds clean spacing like the model validation */
+    align-items: flex-start;
+    text-align: left;
+    padding: 20px 25px;
+    border-width: 0;
 }
 
-/* Label styling */
+/* colored KPI variants */
+.kpi-card-green {
+    background: #0f3a24;
+    border: 1px solid #1e6540;
+}
+
+.kpi-card-blue {
+    background: #10273c;
+    border: 1px solid #214f7a;
+}
+
+.kpi-card-gold {
+    background: #3b2a14;
+    border: 1px solid #f5b400;
+}
+
 .kpi-label {
     font-size: 0.9rem;
-    color: #b5b5b5;
+    color: #d1d1d1;
     margin-bottom: 6px;
 }
 
-/* Value styling */
 .kpi-value {
     font-size: 2rem;
     font-weight: 700;
@@ -200,46 +214,27 @@ body {
 
 .chart-wrapper {
     width: 100%;
-    height: 500px;     /* bigger chart */
+    height: 500px;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 10px 0;
 }
 
-
 .chart-wrapper canvas {
-    width: 95% !important;    /* more centered look */
-    height: 100% !important;  /* full height */
+    width: 95% !important;
+    height: 100% !important;
 }
 
 /* LEFT ALIGN TEXT INSIDE CHART CARD */
 .chart-card h3,
 .chart-card p,
-.chart-card .chart-legend {
+.chart-card .card-subtitle {
     text-align: left !important;
     width: 100%;
-    margin-left: 20px;      /* optional: visually matches padding of KPI cards */
 }
 
-/* Chart legend container fix */
-.chart-legend {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-/* Keep the chart centered below the text */
-.chart-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-
-
-/* ==== SIDE STACK (Validation + Sliders) ==== */
+/* ==== SIDE STACK (Validation + Allocation) ==== */
 
 .right-stack {
     display: flex;
@@ -255,7 +250,7 @@ body {
 .side-title {
     font-weight: 600;
     font-size: 1.1rem;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .side-description {
@@ -283,7 +278,61 @@ body {
     font-weight: 600;
 }
 
-/* ==== SLIDERS ==== */
+/* ==== OPTIMAL BUDGET ALLOCATION ==== */
+
+.allocation-card {
+    background: #15120a;
+    border: 1px solid #f5b400;
+}
+
+.allocation-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+}
+
+.allocation-list li {
+    display: grid;
+    grid-template-columns: 1.6fr 0.6fr 1fr;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.allocation-label {
+    color: #ddd;
+}
+
+.allocation-value {
+    text-align: right;
+    color: #f5b400;
+}
+
+.allocation-budget {
+    text-align: right;
+    font-weight: 700;
+}
+
+.allocation-total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #333;
+    font-size: 0.9rem;
+}
+
+.allocation-total span:last-child {
+    font-weight: 700;
+}
+
+.allocation-recalc {
+    margin-top: 12px;
+    width: 100%;
+    justify-content: center;
+}
+
+/* ==== SLIDERS (orders tab) ==== */
 
 .slider-group {
     display: flex;
@@ -350,11 +399,63 @@ input[type="range"]::-webkit-slider-thumb {
     color: #bbb;
 }
 
-/* ==== BREAKDOWN GRID ==== */
+/* ==== PLATFORM ALLOCATION GRID ==== */
 
 .breakdown-card {
     margin-top: 10px;
 }
+
+.platform-allocation-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 15px;
+}
+
+.platform-card {
+    background: #1a1a1a;
+    border-radius: 10px;
+    border: 1px solid #222;
+    padding: 14px 14px 16px 14px;
+}
+
+.platform-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.platform-metric-label {
+    font-size: 0.8rem;
+    color: #b3b3b3;
+    margin-top: 4px;
+}
+
+.platform-metric-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.platform-metric-value.accent {
+    color: #f5b400;
+}
+
+/* allocation result text */
+
+.allocation-result {
+    margin-top: 18px;
+    padding-top: 10px;
+    border-top: 1px solid #222;
+}
+
+.allocation-result-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+/* ==== SIMPLE ORDERS BREAKDOWN (unchanged) ==== */
 
 .breakdown-grid {
     display: grid;
@@ -389,6 +490,7 @@ input[type="range"]::-webkit-slider-thumb {
         grid-template-columns: 1fr;
     }
 
+    .platform-allocation-grid,
     .breakdown-grid {
         grid-template-columns: 1fr 1fr;
     }
@@ -396,6 +498,11 @@ input[type="range"]::-webkit-slider-thumb {
 
 @media (max-width: 768px) {
     .kpi-row {
+        grid-template-columns: 1fr;
+    }
+
+    .platform-allocation-grid,
+    .breakdown-grid {
         grid-template-columns: 1fr;
     }
 }
