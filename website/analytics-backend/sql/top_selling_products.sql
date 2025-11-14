@@ -1,8 +1,6 @@
 WITH filtered AS (
-    SELECT
-        *,
-        -- Completed Logic
-        CASE
+    SELECT *,
+        CASE 
             WHEN platform_name ILIKE '%retail%' AND order_status = 'Completed'
                 THEN TRUE
             WHEN platform_name NOT ILIKE '%retail%'
@@ -18,9 +16,8 @@ WITH filtered AS (
 
 SELECT
     product_name,
-    SUM(CASE WHEN is_completed THEN product_subtotal_after ELSE 0 END) AS total_sales,
-    SUM(CASE WHEN is_completed THEN quantity ELSE 0 END) AS total_qty
+    CASE WHEN is_completed THEN product_subtotal_after ELSE 0 END AS total_sales
 FROM filtered
-GROUP BY product_name
-ORDER BY total_sales DESC
-LIMIT 10;
+WHERE 
+    (:platform = 'all')
+    OR (LOWER(platform_name) = :platform);

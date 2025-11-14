@@ -408,52 +408,227 @@ body.dashboard-body {
   margin-bottom: 24px;
 }
 
-/* Top-Selling Products */
+/* ============================= */
+/* TOP-SELLING PRODUCTS          */
+/* ============================= */
 
 .top-products-section {
   background: #101010;
   border-radius: 14px;
   border: 1px solid #1c1c1c;
-  padding: 20px 26px 26px;
+  padding: 18px 22px 22px;
+  min-height: 260px;    /* 🔥 makes it visible */
+  display: flex;
+  flex-direction: column;
 }
 
 .top-products-list {
-  margin-top: 12px;
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .product-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid #1f1f1f;
+  width: 100%;
 }
 
-.product-row:last-child {
-  border-bottom: none;
+.product-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
 }
 
 .product-name {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  max-width: 65%;
   color: #ffffff;
 }
 
 .product-sales {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #9be37a;
 }
 
-/* green bar background */ 
 .product-bar {
   height: 10px;
-  background: linear-gradient(90deg, #69c756, #3fa53a);
+  width: 100%;
+  background: #222;
   border-radius: 8px;
-  margin-top: 6px;
+  overflow: hidden;
 }
 
+.product-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #69c756, #3fa53a);
+  border-radius: 8px;
+}
+
+.top-products-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.top-products-dropdown {
+  background: #111;
+  color: #fff;
+  border: 1px solid #333;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.top-products-dropdown:hover {
+  background: #222;
+  border-color: #444;
+}
+
+.top-products-dropdown:focus {
+  outline: none;
+  border-color: #f0c24b;
+}
+/* ============================= */
+/* CUSTOM DROPDOWN               */
+/* ============================= */
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-btn {
+  padding: 8px 16px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s ease-in-out;
+}
+
+.dropdown-btn:hover {
+  background: #222;
+  border-color: #555;
+}
+
+.dropdown-btn i {
+  font-size: 0.75rem;
+  transition: transform 0.2s;
+}
+
+/* Wrapper to mimic Sales Trend layout */
+.top-products-wrapper {
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+/* Move dropdown to right of header */
+.top-products-wrapper .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Black container */
+.top-products-section {
+  background: #101010;
+  border-radius: 14px;
+  border: 1px solid #1c1c1c;
+  padding: 20px 20px;
+  min-height: 260px;
+}
+
+/* Dropdown styling */
+.top-products-dropdown {
+  position: relative;
+}
+
+#topProductsBtn {
+  background: #111;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  font-size: 0.85rem;
+  color: #fff;
+  cursor: pointer;
+}
+
+#topProductsBtn i {
+  margin-left: 6px;
+}
+
+.top-products-menu {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  width: 180px;
+  list-style: none;
+  display: none;
+  z-index: 10;
+}
+
+.top-products-menu.show {
+  display: block;
+}
+
+.dropdown-item {
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: #222;
+}
+
+/* menu */
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 110%;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 6px 0;
+  width: 200px;
+  display: none;
+  flex-direction: column;
+  z-index: 50;
+}
+
+.dropdown-menu.show {
+  display: flex;
+}
+
+.dropdown-item {
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #fff;
+  transition: 0.2s;
+}
+
+.dropdown-item:hover {
+  background: #222;
+  color: #f0c24b;
+}
+
+/* rotate arrow when open */
+.dropdown.open .dropdown-btn i {
+  transform: rotate(180deg);
+}
+s
 /* Digital vs Physical */
 
 .digital-physical-section {
