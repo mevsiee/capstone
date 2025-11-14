@@ -191,6 +191,7 @@ def route_sales_monthly(request: Request):
 def route_top_products(request: Request):
     year_param = request.query_params.get("year")
     month_param = request.query_params.get("month")
+    platform_param = request.query_params.get("platform", "all").lower()
 
     if year_param is None or month_param is None:
         latest = get_latest_year_month_from_db()
@@ -199,7 +200,9 @@ def route_top_products(request: Request):
     else:
         year = int(year_param)
         month = int(month_param)
-    return get_top_selling_products(engine, year, month)
+
+    return get_top_selling_products(engine, year, month, platform_param)
+
 
 
 @app.get("/sales/digital-vs-physical")

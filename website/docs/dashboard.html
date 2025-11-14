@@ -156,16 +156,38 @@
 
         <!-- BOTTOM ROW: TOP PRODUCTS + DIGITAL VS PHYSICAL -->
         <div class="bottom-row">
+
           <!-- Top-Selling Products -->
-          <section class="top-products-section">
+          <section class="top-products-wrapper">
+
             <div class="section-header">
-              <h2>Top-Selling Products</h2>
-              <button class="tag-button">Top Performers (All)</button>
+              <div>
+                <h2>Highest Revenue Products</h2>
+                <p class="section-subtitle">
+                  A breakdown of your best-performing items during the month.
+                </p>
+              </div>
+
+              <!-- Dropdown OUTSIDE the black box -->
+              <div class="top-products-dropdown" id="topProductsDropdown">
+                <button id="topProductsBtn">
+                  Top Performers (All) <i class="fas fa-chevron-down"></i>
+                </button>
+
+                <ul class="top-products-menu" id="topProductsMenu">
+                  <li class="dropdown-item" data-value="all">Top Performers (All)</li>
+                  <li class="dropdown-item" data-value="shopee">Shopee</li>
+                  <li class="dropdown-item" data-value="tiktok">TikTok</li>
+                  <li class="dropdown-item" data-value="retail">Retail</li>
+                </ul>
+              </div>
             </div>
 
-            <div id="top-products" class="top-products-list">
-              <!-- JS populates rows -->
+            <!-- BLACK BOX same as sales trend card -->
+            <div class="top-products-section">
+              <div class="top-products-list" id="top-products"></div>
             </div>
+
           </section>
 
           <!-- Digital vs Physical Sales -->
@@ -173,13 +195,12 @@
             <div class="section-header">
               <h2>Digital vs Physical Sales</h2>
             </div>
-
             <div class="chart-wrapper">
               <canvas id="digitalPhysicalChart"></canvas>
             </div>
           </section>
-        </div>
 
+        </div>
       </div>
     </main>
   </div>
@@ -188,6 +209,22 @@
   <script src="../js/login-auth/firebase-auth.js"></script>
   <script src="../js/login-auth/dashboard-auth.js"></script>
   <script src="../js/UI/dashboard.js"></script>
+
+  <script>
+    (function () {
+      const input = document.getElementById("monthPicker");
+      if (!input) return;
+
+      const now = new Date();
+      const ym = now.toISOString().slice(0, 7);
+      input.value = ym;
+
+      // 🔥 Sync global filter variables so backend gets correct month
+      const [y, m] = ym.split("-");
+      selectedYear = parseInt(y);
+      selectedMonth = parseInt(m);
+    })();
+  </script>
 
   <!-- Optional: auto-set month picker to current month -->
   <script>
@@ -199,5 +236,6 @@
       input.value = ym;
     })();
   </script>
+
 </body>
 </html>
