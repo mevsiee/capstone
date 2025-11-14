@@ -119,7 +119,7 @@
             <div class="analytics-main-grid">
               <!-- Chart LEFT -->
               <div class="card chart-card">
-                <div class="card-header">
+                <div class="card-header" style="text-align: center;">
                   <h3>Projected Sales for Upcoming Quarter</h3>
                   <span class="card-subtitle">
                     A comprehensive outlook on revenue trajectories across e-commerce and retail channels.
@@ -151,6 +151,10 @@
                       <span>Mean Absolute Percentage Error</span>
                       <span id="salesMAPE">--</span>
                     </li>
+                    <li>
+                      <span>Symmetric Mean Absolute Percentage Error</span>
+                      <span id="salesSMAPE">--</span>
+                    </li>
                   </ul>
                 </div>
 
@@ -163,20 +167,75 @@
                   </p>
 
                   <ul class="allocation-list">
+                    <!-- Retail -->
                     <li>
                       <span class="allocation-label">Retail Profit Margin</span>
-                      <span class="allocation-value" id="retailMargin">30%</span>
-                      <span class="allocation-budget" id="retailBudget">₱ 0</span>
+
+                      <!-- Editable margin input -->
+                      <input 
+                        type="number" 
+                        class="allocation-input" 
+                        id="retailMarginInput"
+                        placeholder="30"
+                        min="0"
+                        max="100"
+                      />
+                      <span class="allocation-percent">%</span>
+
+                      <!-- Editable budget input -->
+                      <input 
+                        type="number" 
+                        class="allocation-input budget-input"
+                        id="retailBudgetInput"
+                        placeholder="0"
+                        min="0"
+                      />
                     </li>
+
+                    <!-- Shopee -->
                     <li>
                       <span class="allocation-label">Shopee Profit Margin</span>
-                      <span class="allocation-value" id="shopeeMargin">22%</span>
-                      <span class="allocation-budget" id="shopeeBudget">₱ 0</span>
+
+                      <input 
+                        type="number" 
+                        class="allocation-input" 
+                        id="shopeeMarginInput"
+                        placeholder="22"
+                        min="0"
+                        max="100"
+                      />
+                      <span class="allocation-percent">%</span>
+
+                      <input 
+                        type="number" 
+                        class="allocation-input budget-input"
+                        id="shopeeBudgetInput"
+                        placeholder="0"
+                        min="0"
+                      />
                     </li>
+
+                    <!-- TikTok -->
                     <li>
                       <span class="allocation-label">TikTok Profit Margin</span>
-                      <span class="allocation-value" id="tiktokMargin">25%</span>
-                      <span class="allocation-budget" id="tiktokBudget">₱ 0</span>
+
+                      <input 
+                        type="number" 
+                        class="allocation-input" 
+                        id="tiktokMarginInput"
+                        placeholder="25"
+                        min="0"
+                        max="100"
+                      />
+                      <span class="allocation-percent">%</span>
+
+                      <input 
+                        type="number" 
+                        class="allocation-input budget-input"
+                        id="tiktokBudgetInput"
+                        placeholder="0"
+                        min="0"
+                      />
                     </li>
                   </ul>
 
@@ -202,29 +261,55 @@
               </div>
 
               <div class="platform-allocation-grid">
+
                 <div class="platform-card">
                   <div class="platform-title">Shopee Sales Projection</div>
                   <div class="platform-metric-label">Base Forecast</div>
-                  <div class="platform-metric-value" id="salesShopeeBase">₱ 0</div>
+                  <div class="platform-metric-value" id="shopeeBaseForecast">₱ 0</div>
                   <div class="platform-metric-label">After Allocation</div>
-                  <div class="platform-metric-value accent" id="salesShopeeAfter">₱ 0</div>
+                  <div class="platform-metric-value accent" id="shopeeAfterAllocation">₱ 0</div>
                 </div>
 
                 <div class="platform-card">
                   <div class="platform-title">TikTok Sales Projection</div>
                   <div class="platform-metric-label">Base Forecast</div>
-                  <div class="platform-metric-value" id="salesTiktokBase">₱ 0</div>
+                  <div class="platform-metric-value" id="tiktokBaseForecast">₱ 0</div>
                   <div class="platform-metric-label">After Allocation</div>
-                  <div class="platform-metric-value accent" id="salesTiktokAfter">₱ 0</div>
+                  <div class="platform-metric-value accent" id="tiktokAfterAllocation">₱ 0</div>
                 </div>
 
                 <div class="platform-card">
                   <div class="platform-title">Retail Sales Projection</div>
                   <div class="platform-metric-label">Base Forecast</div>
-                  <div class="platform-metric-value" id="salesRetailBase">₱ 0</div>
+                  <div class="platform-metric-value" id="retailBaseForecast">₱ 0</div>
                   <div class="platform-metric-label">After Allocation</div>
-                  <div class="platform-metric-value accent" id="salesRetailAfter">₱ 0</div>
+                  <div class="platform-metric-value accent" id="retailAfterAllocation">₱ 0</div>
                 </div>
+
+                <div class="platform-card">
+                  <div class="platform-title">Retail Allocation</div>
+                  <div class="platform-metric-label">Budget</div>
+                  <div class="platform-metric-value" id="allocationRetail">₱ 0</div>
+                  <div class="platform-metric-label">Share</div>
+                  <div class="platform-metric-value" id="allocationRetailPct">0%</div>
+              </div>
+
+                <div class="platform-card">
+                  <div class="platform-title">Shopee Allocation</div>
+                  <div class="platform-metric-label">Budget</div>
+                  <div class="platform-metric-value" id="allocationShopee">₱ 0</div>
+                  <div class="platform-metric-label">Share</div>
+                  <div class="platform-metric-value" id="allocationShopeePct">0%</div>
+              </div>
+
+                <div class="platform-card">
+                  <div class="platform-title">TikTok Allocation</div>
+                  <div class="platform-metric-label">Budget</div>
+                  <div class="platform-metric-value" id="allocationTiktok">₱ 0</div>
+                  <div class="platform-metric-label">Share</div>
+                  <div class="platform-metric-value" id="allocationTiktokPct">0%</div>
+              </div>
+
               </div>
 
               <div class="allocation-result">
@@ -295,6 +380,10 @@
                     <li>
                       <span>Mean Absolute Percentage Error</span>
                       <span id="ordersMAPE">--</span>
+                    </li>
+                    <li>
+                      <span>Symmetric Mean Absolute Percentage Error</span>
+                      <span id="ordersSMAPE">--</span>
                     </li>
                   </ul>
                 </div>

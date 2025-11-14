@@ -294,23 +294,36 @@ body {
 
 .allocation-list li {
     display: grid;
-    grid-template-columns: 1.6fr 0.6fr 1fr;
+    grid-template-columns: 1.4fr 0.5fr 0.3fr 1fr;
     align-items: center;
     padding: 4px 0;
 }
 
+/* ==== Allocation Input Fields (NEW) ==== */
+
+.allocation-input {
+    width: 80px;
+    background: #222;
+    border: 1px solid #444;
+    padding: 6px 8px;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.9rem;
+    text-align: right;
+}
+
+.budget-input {
+    width: 100px;
+}
+
+.allocation-percent {
+    margin-left: 4px;
+    margin-right: 12px;
+    color: #bbb;
+}
+
 .allocation-label {
     color: #ddd;
-}
-
-.allocation-value {
-    text-align: right;
-    color: #f5b400;
-}
-
-.allocation-budget {
-    text-align: right;
-    font-weight: 700;
 }
 
 .allocation-total {
@@ -454,6 +467,20 @@ input[type="range"]::-webkit-slider-thumb {
     font-weight: 600;
     margin-bottom: 6px;
 }
+
+.manual-override {
+    background: #113d11 !important;
+    color: #c8ffc8 !important;
+}
+
+
+.manual-tag {
+  font-size: 11px;
+  color: #00e676;
+  margin-left: 6px;
+  font-weight: bold;
+}
+
 
 /* ==== SIMPLE ORDERS BREAKDOWN (unchanged) ==== */
 

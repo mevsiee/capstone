@@ -302,6 +302,26 @@ function computePlatformMetrics(historyRows, forecastRows) {
   };
 }
 
+// ---------- SMAPE CALCULATION ----------
+function computeSMAPE(actual, predicted) {
+  let sum = 0;
+  let count = 0;
+
+  for (let i = 0; i < actual.length; i++) {
+    const a = actual[i];
+    const p = predicted[i];
+    const denom = (Math.abs(a) + Math.abs(p)) / 2;
+
+    if (denom !== 0) {
+      sum += Math.abs(a - p) / denom;
+      count++;
+    }
+  }
+
+  return (sum / count) * 100; // return % value
+}
+
+
 function computeChartSeries(historyRowsAll, forecastRowsAll) {
   const allRows = [...historyRowsAll, ...forecastRowsAll].sort(
     (a, b) => parseDate(a.ds) - parseDate(b.ds)
@@ -413,21 +433,94 @@ function computeMetricsFromRows({
   };
 }
 
-// ---------- BUDGET ALLOCATION & PROFIT TEXT ----------
-function updateBudgetAllocation(m) {
+function attachOverrideWatcher(inputId) {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+
+    el.addEventListener("input", () => {
+        if (el.value.trim() !== "") {
+            el.classList.add("manual-override");
+        } else {
+            el.classList.remove("manual-override");
+        }
+    });
+}
+
+  // ---------- BUDGET ALLOCATION & PROFIT TEXT ----------
+  function updateBudgetAllocation(m) {
   if (!m) return;
 
-  // assumed profit margins (you can tweak these)
+  // -----------------------------------------
+  // A) Grab input elements FIRST (fix #1)
+  // -----------------------------------------
+  const retailMarginEl = document.getElementById("retailMarginInput");
+  const shopeeMarginEl = document.getElementById("shopeeMarginInput");
+  const tiktokMarginEl = document.getElementById("tiktokMarginInput");
+
+  const retailBudgetEl = document.getElementById("retailBudgetInput");
+  const shopeeBudgetEl = document.getElementById("shopeeBudgetInput");
+  const tiktokBudgetEl = document.getElementById("tiktokBudgetInput");
+
+  // -----------------------------------------
+  // B) Read user inputs (convert)
+  // -----------------------------------------
+  const retailMarginInput = Number(retailMarginEl?.value) / 100;
+  const shopeeMarginInput = Number(shopeeMarginEl?.value) / 100;
+  const tiktokMarginInput = Number(tiktokMarginEl?.value) / 100;
+
+  const retailBudgetInput = Number(retailBudgetEl?.value);
+  const shopeeBudgetInput = Number(shopeeBudgetEl?.value);
+  const tiktokBudgetInput = Number(tiktokBudgetEl?.value);
+
+  // -----------------------------------------
+  // C) Detect per-field overrides
+  // -----------------------------------------
+  const retailMarginOverride = retailMarginEl?.value.trim() !== "";
+  const shopeeMarginOverride = shopeeMarginEl?.value.trim() !== "";
+  const tiktokMarginOverride = tiktokMarginEl?.value.trim() !== "";
+
+  const retailBudgetOverride = retailBudgetEl?.value.trim() !== "";
+  const shopeeBudgetOverride = shopeeBudgetEl?.value.trim() !== "";
+  const tiktokBudgetOverride = tiktokBudgetEl?.value.trim() !== "";
+
+  // Clear placeholder immediately once user types anything
+  if (retailMarginOverride) retailMarginEl.placeholder = "";
+  if (shopeeMarginOverride) shopeeMarginEl.placeholder = "";
+  if (tiktokMarginOverride) tiktokMarginEl.placeholder = "";
+
+  if (retailBudgetOverride) retailBudgetEl.placeholder = "";
+  if (shopeeBudgetOverride) shopeeBudgetEl.placeholder = "";
+  if (tiktokBudgetOverride) tiktokBudgetEl.placeholder = "";
+
+  // -----------------------------------------
+  // D) Compute profit margins (with overrides)
+  // -----------------------------------------
   const profitMargins = {
-    retail: 0.30,
-    shopee: 0.22,
-    tiktok: 0.25,
+    retail: retailMarginOverride ? retailMarginInput : 0.30,
+    shopee: shopeeMarginOverride ? shopeeMarginInput : 0.22,
+    tiktok: tiktokMarginOverride ? tiktokMarginInput : 0.25,
   };
 
-  const totalNext = baselineSalesNext || 0;
-  const budgetRatio = 0.2; // 20% of projected sales as total marketing budget
-  const totalBudget = totalNext * budgetRatio;
+  // -----------------------------------------
+  // E) Compute total marketing budget
+  // -----------------------------------------
+  let totalNext = baselineSalesNext || 0;
+  let totalBudget = totalNext * 0.2; // default = 20% of projected sales
 
+  const anyBudgetOverride =
+    retailBudgetOverride || shopeeBudgetOverride || tiktokBudgetOverride;
+
+  // If user overrides any, TOTAL budget becomes sum of user-entered ones
+  if (anyBudgetOverride) {
+    totalBudget =
+      (retailBudgetOverride ? retailBudgetInput : 0) +
+      (shopeeBudgetOverride ? shopeeBudgetInput : 0) +
+      (tiktokBudgetOverride ? tiktokBudgetInput : 0);
+  }
+
+  // -----------------------------------------
+  // F) Compute platform scores
+  // -----------------------------------------
   const platforms = ["retail", "shopee", "tiktok"];
   const scores = {};
   let totalScore = 0;
@@ -435,87 +528,109 @@ function updateBudgetAllocation(m) {
   platforms.forEach((p) => {
     const sales = platformNextSales[p] || 0;
     const margin = profitMargins[p] || 0;
+
     const score = Math.max(sales, 0) * margin;
     scores[p] = score;
     totalScore += score;
   });
 
+  // -----------------------------------------
+  // G) Allocate budgets (with per-field overrides)
+  // -----------------------------------------
   const budgets = {};
   const allocPercents = {};
 
   platforms.forEach((p) => {
-    const bud =
+    let bud =
       totalScore > 0 ? (totalBudget * scores[p]) / totalScore : 0;
+
+    // User overrides
+    if (p === "retail" && retailBudgetOverride) bud = retailBudgetInput;
+    if (p === "shopee" && shopeeBudgetOverride) bud = shopeeBudgetInput;
+    if (p === "tiktok" && tiktokBudgetOverride) bud = tiktokBudgetInput;
+
     budgets[p] = bud;
-    allocPercents[p] =
-      totalBudget > 0 ? (bud / totalBudget) * 100 : 0;
+    allocPercents[p] = totalBudget > 0 ? (bud / totalBudget) * 100 : 0;
   });
 
-  // Update margin labels (static for now, but separated in case you want to change later)
-  setText("retailMargin", Math.round(profitMargins.retail * 100) + "%");
-  setText("shopeeMargin", Math.round(profitMargins.shopee * 100) + "%");
-  setText("tiktokMargin", Math.round(profitMargins.tiktok * 100) + "%");
+  // -----------------------------------------
+  // H) Update margin inputs (only if untouched)
+  // -----------------------------------------
+  if (!retailMarginOverride)
+    retailMarginEl.placeholder = `(${Math.round(
+      profitMargins.retail * 100
+    )}%)`;
 
-  // Update budget amounts
-  setText("retailBudget", formatPeso(budgets.retail || 0));
-  setText("shopeeBudget", formatPeso(budgets.shopee || 0));
-  setText("tiktokBudget", formatPeso(budgets.tiktok || 0));
-  setText("totalBudget", formatPeso(totalBudget || 0));
+  if (!shopeeMarginOverride)
+    shopeeMarginEl.placeholder = `(${Math.round(
+      profitMargins.shopee * 100
+    )}%)`;
 
-  // Base and after-allocation sales for each platform
-  const baseSales = {
-    shopee: platformNextSales.shopee || 0,
-    tiktok: platformNextSales.tiktok || 0,
-    retail: platformNextSales.retail || 0,
-  };
+  if (!tiktokMarginOverride)
+    tiktokMarginEl.placeholder = `(${Math.round(
+      profitMargins.tiktok * 100
+    )}%)`;
 
-  setText("salesShopeeBase", formatPeso(baseSales.shopee));
-  setText("salesTiktokBase", formatPeso(baseSales.tiktok));
-  setText("salesRetailBase", formatPeso(baseSales.retail));
+  // -----------------------------------------
+  // I) Update budget inputs (only if untouched)
+  // -----------------------------------------
+  if (!retailBudgetOverride)
+    retailBudgetEl.placeholder = `(${formatPeso(
+      budgets.retail
+    )})`;
 
-  const equalShare = 100 / 3;
+  if (!shopeeBudgetOverride)
+    shopeeBudgetEl.placeholder = `(${formatPeso(
+      budgets.shopee
+    )})`;
 
-  function adjustedSales(platformKey) {
-    const alloc = allocPercents[platformKey] || 0;
-    const diff = (alloc - equalShare) / 100; // positive if over-weighted
-    const impactFactor = 1 + diff * 0.8; // softened impact factor
-    return baseSales[platformKey] * impactFactor;
+  if (!tiktokBudgetOverride)
+    tiktokBudgetEl.placeholder = `(${formatPeso(
+      budgets.tiktok
+    )})`;
+
+  // -----------------------------------------
+  // J) Update TOTAL budget (display only)
+  // -----------------------------------------
+  setText("totalBudget", formatPeso(totalBudget));
+
+  // -----------------------------------------
+  // K) Update platform cards below (3rd image)
+  // -----------------------------------------
+  setText("allocationRetail", formatPeso(budgets.retail));
+  setText("allocationShopee", formatPeso(budgets.shopee));
+  setText("allocationTiktok", formatPeso(budgets.tiktok));
+
+  setText("allocationRetailPct", allocPercents.retail.toFixed(1) + "%");
+  setText("allocationShopeePct", allocPercents.shopee.toFixed(1) + "%");
+  setText("allocationTiktokPct", allocPercents.tiktok.toFixed(1) + "%");
+
+  function updateChannelCards(m, budgets) {
+  // Base forecasts per platform (from computeMetrics)
+  const retailBase = platformNextSales.retail || 0;
+  const shopeeBase = platformNextSales.shopee || 0;
+  const tiktokBase = platformNextSales.tiktok || 0;
+
+  // After-allocation forecast (simple model: base + (budget × margin))
+  const retailAfter = retailBase + budgets.retail * (m.retail.mae ? 0.01 : 0.2);
+  const shopeeAfter = shopeeBase + budgets.shopee * (m.shopee.mae ? 0.01 : 0.2);
+  const tiktokAfter = tiktokBase + budgets.tiktok * (m.tiktok.mae ? 0.01 : 0.2);
+
+  // Write to DOM
+  setText("retailBaseForecast", formatPeso(retailBase));
+  setText("retailAfterAllocation", formatPeso(retailAfter));
+
+  setText("shopeeBaseForecast", formatPeso(shopeeBase));
+  setText("shopeeAfterAllocation", formatPeso(shopeeAfter));
+
+  setText("tiktokBaseForecast", formatPeso(tiktokBase));
+  setText("tiktokAfterAllocation", formatPeso(tiktokAfter));  
   }
+  
+  updateChannelCards(m, budgets);
 
-  setText(
-    "salesShopeeAfter",
-    formatPeso(adjustedSales("shopee"))
-  );
-  setText(
-    "salesTiktokAfter",
-    formatPeso(adjustedSales("tiktok"))
-  );
-  setText(
-    "salesRetailAfter",
-    formatPeso(adjustedSales("retail"))
-  );
-
-  // Profit allocation narrative
-  const leadingPlatform = Object.entries(budgets).sort(
-    (a, b) => b[1] - a[1]
-  )[0][0];
-
-  const platformNames = {
-    retail: "Retail Stores",
-    shopee: "Shopee",
-    tiktok: "TikTok Shop",
-  };
-  const leadLabel = platformNames[leadingPlatform] || "TikTok Shop";
-
-  const resultText =
-    `Based on forecasted sales, assumed profit margins, and a ${Math.round(
-      budgetRatio * 100
-    )}% marketing budget, ${leadLabel} receives ` +
-    `the largest share of recommended spend. Prioritize incremental campaigns on ${leadLabel} while ` +
-    `using the other channels to support reach, diversification, and operational stability.`;
-
-  setText("allocationResultText", resultText);
 }
+
 
 // ---------- POPULATE SALES TAB ----------
 function populateSalesTab(m) {
@@ -560,6 +675,14 @@ function populateSalesTab(m) {
   setText("salesMAE", m.mae.toFixed(2));
   setText("salesRMSE", m.rmse.toFixed(2));
   setText("salesMAPE", m.mape.toFixed(2) + "%");
+
+  // --- SMAPE for sales ---
+  const salesActual = m.chartData.currentSeries.filter(v => v !== null);
+  const salesPredicted = m.chartData.forecastSeries.filter(v => v !== null);
+  const smapeSales = computeSMAPE(salesActual, salesPredicted);
+
+  setText("salesSMAPE", smapeSales.toFixed(2) + "%");
+
 
   // Update allocation-related UI
   updateBudgetAllocation(m);
@@ -657,6 +780,14 @@ function populateOrdersTab(m) {
   setText("ordersMAE", m.mae.toFixed(2));
   setText("ordersRMSE", m.rmse.toFixed(2));
   setText("ordersMAPE", m.mape.toFixed(2) + "%");
+
+  // --- SMAPE for orders ---
+  const ordersActual = m.chartData.currentSeries.filter(v => v !== null).map(v => v / 500);
+  const ordersPredicted = m.chartData.forecastSeries.filter(v => v !== null).map(v => v / 500);
+  const smapeOrders = computeSMAPE(ordersActual, ordersPredicted);
+
+  setText("ordersSMAPE", smapeOrders.toFixed(2) + "%");
+
 
   const AVERAGE_ORDER_VALUE = 500;
   setText(
@@ -819,10 +950,41 @@ document.addEventListener("DOMContentLoaded", () => {
   setupTabs();
   loadCsvForecasts();
 
+  attachOverrideWatcher("retailMarginInput");
+  attachOverrideWatcher("shopeeMarginInput");
+  attachOverrideWatcher("tiktokMarginInput");
+
+  attachOverrideWatcher("retailBudgetInput");
+  attachOverrideWatcher("shopeeBudgetInput");
+  attachOverrideWatcher("tiktokBudgetInput");
+
+
   const recalcBtn = document.getElementById("recalcAllocationBtn");
   if (recalcBtn) {
     recalcBtn.addEventListener("click", () => {
       if (lastMetrics) updateBudgetAllocation(lastMetrics);
     });
   }
+
+    // --- LIVE RECALC WHEN USER EDITS INPUTS ---
+  const allocationInputs = [
+    "retailMarginInput",
+    "shopeeMarginInput",
+    "tiktokMarginInput",
+    "retailBudgetInput",
+    "shopeeBudgetInput",
+    "tiktokBudgetInput",
+  ];
+
+  allocationInputs.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    el.addEventListener("input", () => {
+      if (lastMetrics) updateBudgetAllocation(lastMetrics);
+    });
+  });
+
 });
+
+
