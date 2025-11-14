@@ -605,16 +605,30 @@ function attachOverrideWatcher(inputId) {
   setText("allocationShopeePct", allocPercents.shopee.toFixed(1) + "%");
   setText("allocationTiktokPct", allocPercents.tiktok.toFixed(1) + "%");
 
-  function updateChannelCards(m, budgets) {
+  function updateChannelCards(m, budgets, margins) {  
   // Base forecasts per platform (from computeMetrics)
   const retailBase = platformNextSales.retail || 0;
   const shopeeBase = platformNextSales.shopee || 0;
   const tiktokBase = platformNextSales.tiktok || 0;
 
-  // After-allocation forecast (simple model: base + (budget × margin))
-  const retailAfter = retailBase + budgets.retail * (m.retail.mae ? 0.01 : 0.2);
-  const shopeeAfter = shopeeBase + budgets.shopee * (m.shopee.mae ? 0.01 : 0.2);
-  const tiktokAfter = tiktokBase + budgets.tiktok * (m.tiktok.mae ? 0.01 : 0.2);
+  // 1️⃣ Define realistic ROI effectiveness
+  const efficiency = {
+    retail: 1.3,
+    shopee: 1.1,
+    tiktok: 1.8,
+  };
+
+  // 2️⃣ Convert margin (0.25 → 1.25 multiplier)
+  const marginFactor = {
+    retail: 1 + (margins.retail || 0),
+    shopee: 1 + (margins.shopee || 0),
+    tiktok: 1 + (margins.tiktok || 0),
+  };
+
+  // 3️⃣ NEW REALISTIC MODEL
+  const retailAfter  = retailBase  + (budgets.retail  * efficiency.retail  * marginFactor.retail);
+  const shopeeAfter  = shopeeBase  + (budgets.shopee  * efficiency.shopee  * marginFactor.shopee);
+  const tiktokAfter  = tiktokBase  + (budgets.tiktok  * efficiency.tiktok  * marginFactor.tiktok);
 
   // Write to DOM
   setText("retailBaseForecast", formatPeso(retailBase));
@@ -627,7 +641,7 @@ function attachOverrideWatcher(inputId) {
   setText("tiktokAfterAllocation", formatPeso(tiktokAfter));  
   }
   
-  updateChannelCards(m, budgets);
+  updateChannelCards(m, budgets, profitMargins);
 
 }
 
