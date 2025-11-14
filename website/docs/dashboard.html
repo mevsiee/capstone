@@ -9,6 +9,9 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
+  <!-- Chart.js for graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <!-- ✅ Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -17,7 +20,7 @@
 
 <body class="dashboard-body">
   <div class="dashboard-container">
-    <!-- Header -->
+    <!-- Header (unchanged) -->
     <header class="main-header">
       <div class="header-content">
         <h1>EShop InventoryIQ</h1>
@@ -28,33 +31,173 @@
     <!-- Sidebar -->
     <nav class="sidebar">
       <ul class="sidebar-menu">
-        <li class="menu-item active"><a href="dashboard.html"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
-        <li class="menu-item"><a href="inventory.html"><i class="fas fa-box"></i><span>Inventory</span></a></li>
-        <li class="menu-item"><a href="analytics.html"><i class="fas fa-chart-bar"></i><span>Analytics</span></a></li>
-        <li class="menu-item" id="userManagementLink" style="display:none;"><a href="usermanagement.html"><i class="fas fa-users"></i><span>User Management</span></a></li>
-        <li class="menu-item"><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
-        <li class="menu-item"><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Log Out</span></a></li>
+        <li class="menu-item active">
+          <a href="dashboard.html"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+        </li>
+        <li class="menu-item">
+          <a href="inventory.html"><i class="fas fa-box"></i><span>Inventory</span></a>
+        </li>
+        <li class="menu-item">
+          <a href="analytics.html"><i class="fas fa-chart-bar"></i><span>Analytics</span></a>
+        </li>
+        <li class="menu-item" id="userManagementLink" style="display:none;">
+          <a href="usermanagement.html"><i class="fas fa-users"></i><span>User Management</span></a>
+        </li>
+        <li class="menu-item">
+          <a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a>
+        </li>
+        <li class="menu-item">
+          <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Log Out</span></a>
+        </li>
       </ul>
     </nav>
 
-    <!-- Main Content -->
+    <!-- MAIN CONTENT -->
     <main class="main-content">
-      <div class="content-area">
-        <iframe
-          title="Unified Dashboard"
-          width="1140"
-          height="541.25"
-          src="https://app.powerbi.com/reportEmbed?reportId=5bdb02d2-d3d4-4919-9fc3-510053f05e7c&autoAuth=true&ctid=2840082d-702c-4fb1-9885-abddd1ddaa1e"
-          frameborder="0"
-          allowfullscreen="true">
-        </iframe>
+      <div class="main-inner">
+
+        <!-- Top bar: title + month picker -->
+        <div class="dashboard-top-bar">
+          <h1 class="page-title">Dashboard</h1>
+
+          <div class="month-picker">
+            <label for="monthPicker">
+              <input type="month" id="monthPicker" />
+            </label>
+          </div>
+        </div>
+
+        <!-- KPI CARDS -->
+        <section class="kpi-section">
+
+          <div class="kpi-card" id="kpi-net">
+            <div class="kpi-title">Total Net Sales</div>
+            <div class="kpi-value">₱0.00</div>
+            <div class="kpi-delta">0% from last month</div>
+          </div>
+
+          <div class="kpi-card" id="kpi-gross">
+            <div class="kpi-title">Total Gross Sales</div>
+            <div class="kpi-value">₱0.00</div>
+            <div class="kpi-delta">0% from last month</div>
+          </div>
+
+          <div class="kpi-card" id="kpi-completed">
+            <div class="kpi-title">Completed Orders</div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-delta">0% from last month</div>
+          </div>
+
+          <div class="kpi-card" id="kpi-discounts">
+            <div class="kpi-title">Total Discounts</div>
+            <div class="kpi-value">₱0.00</div>
+            <div class="kpi-delta">0% from last month</div>
+          </div>
+
+          <div class="kpi-card" id="kpi-cancelled">
+            <div class="kpi-title">Cancelled Orders</div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-delta">0% from last month</div>
+          </div>
+
+        </section>
+
+        <!-- PLATFORM DISTRIBUTION -->
+        <section class="platform-section">
+          <div class="section-header">
+            <h2>Platform Distribution</h2>
+            <p class="section-subtitle">
+              Distribution of Total Net Sales accumulated this month across Shopee, TikTok, and Retail
+            </p>
+          </div>
+
+          <div class="platform-cards">
+            <div class="platform-card" id="platform-shopee">
+              <h4>Shopee</h4>
+              <div class="platform-sales">₱0.00</div>
+              <div class="platform-share">0%</div>
+            </div>
+
+            <div class="platform-card" id="platform-tiktok">
+              <h4>TikTok</h4>
+              <div class="platform-sales">₱0.00</div>
+              <div class="platform-share">0%</div>
+            </div>
+
+            <div class="platform-card" id="platform-retail">
+              <h4>Retail</h4>
+              <div class="platform-sales">₱0.00</div>
+              <div class="platform-share">0%</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SALES TREND -->
+        <section class="sales-trend-section">
+          <div class="trend-header">
+            <div>
+              <h2>Sales Trend Over Time</h2>
+              <p class="section-subtitle">Sales performance across Shopee, TikTok, and Retail</p>
+            </div>
+
+            <div class="sales-toggle-group">
+              <button class="sales-toggle active">Hourly</button>
+              <button class="sales-toggle">Daily</button>
+              <button class="sales-toggle">Monthly</button>
+            </div>
+          </div>
+
+          <div class="chart-wrapper">
+            <div class="sales-trend-chart-container">
+                <canvas id="salesTrendChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- BOTTOM ROW: TOP PRODUCTS + DIGITAL VS PHYSICAL -->
+        <div class="bottom-row">
+          <!-- Top-Selling Products -->
+          <section class="top-products-section">
+            <div class="section-header">
+              <h2>Top-Selling Products</h2>
+              <button class="tag-button">Top Performers (All)</button>
+            </div>
+
+            <div id="top-products" class="top-products-list">
+              <!-- JS populates rows -->
+            </div>
+          </section>
+
+          <!-- Digital vs Physical Sales -->
+          <section class="digital-physical-section">
+            <div class="section-header">
+              <h2>Digital vs Physical Sales</h2>
+            </div>
+
+            <div class="chart-wrapper">
+              <canvas id="digitalPhysicalChart"></canvas>
+            </div>
+          </section>
+        </div>
+
       </div>
     </main>
   </div>
 
-  <!-- ✅ Script Order -->
+  <!-- Scripts -->
   <script src="../js/login-auth/firebase-auth.js"></script>
   <script src="../js/login-auth/dashboard-auth.js"></script>
   <script src="../js/UI/dashboard.js"></script>
+
+  <!-- Optional: auto-set month picker to current month -->
+  <script>
+    (function () {
+      const input = document.getElementById("monthPicker");
+      if (!input) return;
+      const now = new Date();
+      const ym = now.toISOString().slice(0, 7);
+      input.value = ym;
+    })();
+  </script>
 </body>
 </html>

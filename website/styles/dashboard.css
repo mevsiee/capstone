@@ -1,45 +1,46 @@
+/* ============================= */
+/* RESET + BASE                  */
+/* ============================= */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
+body.dashboard-body {
   font-family: "Poppins", sans-serif;
+  background: #000000;
+  color: #ffffff;
   height: 100vh;
   overflow: hidden;
-  background: #000000;
 }
 
-/* Dashboard Styles */
+/* ============================= */
+/* LAYOUT WRAPPER                */
+/* ============================= */
+
 .dashboard-container {
   display: flex;
+  width: 100%;
   height: 100vh;
-  padding-top: 80px;
 }
 
-.sidebar {
-  width: 100px;
-  background: #090909;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  padding: 20px 0;
-  height: calc(100vh - 80px);
-  position: fixed;
-  left: 0;
-  border: none;
-}
+/* ============================= */
+/* HEADER (unchanged visually)   */
+/* ============================= */
 
 .main-header {
-  width: 100%;
-  background: #090909;
-  padding: 20px 40px;
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1;
+  height: 80px;
+  width: 100%;
+  background: #090909;
   text-align: center;
+  padding-top: 14px;
+  z-index: 10;
+  border-bottom: 1px solid #1a1a1a;
 }
 
 .header-content {
@@ -47,180 +48,451 @@ body {
   margin: 0 auto;
 }
 
-.header-content h1 {
-  color: #F0B810;
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 4px;
+.main-header h1 {
+  color: #f0b810;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 3px;
 }
 
-.header-content h2 {
-  font-size: 0.9rem;
-  font-weight: 400;
-  color: #fff;
+.main-header h2 {
+  color: #ffffff;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+/* ============================= */
+/* SIDEBAR (keep existing)       */
+/* ============================= */
+
+.sidebar {
+  position: fixed;
+  top: 80px;
+  left: 0;
+  width: 110px;
+  height: calc(100vh - 80px);
+  background: #0d0d0d;
+  padding-top: 20px;
+  border-right: 1px solid #1a1a1a;
+  color: white;
 }
 
 .sidebar-menu {
-  flex: 1;
   list-style: none;
-  padding: 0;
 }
 
 .menu-item {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
+  text-align: center;
   padding: 0 10px;
 }
 
 .menu-item a {
+  color: #bdbdbd;
+  text-decoration: none;
+  font-size: 0.75rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 8px;
-  color: #bdc3c7;
-  text-decoration: none;
-  transition: all 0.3s;
-  text-align: center;
+  transition: 0.25s;
+}
+
+.menu-item i {
+  font-size: 1.4rem;
+  margin-bottom: 6px;
+}
+
+.menu-item a span {
+  margin-top: 4px;
 }
 
 .menu-item a:hover,
 .menu-item.active a {
-  color: #F0B810;
-  background: transparent;
+  color: #f0b810;
 }
 
-.menu-item i {
-  font-size: 1.2rem;
-  margin-bottom: 2px;
-}
-
-.menu-item a span {
-  font-size: 0.7rem;
-  margin-top: 4px;
-}
-
-/* Remove sidebar footer styles as they're no longer needed */
+/* ============================= */
+/* MAIN CONTENT                  */
+/* ============================= */
 
 .main-content {
-  flex: 1;
-  background: #000000;
-  overflow-y: auto;
-  margin-left: 80px;
+  margin-top: 80px;                 /* below header */
+  margin-left: 110px;               /* beside sidebar */
+  width: calc(100% - 110px);
   height: calc(100vh - 80px);
+  overflow-y: auto;
+  background: #000000;
 }
 
-.content-header {
-  background: transparent;
-  padding: 20px 30px;
+.main-inner {
+  max-width: 1450px;
+  margin: 24px auto 40px;
+  padding: 0 24px 40px;
+}
+
+/* ============================= */
+/* TOP BAR: TITLE + MONTH PICKER */
+/* ============================= */
+
+.dashboard-top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: white;
+  margin-bottom: 22px;
 }
 
-.content-header h1 {
-  color: #F0B810;
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.month-picker label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.month-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #f0f0f0;
+  opacity: 0.8;
+}
+
+.month-label i {
+  margin-right: 6px;
+}
+
+#monthPicker {
+  background: #1a1a1a;
+  border-radius: 6px;
+  border: 1px solid #333333;
+  color: #ffffff;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+#monthPicker::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* ============================= */
+/* KPI SECTION                   */
+/* ============================= */
+
+.kpi-section {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.kpi-card {
+  padding: 16px 18px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  min-height: 110px;
+}
+
+/* Exact-ish mockup gradients */
+#kpi-net {
+  background: linear-gradient(135deg, #1b5728, #1a6d35);
+}
+
+#kpi-gross {
+  background: linear-gradient(135deg, #0c3e7a, #0a4d99);
+}
+
+#kpi-completed {
+  background: linear-gradient(135deg, #1e265c, #28307a);
+}
+
+#kpi-discounts {
+  background: linear-gradient(135deg, #7c4b00, #a7680b);
+}
+
+#kpi-cancelled {
+  background: linear-gradient(135deg, #7e1f2a, #a72736);
+}
+
+.kpi-title {
+  font-size: 0.8rem;
   font-weight: 600;
-  font-size: 1.75rem;
+  margin-bottom: 6px;
 }
 
-.user-info {
-  color: #fff;
-  font-size: 0.9rem;
+.kpi-value {
+  font-size: 1.6rem;
+  font-weight: 700;
 }
 
-.content-area {
-  padding: 20px 30px;
+.kpi-delta {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  opacity: 0.9;
 }
 
-.content-section {
-  display: none;
+/* ============================= */
+/* SHARED SECTION STYLES         */
+/* ============================= */
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
 }
 
-.content-section.active {
-  display: block;
+.section-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
-.placeholder-content iframe {
-  width: 100%;
-  height: calc(100vh - 120px);
-  border: none;
-  background: #000000;
+.section-subtitle {
+  font-size: 0.78rem;
+  color: #bdbdbd;
 }
 
-.placeholder-content i {
-  font-size: 4rem;
-  color: #F0B810;
-  margin-bottom: 20px;
+/* ============================= */
+/* PLATFORM DISTRIBUTION         */
+/* ============================= */
+
+.platform-section {
+  margin-bottom: 26px;
 }
 
-.placeholder-content h3 {
-  color: #fff;
+.platform-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+/* Mockup platform colors */
+#platform-shopee {
+  background: #8c5432;
+}
+
+#platform-tiktok {
+  background: #8c3a5c;
+}
+
+#platform-retail {
+  background: #9a7b2c;
+}
+
+.platform-card {
+  padding: 18px 20px;
+  border-radius: 12px;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  min-height: 110px;
+}
+
+.platform-card h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
   margin-bottom: 10px;
 }
 
-.placeholder-content p {
-  color: #bdc3c7;
+.platform-sales {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
-/* === Responsive Power BI Dashboard (full-bleed view) === */
-.main-content {
+.platform-share {
+  font-size: 0.8rem;
+}
+
+/* ============================= */
+/* SALES TREND                   */
+/* ============================= */
+
+.sales-trend-section {
+  margin-top: 30px;
+  padding-bottom: 40px;            /* was 30px */
+}
+
+/* Sales Trend Header */
+.trend-header {
   display: flex;
-  justify-content: center;
-  align-items: stretch;
-  margin-left: 100px; /* same as sidebar width */
-  height: calc(100vh - 80px); /* remove header height */
-  background: #000;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;             /* was 10px */
 }
 
-.content-area {
-  flex: 1;
+.trend-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.trend-header .section-subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+/* Toggle Buttons */
+.sales-toggle-group {
   display: flex;
-  justify-content: center;
-  align-items: stretch;
-  padding: 0;
-  height: 100%;
-  width: 100%;
+  gap: 8px;
 }
 
-.content-area iframe {
+/* Chart spacing */
+.chart-wrapper {
+  background: #111;
+  border-radius: 12px;
+  padding: 24px;
+
+  /* Full width but with max limit */
+  width: 100%;
+  max-width: 1600px;  /* Prevents over-stretch on 4K screens */
+
+  /* Maintain a good aspect ratio */
+  aspect-ratio: 16 / 9;
+
+  /* Center the chart visually */
+  margin: 0 auto;
+
+  position: relative;
+}
+
+/* Let the canvas stretch nicely inside */
+.sales-trend-chart-container {
   width: 100%;
   height: 100%;
+  position: relative;
+
+  /* Prevent Chart.js from shrinking */
+  display: block;
+}
+
+#salesTrendChart {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.sales-toggle {
+  padding: 8px 16px;
+  background: #1a1a1a;
   border: none;
-  border-radius: 0;
-  background: #000;
-  box-shadow: none;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+.sales-toggle.active {
+  background: #f0c24b !important;
+  color: #000 !important;
+  border: none !important;
+  font-weight: 700;
+  transform: translateY(-1px);
 }
 
-/* Responsive Design for Dashboard */
+/* ============================= */
+/* BOTTOM ROW                    */
+/* ============================= */
+
+.bottom-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+  gap: 22px;
+  margin-bottom: 24px;
+}
+
+/* Top-Selling Products */
+
+.top-products-section {
+  background: #101010;
+  border-radius: 14px;
+  border: 1px solid #1c1c1c;
+  padding: 20px 26px 26px;
+}
+
+.top-products-list {
+  margin-top: 12px;
+}
+
+.product-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #1f1f1f;
+}
+
+.product-row:last-child {
+  border-bottom: none;
+}
+
+.product-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  max-width: 65%;
+  color: #ffffff;
+}
+
+.product-sales {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #9be37a;
+}
+
+/* green bar background */ 
+.product-bar {
+  height: 10px;
+  background: linear-gradient(90deg, #69c756, #3fa53a);
+  border-radius: 8px;
+  margin-top: 6px;
+}
+
+/* Digital vs Physical */
+
+.digital-physical-section {
+  background: #101010;
+  border-radius: 14px;
+  border: 1px solid #1c1c1c;
+  padding: 18px 22px 22px;
+}
+
+/* ============================= */
+/* RESPONSIVE                    */
+/* ============================= */
+
+@media (max-width: 1100px) {
+  .kpi-section {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .platform-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
-  .dashboard-container {
+  .dashboard-top-bar {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
-  .sidebar {
-    width: 100%;
-    height: auto;
+  .month-picker label {
+    align-items: flex-start;
   }
 
-  .sidebar-menu {
-    display: flex;
-    overflow-x: auto;
-    padding: 10px;
-  }
-
-  .menu-item {
-    margin-right: 10px;
-    margin-bottom: 0;
-    white-space: nowrap;
-  }
-
-  .main-content {
-    margin-left: 0;
-    height: calc(100vh - 140px);
-  }
-
-  .content-area iframe {
-    border-radius: 0;
+  .main-inner {
+    padding: 0 16px 32px;
   }
 }
