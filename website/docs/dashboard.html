@@ -24,7 +24,7 @@
     <header class="main-header">
       <div class="header-content">
         <h1>EShop InventoryIQ</h1>
-        <h2>Forecasting & Management System</h2>
+        <h2>Analytics Dashboard</h2>
       </div>
     </header>
 
@@ -107,7 +107,7 @@
           <div class="section-header">
             <h2>Platform Distribution</h2>
             <p class="section-subtitle">
-              Distribution of Total Net Sales accumulated this month across Shopee, TikTok, and Retail
+              Sales distribution across Shopee, TikTok, and Retail for the current month
             </p>
           </div>
 
@@ -136,8 +136,8 @@
         <section class="sales-trend-section">
           <div class="trend-header">
             <div>
-              <h2>Sales Trend Over Time</h2>
-              <p class="section-subtitle">Sales performance across Shopee, TikTok, and Retail</p>
+              <h2>Sales Trends Over Key Time Intervals</h2>
+              <p class="section-subtitle">A breakdown of aggregated sales patterns across hours, days, and months.</p>
             </div>
 
             <div class="sales-toggle-group">
@@ -162,13 +162,13 @@
 
             <div class="section-header">
               <div>
-                <h2>Highest Revenue Products</h2>
+                <h2>Top 5 Products by Revenue Contribution</h2>
                 <p class="section-subtitle">
                   A breakdown of your best-performing items during the month.
                 </p>
               </div>
 
-              <!-- Dropdown OUTSIDE the black box -->
+              <!-- Dropdown -->
               <div class="top-products-dropdown" id="topProductsDropdown">
                 <button id="topProductsBtn">
                   Top Performers (All) <i class="fas fa-chevron-down"></i>
@@ -183,22 +183,28 @@
               </div>
             </div>
 
-            <!-- BLACK BOX same as sales trend card -->
-            <div class="top-products-section">
-              <div class="top-products-list" id="top-products"></div>
+            <div class="top-products-chart-container">
+                <canvas id="topProductsChart"></canvas>
             </div>
-
+          
           </section>
 
-          <!-- Digital vs Physical Sales -->
-          <section class="digital-physical-section">
-            <div class="section-header">
-              <h2>Digital vs Physical Sales</h2>
-            </div>
-            <div class="chart-wrapper">
-              <canvas id="digitalPhysicalChart"></canvas>
-            </div>
-          </section>
+          <!-- DIGITAL VS PHYSICAL SALES -->
+            <section class="digital-physical-section">
+              <h2>Sales Performance on Store Channels</h2>
+              <p class="section-subtitle">Comparing online sales with retail store performance.</p>
+
+              <div class="digital-physical-container">
+                  <div class="digital-physical-layout">
+                      <div class="digital-physical-chart-wrapper">
+                          <canvas id="digitalPhysicalChart"></canvas>
+                      </div>
+
+                      <div class="digital-physical-legend" id="digitalLegend"></div>
+                  </div>
+              </div>
+            </section>
+
 
         </div>
       </div>
@@ -206,6 +212,7 @@
   </div>
 
   <!-- Scripts -->
+   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <script src="../js/login-auth/firebase-auth.js"></script>
   <script src="../js/login-auth/dashboard-auth.js"></script>
   <script src="../js/UI/dashboard.js"></script>
@@ -219,14 +226,14 @@
       const ym = now.toISOString().slice(0, 7);
       input.value = ym;
 
-      // 🔥 Sync global filter variables so backend gets correct month
+      // Sync global filter variables so backend gets correct month
       const [y, m] = ym.split("-");
       selectedYear = parseInt(y);
       selectedMonth = parseInt(m);
     })();
   </script>
 
-  <!-- Optional: auto-set month picker to current month -->
+  <!-- Auto-set month picker to current month -->
   <script>
     (function () {
       const input = document.getElementById("monthPicker");

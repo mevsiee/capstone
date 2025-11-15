@@ -216,7 +216,7 @@ let currentTrendMode = "daily"; // default
 const PLATFORM_COLORS = {
   shopee: "#E86A5F",
   tiktok: "#B32780",
-  retail: "#D8A232"
+  retail: "#B38A00"
 };
 
 const PLATFORM_LABELS = {
@@ -439,34 +439,52 @@ async function loadTopSellingProducts(platform = "all") {
   }
 }
 
+let topProductsChart = null;
+
 function updateTopSellingProducts(data) {
-    const container = document.getElementById("top-products");
-    container.innerHTML = "";
+    const ctx = document.getElementById("topProductsChart");
 
-    if (!data || data.length === 0) {
-        container.innerHTML = "<p>No data available</p>";
-        return;
-    }
+    if (topProductsChart) topProductsChart.destroy();
 
-    const maxSales = Math.max(...data.map(p => p.total_sales));
+    const labels = data.map(item => item.product_name);
+    const values = data.map(item => item.total_sales);
 
-    data.forEach((item) => {
-        const div = document.createElement("div");
-        div.className = "product-row";
-
-        const widthPercent = (item.total_sales / maxSales) * 100;
-
-        div.innerHTML = `
-          <div class="product-top">
-            <span class="product-name">${item.product_name}</span>
-            <span class="product-sales">${formatPeso(item.total_sales)}</span>
-          </div>
-          <div class="product-bar">
-            <div class="product-bar-fill" style="width: ${widthPercent}%"></div>
-          </div>
-        `;
-
-        container.appendChild(div);
+    topProductsChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Revenue (₱)",
+                data: values,
+                borderRadius: 6,
+                backgroundColor: "#4ade80", // green bar
+            }]
+        },
+        options: {
+            indexAxis: "y", // ← horizontal mode
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => "₱" + ctx.raw.toLocaleString()
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: "#fff",
+                        callback: (value) => "₱" + Number(value).toLocaleString()
+                    },
+                    grid: { color: "#333" }
+                },
+                y: {
+                    ticks: { color: "#fff" },
+                    grid: { display: false }
+                }
+            }
+        }
     });
 }
 
@@ -475,16 +493,26 @@ function updateTopSellingProducts(data) {
 // ================================
 let digitalPhysicalChart;
 
+// Register plugin FIRST
+if (window.ChartDataLabels) {
+  Chart.register(window.ChartDataLabels);
+}
+
+// THEN disable datalabels globally
+Chart.defaults.set('plugins.datalabels', {
+  display: false
+});
+
 async function loadDigitalVsPhysical() {
   try {
-    const qs = buildFilterQuery();
+    const qs = buildFilterQuery(true);
     const res = await fetch(`${API_BASE}/sales/digital-vs-physical` + qs);
     const data = await res.json();
 
-    const onlineSales =
-      data.find((x) => x.sales_channel === "Online")?.total_sales || 0;
-    const retailSales =
-      data.find((x) => x.sales_channel === "Retail")?.total_sales || 0;
+    const online = data.find(x => x.sales_channel === "Online")?.total_sales || 0;
+    const retail = data.find(x => x.sales_channel === "Retail")?.total_sales || 0;
+
+    const total = online + retail;
 
     const ctx = document.getElementById("digitalPhysicalChart");
 
@@ -493,16 +521,68 @@ async function loadDigitalVsPhysical() {
     digitalPhysicalChart = new Chart(ctx, {
       type: "pie",
       data: {
-        labels: ["Online Stores", "Retail Store"],
-        datasets: [
-          {
-            data: [onlineSales, retailSales],
-            backgroundColor: ["#62374E", "#D8A232"],
-          },
-        ],
+        labels: ["Online", "Retail"],
+        datasets: [{
+          data: [online, retail],
+          backgroundColor: ["#62374E", "#AE7C34"],
+          borderColor: "#0f0f0f",
+          borderWidth: 3
+        }]
       },
-      options: { responsive: true },
+      options: {
+        maintainAspectRatio: false,
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: "right",
+            labels: {
+              color: "#fff",
+              usePointStyle: true,
+              pointStyle: "circle"
+            }
+          },
+
+          // ← ENABLE ONLY HERE
+          datalabels: {
+            display: true,
+            color: "#fff",
+            font: {
+              size: 18,
+              weight: "700"
+            },
+            formatter: (value, ctx) => {
+              const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+              return Math.round((value / total) * 100) + "%";
+            },
+            anchor: "center",
+            align: "center"
+          }
+        }
+      }
     });
+
+
+    // Custom legend box
+    document.getElementById("digitalLegend").innerHTML = `
+      <div class="legend-row">
+        <div class="legend-dot online"></div>
+        <div class="legend-text">
+          <span class="legend-label">Online Stores</span>
+          <span class="legend-value">₱${online.toLocaleString()}</span>
+          <span class="legend-percent">${((online / total) * 100).toFixed(0)}%</span>
+        </div>
+      </div>
+
+      <div class="legend-row">
+        <div class="legend-dot retail"></div>
+        <div class="legend-text">
+          <span class="legend-label">Retail Store</span>
+          <span class="legend-value">₱${retail.toLocaleString()}</span>
+          <span class="legend-percent">${((retail / total) * 100).toFixed(0)}%</span>
+        </div>
+      </div>
+    `;
   } catch (err) {
     console.error("Digital vs Physical chart failed:", err);
   }
