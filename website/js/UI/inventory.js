@@ -206,7 +206,8 @@ function updateProductCount(totalItems) {
     return data.slice(start, end);
   }
 
-  function populateTable(data = (filteredData.length ? filteredData : inventoryData)) {
+  function populateTable(data) {
+    if (!data) data = filteredData.length ? filteredData : inventoryData;
     const tbody = document.querySelector("tbody");
     tbody.innerHTML = "";
 
@@ -279,7 +280,14 @@ const searchInput = document.querySelector(".search-bar input");
 searchInput?.addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase().trim();
 
-  let data = [...inventoryData];
+  if (!searchTerm && !selectedPlatform && !selectedStock) {
+    filteredData = [];
+    populateTable(inventoryData);
+    return;
+  }
+
+  let data = inventoryData;
+  filteredData = [];
 
   // Apply platform filter if active
   if (selectedPlatform) {

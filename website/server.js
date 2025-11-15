@@ -36,12 +36,12 @@ app.get("/api/inventory", async (req, res) => {
     const query = `
       SELECT 
         'E-Commerce' AS platform,
-        p.product_name AS product_name,
-        pv.size AS size,
+        p.product_name,
+        pv.size,
         pv.variation AS color,
         COALESCE(pv.original_price, 0) AS price,
         COALESCE(p.cost, 0) AS cost,
-        COALESCE(pv.stock, 0) AS stock_count       -- <--- THIS IS CORRECT
+        COALESCE(pv.stock, 0) AS stock_count
       FROM product_dimension p
       JOIN product_variation_dimension pv 
           ON p.product_id = pv.product_id
@@ -71,14 +71,14 @@ app.post("/api/update-cost", express.json(), async (req, res) => {
     let query, params;
 
     if (product === "all") {
-      // ✅ Update ALL products in both tables
+      // Update ALL products in both tables
       query = `
         UPDATE product_dimension SET product_cost = $1;
         UPDATE retail_product_dimension SET product_cost = $1;
       `;
       params = [newCost];
     } else {
-      // ✅ Update cost for specific product name across both tables
+      // Update cost for specific product name across both tables
       query = `
         UPDATE product_dimension
         SET product_cost = $1
