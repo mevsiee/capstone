@@ -493,10 +493,15 @@ function updateTopSellingProducts(data) {
 // ================================
 let digitalPhysicalChart;
 
-// Register plugin
+// Register plugin FIRST
 if (window.ChartDataLabels) {
-  Chart.register(ChartDataLabels);
+  Chart.register(window.ChartDataLabels);
 }
+
+// THEN disable datalabels globally
+Chart.defaults.set('plugins.datalabels', {
+  display: false
+});
 
 async function loadDigitalVsPhysical() {
   try {
@@ -506,6 +511,8 @@ async function loadDigitalVsPhysical() {
 
     const online = data.find(x => x.sales_channel === "Online")?.total_sales || 0;
     const retail = data.find(x => x.sales_channel === "Retail")?.total_sales || 0;
+
+    const total = online + retail;
 
     const ctx = document.getElementById("digitalPhysicalChart");
 
@@ -535,17 +542,18 @@ async function loadDigitalVsPhysical() {
               pointStyle: "circle"
             }
           },
+
+          // ← ENABLE ONLY HERE
           datalabels: {
+            display: true,
             color: "#fff",
             font: {
               size: 18,
               weight: "700"
             },
             formatter: (value, ctx) => {
-              const total = ctx.chart.data.datasets[0].data
-                .reduce((a, b) => a + b, 0);
-              const percent = Math.round((value / total) * 100);
-              return percent + "%";
+              const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+              return Math.round((value / total) * 100) + "%";
             },
             anchor: "center",
             align: "center"
@@ -554,9 +562,8 @@ async function loadDigitalVsPhysical() {
       }
     });
 
-    // Legend below the chart (your custom box)
-    const total = online + retail;
 
+    // Custom legend box
     document.getElementById("digitalLegend").innerHTML = `
       <div class="legend-row">
         <div class="legend-dot online"></div>
@@ -576,7 +583,6 @@ async function loadDigitalVsPhysical() {
         </div>
       </div>
     `;
-
   } catch (err) {
     console.error("Digital vs Physical chart failed:", err);
   }

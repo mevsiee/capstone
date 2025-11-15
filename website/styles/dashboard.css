@@ -660,10 +660,10 @@ s
 .digital-physical-container {
   margin-top: 10px;
   background: #101010;
-  border-radius: 14px;
+  border-radius: 10px;
   border: 1px solid #1c1c1c;
-  padding: 22px;
-  flex: 1;                  /* allow equal height with top products */
+  padding: 20px;
+  flex: 1 !important;                  /* allow equal height with top products */
   display: flex;
   flex-direction: column;
 }
