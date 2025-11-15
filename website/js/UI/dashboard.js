@@ -53,6 +53,36 @@ document.addEventListener("DOMContentLoaded", () => {
   initDashboard();
 });
 
+// ================================
+// CUSTOM DROPDOWN LOGIC
+// ================================
+const dropdown = document.getElementById("topProductsDropdown");
+const dropdownBtn = document.getElementById("topProductsBtn");
+const dropdownMenu = document.getElementById("topProductsMenu");
+
+dropdownBtn.addEventListener("click", () => {
+  dropdownMenu.classList.toggle("show");
+});
+
+document.querySelectorAll("#topProductsMenu .dropdown-item").forEach(item => {
+  item.addEventListener("click", () => {
+    const value = item.dataset.value;
+    const label = item.textContent;
+
+    dropdownBtn.innerHTML = `${label} <i class="fas fa-chevron-down"></i>`;
+    dropdownMenu.classList.remove("show");
+
+    loadTopSellingProducts(value);
+  });
+});
+
+// Close dropdown when clicking outside
+document.addEventListener("click", (e) => {
+  if (!dropdown.contains(e.target)) {
+    dropdownMenu.classList.remove("show");
+  }
+});
+
 // Firebase logout function
 function handleLogout() {
   if (typeof firebase !== "undefined" && firebase.auth) {
@@ -80,10 +110,14 @@ function formatPeso(value) {
 }
 
 // Build query string for current filter
-function buildFilterQuery() {
-  if (selectedYear === null || selectedMonth === null) return "";
-  const mm = selectedMonth.toString().padStart(2, "0");
-  return `?year=${selectedYear}&month=${mm}`;
+function buildFilterQuery(includeQuestionMark = false) {
+  const now = new Date();
+  const year = selectedYear ?? now.getFullYear();
+  const month = (selectedMonth ?? now.getMonth() + 1).toString().padStart(2, "0");
+
+  return includeQuestionMark
+    ? `?year=${year}&month=${month}`
+    : `&year=${year}&month=${month}`;
 }
 
 // ================================
@@ -101,7 +135,7 @@ async function initDashboard() {
 // 1. KPI LOADERS
 // ================================
 async function loadKPIs() {
-  const qs = buildFilterQuery();
+  const qs = buildFilterQuery(true);
   const endpoints = {
     net: "/kpi/net-sales",
     gross: "/kpi/gross-sales",
@@ -147,7 +181,7 @@ function updateKpiCard(type, data) {
 // ================================
 async function loadPlatformDistribution() {
   try {
-    const qs = buildFilterQuery();
+    const qs = buildFilterQuery(true);
     const response = await fetch(`${API_BASE}/platform/distribution` + qs);
     const data = await response.json();
 
@@ -212,7 +246,7 @@ function setupTrendButtons() {
 }
 
 // ================================
-// MAIN TREND LOADER (decides mode)
+// MAIN TREND LOADER
 // ================================
 async function loadSalesTrend() {
   if (currentTrendMode === "hourly") return loadSalesTrendHourly();
@@ -221,11 +255,11 @@ async function loadSalesTrend() {
 }
 
 // ================================
-// 1) HOURLY SALES TREND (correct)
+// 1) HOURLY SALES TREND
 // ================================
 async function loadSalesTrendHourly() {
   try {
-    const qs = buildFilterQuery();
+    const qs = buildFilterQuery(true);
     const res = await fetch(`${API_BASE}/sales/trend/hourly` + qs);
     let data = await res.json();
 
@@ -253,11 +287,11 @@ async function loadSalesTrendHourly() {
 }
 
 // ================================
-// 2) DAILY SALES TREND (correct)
+// 2) DAILY SALES TREND
 // ================================
 async function loadSalesTrendDaily() {
   try {
-    const qs = buildFilterQuery();
+    const qs = buildFilterQuery(true);
     const res = await fetch(`${API_BASE}/sales/trend/daily` + qs);
     let data = await res.json();
 
@@ -287,11 +321,11 @@ async function loadSalesTrendDaily() {
 }
 
 // ================================
-// 3) MONTHLY SALES TREND (correct)
+// 3) MONTHLY SALES TREND
 // ================================
 async function loadSalesTrendMonthly() {
   try {
-    const qs = buildFilterQuery();
+    const qs = buildFilterQuery(true);
     const res = await fetch(`${API_BASE}/sales/trend/monthly` + qs);
     let data = await res.json();
 
@@ -391,6 +425,20 @@ document.addEventListener("DOMContentLoaded", () => {
 // ================================
 // 4. TOP SELLING PRODUCTS
 // ================================
+
+async function loadTopSellingProducts(platform = "all") {
+  try {
+    const res = await fetch(
+      `${API_BASE}/products/top?platform=${platform}&year=${selectedYear}&month=${selectedMonth}`
+    );
+
+    const data = await res.json();
+    updateTopSellingProducts(data);
+  } catch (e) {
+    console.error("Top products failed:", e);
+  }
+}
+
 function updateTopSellingProducts(data) {
     const container = document.getElementById("top-products");
     container.innerHTML = "";
@@ -402,21 +450,23 @@ function updateTopSellingProducts(data) {
 
     const maxSales = Math.max(...data.map(p => p.total_sales));
 
-    data.forEach(item => {
-        const width = (item.total_sales / maxSales) * 100;
+    data.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "product-row";
 
-        const row = document.createElement("div");
-        row.classList.add("product-row");
+        const widthPercent = (item.total_sales / maxSales) * 100;
 
-        row.innerHTML = `
-            <div class="product-info">
-                <div class="product-name">${item.product_name}</div>
-                <div class="product-bar" style="width:${width}%"></div>
-            </div>
-            <div class="product-sales">₱${item.total_sales.toLocaleString()}</div>
+        div.innerHTML = `
+          <div class="product-top">
+            <span class="product-name">${item.product_name}</span>
+            <span class="product-sales">${formatPeso(item.total_sales)}</span>
+          </div>
+          <div class="product-bar">
+            <div class="product-bar-fill" style="width: ${widthPercent}%"></div>
+          </div>
         `;
 
-        container.appendChild(row);
+        container.appendChild(div);
     });
 }
 

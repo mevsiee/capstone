@@ -110,35 +110,6 @@ function formatMonthKey(dateObj) {
   return `${y}-${String(m).padStart(2, "0")}-01`;
 }
 
-// ---------- CSV LOADING (FORECAST) ----------
-function parseForecastCsv(path, platformName) {
-  return new Promise((resolve, reject) => {
-    Papa.parse(path, {
-      download: true,
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        const rows = (results.data || [])
-          .filter((row) => row.ds && row.y !== undefined && row.y !== null)
-          .map((row) => ({
-            platform: platformName,
-            ds: row.ds,
-            y: Number(row.y) || 0,
-            lo95: Number(row.lo95) || 0,
-            hi95: Number(row.hi95) || 0,
-            model_use: row.model_use || "",
-            mae: Number(row.mae) || 0,
-            rmse: Number(row.rmse) || 0,
-            mape: Number(row.mape) || 0,
-            smape: Number(row.smape) || 0,
-          }));
-        resolve(rows);
-      },
-      error: (err) => reject(err),
-    });
-  });
-}
 
 // ---------- CSV LOADING (DENORMALIZED HISTORY) ----------
 function normalizePlatformName(raw) {
@@ -148,150 +119,16 @@ function normalizePlatformName(raw) {
   return "retail";
 }
 
-/**
- * denormalized_table_2025.csv → monthly sales history rows
- * Only "Completed" orders from 2025 onward are used.
- * Aggregates by (platform, month).
- */
-function parseDenormalizedHistory(path) {
-  return new Promise((resolve, reject) => {
-    Papa.parse(path, {
-      download: true,
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        const raw = results.data || [];
-
-        const byKey = {};
-        raw.forEach((row) => {
-          const status = (row.order_status || "").trim();
-          if (status !== "Completed") return;
-
-          const orderDateStr = row.order_date || "";
-          const dt = parseDate(orderDateStr);
-          if (!dt || isNaN(dt.getTime())) return;
-          if (dt.getFullYear() < 2025) return;
-
-          const platform = normalizePlatformName(row.platform_name);
-          const monthKey = formatMonthKey(dt);
-
-          let amount =
-            Number(row.order_amount) ||
-            Number(row.product_subtotal_after) ||
-            0;
-
-          const key = `${platform}|${monthKey}`;
-          if (!byKey[key]) {
-            byKey[key] = {
-              platform,
-              ds: monthKey,
-              y: 0,
-            };
-          }
-          byKey[key].y += amount;
-        });
-
-        const historyRows = Object.values(byKey);
-        resolve(historyRows);
-      },
-      error: (err) => reject(err),
-    });
-  });
-}
-
-// ---------- LOAD ALL DATA ----------
-async function loadCsvForecasts() {
-  try {
-    const historyRows = await parseDenormalizedHistory(
-      "../data/denormalized_table_2025.csv"
-    );
-
-    const [retailForecast, shopeeForecast, tiktokForecast] =
-      await Promise.all([
-        parseForecastCsv("../data/forecast_retail.csv", "retail"),
-        parseForecastCsv("../data/forecast_shopee.csv", "shopee"),
-        parseForecastCsv("../data/forecast_tiktok.csv", "tiktok"),
-      ]);
-
-    const lastHistoryPerPlatform = {};
-    historyRows.forEach((row) => {
-      const d = parseDate(row.ds);
-      const plat = row.platform;
-      if (!lastHistoryPerPlatform[plat]) {
-        lastHistoryPerPlatform[plat] = d;
-      } else if (d > lastHistoryPerPlatform[plat]) {
-        lastHistoryPerPlatform[plat] = d;
-      }
-    });
-
-    function filterForecastForPlatform(forecastRows, platformKey) {
-      const lastHistDate = lastHistoryPerPlatform[platformKey];
-      if (!lastHistDate) return forecastRows;
-      return forecastRows.filter((r) => parseDate(r.ds) > lastHistDate);
-    }
-
-    const filteredRetailForecast = filterForecastForPlatform(
-      retailForecast,
-      "retail"
-    );
-    const filteredShopeeForecast = filterForecastForPlatform(
-      shopeeForecast,
-      "shopee"
-    );
-    const filteredTiktokForecast = filterForecastForPlatform(
-      tiktokForecast,
-      "tiktok"
-    );
-
-    const historyRetail = historyRows.filter(
-      (r) => r.platform === "retail"
-    );
-    const historyShopee = historyRows.filter(
-      (r) => r.platform === "shopee"
-    );
-    const historyTiktok = historyRows.filter(
-      (r) => r.platform === "tiktok"
-    );
-
-    const metrics = computeMetricsFromRows({
-      historyByPlatform: {
-        retail: historyRetail,
-        shopee: historyShopee,
-        tiktok: historyTiktok,
-      },
-      forecastByPlatform: {
-        retail: filteredRetailForecast,
-        shopee: filteredShopeeForecast,
-        tiktok: filteredTiktokForecast,
-      },
-    });
-
-    lastMetrics = metrics;
-
-    populateSalesTab(metrics);
-    populateOrdersTab(metrics);
-    initSliders();
-  } catch (err) {
-    console.error("❌ Error loading data:", err);
-    alert("Failed to load analytics CSV data. Check console for details.");
-  }
-}
 
 // ---------- METRIC COMPUTATION ----------
 function computePlatformMetrics(historyRows, forecastRows) {
-  const currentSales = sumField(historyRows, "y");
-  const nextSales = sumField(forecastRows, "y");
+  // Take only the first record for current and next sales instead of summing
+  const currentSales = historyRows.length ? Number(historyRows[0].y) : 0;
+  const nextSales = forecastRows.length ? Number(forecastRows[0].y) : 0;
 
-  const combined = [...historyRows, ...forecastRows];
-  const len = combined.length || 1;
-
-  const mae =
-    combined.reduce((acc, r) => acc + (r.mae || 0), 0) / len;
-  const rmse =
-    combined.reduce((acc, r) => acc + (r.rmse || 0), 0) / len;
-  const mape =
-    combined.reduce((acc, r) => acc + (r.mape || 0), 0) / len;
+  const mae = forecastRows.reduce((acc, r) => acc + (r.mae || 0), 0) / forecastRows.length;
+  const rmse = forecastRows.reduce((acc, r) => acc + (r.rmse || 0), 0) / forecastRows.length;
+  const mape = forecastRows.reduce((acc, r) => acc + (r.mape || 0), 0) / forecastRows.length;
 
   return {
     currentSales,
@@ -323,37 +160,43 @@ function computeSMAPE(actual, predicted) {
 
 
 function computeChartSeries(historyRowsAll, forecastRowsAll) {
+
+  // Merge and sort
   const allRows = [...historyRowsAll, ...forecastRowsAll].sort(
     (a, b) => parseDate(a.ds) - parseDate(b.ds)
   );
 
   const labels = [...new Set(allRows.map((r) => r.ds))];
 
-  const historyTotals = {};
-  historyRowsAll.forEach((row) => {
-    historyTotals[row.ds] =
-      (historyTotals[row.ds] || 0) + (row.y || 0);
+  const ecommercePlatforms = ["shopee", "tiktok"];
+
+  const historyEcom = {};
+  const historyRetail = {};
+  const forecastEcom = {};
+  const forecastRetail = {};
+
+  // Overwrite values instead of summing
+  allRows.forEach((row) => {
+    const isHistory = row.isHistory === true;
+    const isEcom = ecommercePlatforms.includes(row.platform);
+    const bucket = isHistory
+      ? (isEcom ? historyEcom : historyRetail)
+      : (isEcom ? forecastEcom : forecastRetail);
+
+    bucket[row.ds] = Number(row.y);  // Overwrite, no sum
   });
 
-  const forecastTotals = {};
-  forecastRowsAll.forEach((row) => {
-    forecastTotals[row.ds] =
-      (forecastTotals[row.ds] || 0) + (row.y || 0);
-  });
-
-  const currentSeries = labels.map((d) =>
-    historyTotals[d] !== undefined ? historyTotals[d] : null
-  );
-  const forecastSeries = labels.map((d) =>
-    forecastTotals[d] !== undefined ? forecastTotals[d] : null
-  );
-
+  // Align series to labels
   return {
     labels,
-    currentSeries,
-    forecastSeries,
+    currentEcom: labels.map((d) => historyEcom[d]),
+    currentRetail: labels.map((d) => historyRetail[d]),
+    forecastEcomSeries: labels.map((d) => forecastEcom[d]),
+    forecastRetailSeries: labels.map((d) => forecastRetail[d]),
   };
 }
+
+
 
 function computeMetricsFromRows({
   historyByPlatform,
@@ -661,13 +504,6 @@ function populateSalesTab(m) {
 
   const leadLabel = platformLabelMap[leadingPlatform] || "Retail Stores";
 
-  setText(
-    "salesSummary",
-    `The forecast for total sales indicates upcoming ${m.growthRate >= 0 ? "growth" : "contraction"} over the next quarter. ` +
-      `${leadLabel} is expected to contribute the largest share of forecasted revenue based on current model outputs. ` +
-      `Use these projections to fine-tune inventory, marketing mix, and pricing while monitoring error metrics (MAE/RMSE/MAPE) for stability.`
-  );
-
   // KPIs
   setText("salesCurrent", formatPeso(m.totalCurrent));
   setText("salesNext", formatPeso(m.totalNext));
@@ -691,15 +527,22 @@ function populateSalesTab(m) {
   setText("salesMAPE", m.mape.toFixed(2) + "%");
 
   // --- SMAPE for sales ---
-  const salesActual = m.chartData.currentSeries.filter(v => v !== null);
-  const salesPredicted = m.chartData.forecastSeries.filter(v => v !== null);
+  // Combine e-commerce + retail into total actual
+  const salesActual = m.chartData.labels.map((_, i) => {
+    const ec = m.chartData.currentEcom[i] ?? 0;
+    const rt = m.chartData.currentRetail[i] ?? 0;
+    return ec + rt;
+  });
+
+  // Combine e-commerce + retail into total forecast
+  const salesPredicted = m.chartData.labels.map((_, i) => {
+    const ec = m.chartData.forecastEcomSeries[i] ?? 0;
+    const rt = m.chartData.forecastRetailSeries[i] ?? 0;
+    return ec + rt;
+  });
+
   const smapeSales = computeSMAPE(salesActual, salesPredicted);
-
   setText("salesSMAPE", smapeSales.toFixed(2) + "%");
-
-
-  // Update allocation-related UI
-  updateBudgetAllocation(m);
 
   // Chart
   renderSalesChart(m.chartData);
@@ -718,24 +561,38 @@ function renderSalesChart(chartData) {
     data: {
       labels: chartData.labels,
       datasets: [
-        {
-          label: "Current Sales",
-          data: chartData.currentSeries,
-          borderColor: "#f5b400",
-          backgroundColor: "transparent",
-          borderWidth: 2,
-          tension: 0.3,
-        },
-        {
-          label: "Projected Sales",
-          data: chartData.forecastSeries,
-          borderColor: "#ffffff",
-          backgroundColor: "transparent",
-          borderWidth: 2,
-          borderDash: [6, 6],
-          tension: 0.3,
-        },
-      ],
+  {
+    label: "E-Commerce (Current)",
+    data: chartData.currentEcom,
+    borderColor: "#00c2ff",
+    borderWidth: 2,
+    tension: 0.3,
+  },
+  {
+    label: "E-Commerce (Projected)",
+    data: chartData.forecastEcomSeries,
+    borderColor: "#00c2ff",
+    borderDash: [6, 6],
+    borderWidth: 2,
+    tension: 0.3,
+  },
+  {
+    label: "Retail (Current)",
+    data: chartData.currentRetail,
+    borderColor: "#f5b400",
+    borderWidth: 2,
+    tension: 0.3,
+  },
+  {
+    label: "Retail (Projected)",
+    data: chartData.forecastRetailSeries,
+    borderColor: "#f5b400",
+    borderDash: [6, 6],
+    borderWidth: 2,
+    tension: 0.3,
+  },
+]
+
     },
     options: {
       responsive: true,
@@ -754,7 +611,12 @@ function renderSalesChart(chartData) {
         y: {
           ticks: { color: "#fff" },
           grid: { color: "#333" },
-        },
+
+          beginAtZero: true,
+
+          min: 0,
+          max: 2000000,    // ← HARD LIMIT, exactly 4M
+        }
       },
     },
   });
@@ -768,14 +630,6 @@ function populateOrdersTab(m) {
     ordersCurrent > 0
       ? ((ordersNext - ordersCurrent) / ordersCurrent) * 100
       : 0;
-
-  setText(
-    "ordersSummary",
-    `Order volume is projected to change by ${growth.toFixed(
-      1
-    )}% next period based on current sales forecasts. ` +
-      `Use this as a guide for staffing, warehousing, and fulfillment capacity planning.`
-  );
 
   setText("ordersCurrent", ordersCurrent.toLocaleString());
   setText("ordersNext", ordersNext.toLocaleString());
@@ -796,11 +650,21 @@ function populateOrdersTab(m) {
   setText("ordersMAPE", m.mape.toFixed(2) + "%");
 
   // --- SMAPE for orders ---
-  const ordersActual = m.chartData.currentSeries.filter(v => v !== null).map(v => v / 500);
-  const ordersPredicted = m.chartData.forecastSeries.filter(v => v !== null).map(v => v / 500);
-  const smapeOrders = computeSMAPE(ordersActual, ordersPredicted);
+  const ordersActual = m.chartData.labels.map((_, i) => {
+  const ec = (m.chartData.currentEcom[i] ?? 0) / 500;
+  const rt = (m.chartData.currentRetail[i] ?? 0) / 500;
+  return ec + rt;
+  });
 
+  const ordersPredicted = m.chartData.labels.map((_, i) => {
+    const ec = (m.chartData.forecastEcomSeries[i] ?? 0) / 500;
+    const rt = (m.chartData.forecastRetailSeries[i] ?? 0) / 500;
+    return ec + rt;
+  });
+
+  const smapeOrders = computeSMAPE(ordersActual, ordersPredicted);
   setText("ordersSMAPE", smapeOrders.toFixed(2) + "%");
+
 
 
   const AVERAGE_ORDER_VALUE = 500;
@@ -834,12 +698,18 @@ function renderOrdersChart(chartData, aov) {
     ordersChartInstance.destroy();
   }
 
-  const currentOrders = chartData.currentSeries.map((v) =>
-    v == null ? null : v / aov
-  );
-  const forecastOrders = chartData.forecastSeries.map((v) =>
-    v == null ? null : v / aov
-  );
+  // Build orders based on new structure
+  const currentOrders = chartData.labels.map((d, i) => {
+    const ec = chartData.currentEcom[i] ?? 0;
+    const rt = chartData.currentRetail[i] ?? 0;
+    return (ec + rt) / aov;
+  });
+
+  const forecastOrders = chartData.labels.map((d, i) => {
+    const ec = chartData.forecastEcomSeries[i] ?? 0;
+    const rt = chartData.forecastRetailSeries[i] ?? 0;
+    return (ec + rt) / aov;
+  });
 
   ordersChartInstance = new Chart(ctx, {
     type: "line",
@@ -850,7 +720,6 @@ function renderOrdersChart(chartData, aov) {
           label: "Current Orders",
           data: currentOrders,
           borderColor: "#00c2ff",
-          backgroundColor: "transparent",
           borderWidth: 2,
           tension: 0.3,
         },
@@ -858,9 +727,8 @@ function renderOrdersChart(chartData, aov) {
           label: "Projected Orders",
           data: forecastOrders,
           borderColor: "#ffffff",
-          backgroundColor: "transparent",
-          borderWidth: 2,
           borderDash: [6, 6],
+          borderWidth: 2,
           tension: 0.3,
         },
       ],
@@ -869,24 +737,17 @@ function renderOrdersChart(chartData, aov) {
       responsive: true,
       plugins: {
         legend: {
-          labels: {
-            color: "#fff",
-          },
+          labels: { color: "#fff" },
         },
       },
       scales: {
-        x: {
-          ticks: { color: "#fff" },
-          grid: { color: "#333" },
-        },
-        y: {
-          ticks: { color: "#fff" },
-          grid: { color: "#333" },
-        },
+        x: { ticks: { color: "#fff" }, grid: { color: "#333" } },
+        y: { ticks: { color: "#fff" }, grid: { color: "#333" } },
       },
     },
   });
 }
+
 
 // ---------- SLIDERS / WHAT-IF (orders tab only) ----------
 function initSliders() {
@@ -958,11 +819,58 @@ function setupTabs() {
   });
 }
 
+// ---------- LOAD ALL DATA FROM NEONDB ----------
+async function loadNeonData() {
+  try {
+    // Load history (denormalized_table)
+    const histResp = await fetch("http://localhost:5000/api/history");
+    const history = await histResp.json();
+
+    // Load forecast (forecast table)
+    const foreResp = await fetch("http://localhost:5000/api/forecast");
+    const forecast = await foreResp.json();
+
+    // Mark rows so computeChartSeries can distinguish history vs forecast
+    history.forEach(r => r.isHistory = true);
+    forecast.forEach(r => r.isHistory = false);
+
+    // Split by platform
+    const historyByPlatform = {
+      retail: history.filter(r => r.platform === "retail"),
+      shopee: history.filter(r => r.platform === "shopee"),
+      tiktok: history.filter(r => r.platform === "tiktok"),
+    };
+
+    const forecastByPlatform = {
+      retail: forecast.filter(r => r.platform === "retail"),
+      shopee: forecast.filter(r => r.platform === "shopee"),
+      tiktok: forecast.filter(r => r.platform === "tiktok"),
+    };
+
+    // Compute metrics
+    const metrics = computeMetricsFromRows({
+      historyByPlatform,
+      forecastByPlatform
+    });
+
+    lastMetrics = metrics;
+
+    populateSalesTab(metrics);
+    populateOrdersTab(metrics);
+    initSliders();
+
+  } catch (err) {
+    console.error("❌ Failed to load NeonDB analytics:", err);
+    alert("Failed to load analytics data. Check console for details.");
+  }
+}
+
+
 // ---------- INIT ----------
 document.addEventListener("DOMContentLoaded", () => {
   setupFirebaseAuth();
   setupTabs();
-  loadCsvForecasts();
+  loadNeonData();
 
   attachOverrideWatcher("retailMarginInput");
   attachOverrideWatcher("shopeeMarginInput");

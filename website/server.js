@@ -109,5 +109,74 @@ app.post("/api/update-cost", express.json(), async (req, res) => {
   }
 });
 
+
+// ========================================
+// GET /api/history
+// Pulls 2025+ completed sales from denormalized_table
+// ========================================
+app.get("/api/history", async (req, res) => {
+  try {
+    const sql = `
+          SELECT 
+          LOWER(platform_name) AS platform,
+          TO_CHAR(DATE_TRUNC('month', order_date), 'YYYY-MM-01') AS ds,
+          SUM(order_amount) AS y
+        FROM denormalized_table
+        WHERE LOWER(order_status) = 'completed'
+          AND EXTRACT(YEAR FROM order_date) = 2025
+        GROUP BY 
+          LOWER(platform_name),
+          DATE_TRUNC('month', order_date)
+        ORDER BY 
+          platform ASC,
+          ds ASC;
+    `;
+
+    const result = await pool.query(sql);
+    res.json(result.rows);
+
+  } catch (err) {
+    console.error("❌ Error fetching history:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
+app.get("/api/forecast", async (req, res) => {
+  try {
+    const sql = `
+      SELECT
+        CASE
+          WHEN LOWER(platform) LIKE '%shopee%' THEN 'shopee'
+          WHEN LOWER(platform) LIKE '%tiktok%' THEN 'tiktok'
+          WHEN LOWER(platform) IN ('retail', 'pos', 'instore', 'in-store', 'store')
+            OR LOWER(platform) LIKE '%retail%'
+            OR LOWER(platform) LIKE '%pos%'
+            THEN 'retail'
+          ELSE 'retail'
+        END AS platform,
+
+        -- Force date into YYYY-MM-01 to match history endpoint
+        TO_CHAR(DATE_TRUNC('month', ds), 'YYYY-MM-01') AS ds,
+
+        forecast_value AS y
+      FROM forecast
+      WHERE DATE_PART('year', ds) = 2025   -- ensure same year as history
+      ORDER BY ds ASC, platform ASC;
+    `;
+
+    const result = await pool.query(sql);
+    res.json(result.rows);
+
+  } catch (err) {
+    console.error("❌ Error fetching forecast:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
+
 const PORT = 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
