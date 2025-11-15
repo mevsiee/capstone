@@ -160,7 +160,11 @@ app.get("/api/forecast", async (req, res) => {
         -- Force date into YYYY-MM-01 to match history endpoint
         TO_CHAR(DATE_TRUNC('month', ds), 'YYYY-MM-01') AS ds,
 
-        forecast_value AS y
+        forecast_value AS y,
+        mae,
+        rmse,
+        mape,
+        smape
       FROM forecast
       WHERE DATE_PART('year', ds) = 2025   -- ensure same year as history
       ORDER BY ds ASC, platform ASC;
