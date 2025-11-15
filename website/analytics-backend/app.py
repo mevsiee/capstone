@@ -217,4 +217,5 @@ def route_digital_physical(request: Request):
     else:
         year = int(year_param)
         month = int(month_param)
+
     return get_digital_vs_physical(engine, year, month)

@@ -1,19 +1,20 @@
 import pandas as pd
-from sqlalchemy.sql import text
-from endpoints.sql_loader import load_sql
+from sqlalchemy import text
 
+def get_digital_vs_physical(engine, year: int, month: int):
+    sql = open("sql/digital_vs_physical.sql", "r", encoding="utf-8").read()
 
-def get_digital_vs_physical(engine):
-    sql = load_sql("digital_vs_physical.sql")
     with engine.connect() as conn:
-        df = pd.read_sql(text(sql), conn)
-
-    rows = []
-    for _, r in df.iterrows():
-        rows.append(
-            {
-                "sales_channel": r["sales_channel"],
-                "total_sales": float(r["total_sales"]),
-            }
+        df = pd.read_sql(
+            text(sql),
+            conn,
+            params={"year": year, "month": month}
         )
-    return rows
+
+    online = float(df[df["sales_channel"] == "Online"]["total_sales"].sum() or 0)
+    retail = float(df[df["sales_channel"] == "Retail"]["total_sales"].sum() or 0)
+
+    return [
+        {"sales_channel": "Online", "total_sales": online},
+        {"sales_channel": "Retail", "total_sales": retail}
+    ]
