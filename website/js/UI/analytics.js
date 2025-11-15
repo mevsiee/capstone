@@ -1,5 +1,5 @@
 /* ============================================================
-   ANALYTICS.JS  (DENORMALIZED + FORECAST CSV VERSION)
+   ANALYTICS.JS 
    ============================================================ */
 
 console.log("📊 analytics.js (denormalized + forecast CSV version) loaded");
@@ -159,122 +159,107 @@ function computeSMAPE(actual, predicted) {
 }
 
 
-function computeChartSeries(historyRowsAll, forecastRowsAll) {
+function computeChartSeries(history, forecast) {
+  const allRows = [
+    ...history.retail,
+    ...history.ecommerce,
+    ...forecast.retail,
+    ...forecast.ecommerce
+  ].sort((a, b) => parseDate(a.ds) - parseDate(b.ds));
 
-  // Merge and sort
-  const allRows = [...historyRowsAll, ...forecastRowsAll].sort(
-    (a, b) => parseDate(a.ds) - parseDate(b.ds)
-  );
-
-  const labels = [...new Set(allRows.map((r) => r.ds))];
-
-  const ecommercePlatforms = ["shopee", "tiktok"];
+  const labels = [...new Set(allRows.map(r => r.ds))];
 
   const historyEcom = {};
   const historyRetail = {};
   const forecastEcom = {};
   const forecastRetail = {};
 
-  // Overwrite values instead of summing
-  allRows.forEach((row) => {
-    const isHistory = row.isHistory === true;
-    const isEcom = ecommercePlatforms.includes(row.platform);
-    const bucket = isHistory
+  allRows.forEach(row => {
+    const isHist = row.isHistory === true;
+    const isEcom = row.platform === "tiktok" || row.platform === "shopee";
+
+    const bucket = isHist
       ? (isEcom ? historyEcom : historyRetail)
       : (isEcom ? forecastEcom : forecastRetail);
 
-    bucket[row.ds] = Number(row.y);  // Overwrite, no sum
+    bucket[row.ds] = Number(row.y);
   });
 
-  // Align series to labels
   return {
     labels,
-    currentEcom: labels.map((d) => historyEcom[d]),
-    currentRetail: labels.map((d) => historyRetail[d]),
-    forecastEcomSeries: labels.map((d) => forecastEcom[d]),
-    forecastRetailSeries: labels.map((d) => forecastRetail[d]),
+    currentEcom: labels.map(d => historyEcom[d] ?? null),
+    currentRetail: labels.map(d => historyRetail[d] ?? null),
+    forecastEcomSeries: labels.map(d => forecastEcom[d] ?? null),
+    forecastRetailSeries: labels.map(d => forecastRetail[d] ?? null),
   };
 }
 
-
-
-function computeMetricsFromRows({
-  historyByPlatform,
-  forecastByPlatform,
-}) {
+function computeMetricsFromRows({ historyByPlatform, forecastByPlatform }) {
+  
   const retail = computePlatformMetrics(
     historyByPlatform.retail,
     forecastByPlatform.retail
   );
-  const shopee = computePlatformMetrics(
-    historyByPlatform.shopee,
-    forecastByPlatform.shopee
-  );
-  const tiktok = computePlatformMetrics(
-    historyByPlatform.tiktok,
-    forecastByPlatform.tiktok
+
+  const ecommerce = computePlatformMetrics(
+    historyByPlatform.ecommerce,
+    forecastByPlatform.ecommerce
   );
 
-  const totalCurrent =
-    retail.currentSales + shopee.currentSales + tiktok.currentSales;
-  const totalNext =
-    retail.nextSales + shopee.nextSales + tiktok.nextSales;
+  const totalCurrent = retail.currentSales + ecommerce.currentSales;
+  const totalNext = retail.nextSales + ecommerce.nextSales;
 
   baselineSalesCurrent = totalCurrent;
   baselineSalesNext = totalNext;
 
-  const AVERAGE_ORDER_VALUE = 500;
-  baselineOrdersCurrent = totalCurrent / AVERAGE_ORDER_VALUE;
-  baselineOrdersNext = totalNext / AVERAGE_ORDER_VALUE;
+  const AOV = 500;
+  baselineOrdersCurrent = totalCurrent / AOV;
+  baselineOrdersNext = totalNext / AOV;
 
   platformNextSales = {
     retail: retail.nextSales,
-    shopee: shopee.nextSales,
-    tiktok: tiktok.nextSales,
+    shopee: forecastByPlatform.ecommerce   // stays for budget tab
+      .filter(r => r.platform === "shopee")
+      .reduce((a, r) => a + r.y, 0),
+    tiktok: forecastByPlatform.ecommerce   // stays for budget tab
+      .filter(r => r.platform === "tiktok")
+      .reduce((a, r) => a + r.y, 0)
   };
 
-  const growthRate =
-    totalCurrent > 0
-      ? ((totalNext - totalCurrent) / totalCurrent) * 100
-      : 0;
-
+  // combine all ecommerce forecast rows for validation
   const allForecastRows = [
     ...forecastByPlatform.retail,
-    ...forecastByPlatform.shopee,
-    ...forecastByPlatform.tiktok,
+    ...forecastByPlatform.ecommerce
   ];
+
   const denom = allForecastRows.length || 1;
-  const allMae =
-    allForecastRows.reduce((acc, r) => acc + (r.mae || 0), 0) /
-    denom;
-  const allRmse =
-    allForecastRows.reduce((acc, r) => acc + (r.rmse || 0), 0) /
-    denom;
-  const allMape =
-    allForecastRows.reduce((acc, r) => acc + (r.mape || 0), 0) /
-    denom;
 
-  const historyAll = [
-    ...historyByPlatform.retail,
-    ...historyByPlatform.shopee,
-    ...historyByPlatform.tiktok,
-  ];
+  const allMae = allForecastRows.reduce((a, r) => a + (r.mae || 0), 0) / denom;
+  const allRmse = allForecastRows.reduce((a, r) => a + (r.rmse || 0), 0) / denom;
+  const allMape = allForecastRows.reduce((a, r) => a + (r.mape || 0), 0) / denom;
 
-  const chartData = computeChartSeries(historyAll, allForecastRows);
+  const chartData = computeChartSeries(
+    historyByPlatform,
+    forecastByPlatform
+  );
+
+  const growthRate = totalCurrent > 0
+    ? ((totalNext - totalCurrent) / totalCurrent) * 100
+    : 0;
 
   return {
     totalCurrent,
     totalNext,
     growthRate,
     retail,
-    shopee,
-    tiktok,
+    ecommerce,
     mae: allMae,
     rmse: allRmse,
     mape: allMape,
     chartData,
   };
 }
+
 
 function attachOverrideWatcher(inputId) {
     const el = document.getElementById(inputId);
@@ -822,32 +807,36 @@ function setupTabs() {
 // ---------- LOAD ALL DATA FROM NEONDB ----------
 async function loadNeonData() {
   try {
-    // Load history (denormalized_table)
     const histResp = await fetch("http://localhost:5000/api/history");
     const history = await histResp.json();
 
-    // Load forecast (forecast table)
     const foreResp = await fetch("http://localhost:5000/api/forecast");
     const forecast = await foreResp.json();
 
-    // Mark rows so computeChartSeries can distinguish history vs forecast
+    console.log("🔥 RAW HISTORY ROWS:", history);
+    console.log("🔥 RAW FORECAST ROWS:", forecast);
+
+    console.log("HISTORY PLATFORMS:", [...new Set(history.map(r => r.platform))]);
+    console.log("FORECAST PLATFORMS:", [...new Set(forecast.map(r => r.platform))]);
+
+
+    // Mark rows
     history.forEach(r => r.isHistory = true);
     forecast.forEach(r => r.isHistory = false);
 
-    // Split by platform
+    // PLATFORM GROUPING (Option A)
     const historyByPlatform = {
       retail: history.filter(r => r.platform === "retail"),
-      shopee: history.filter(r => r.platform === "shopee"),
-      tiktok: history.filter(r => r.platform === "tiktok"),
+      ecommerce: history.filter(r => r.platform === "shopee" || r.platform === "tiktok"),
     };
 
     const forecastByPlatform = {
       retail: forecast.filter(r => r.platform === "retail"),
-      shopee: forecast.filter(r => r.platform === "shopee"),
-      tiktok: forecast.filter(r => r.platform === "tiktok"),
+      ecommerce: forecast.filter(r => r.platform === "shopee" || r.platform === "tiktok"),
     };
 
-    // Compute metrics
+
+    // COMPUTE METRICS
     const metrics = computeMetricsFromRows({
       historyByPlatform,
       forecastByPlatform
@@ -864,6 +853,7 @@ async function loadNeonData() {
     alert("Failed to load analytics data. Check console for details.");
   }
 }
+
 
 
 // ---------- INIT ----------

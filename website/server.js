@@ -141,8 +141,6 @@ app.get("/api/history", async (req, res) => {
   }
 });
 
-
-
 app.get("/api/forecast", async (req, res) => {
   try {
     const sql = `
@@ -150,14 +148,12 @@ app.get("/api/forecast", async (req, res) => {
         CASE
           WHEN LOWER(platform) LIKE '%shopee%' THEN 'shopee'
           WHEN LOWER(platform) LIKE '%tiktok%' THEN 'tiktok'
-          WHEN LOWER(platform) IN ('retail', 'pos', 'instore', 'in-store', 'store')
-            OR LOWER(platform) LIKE '%retail%'
-            OR LOWER(platform) LIKE '%pos%'
-            THEN 'retail'
+          WHEN LOWER(platform) LIKE '%tiktoc%' THEN 'tiktok'
+          WHEN LOWER(platform) LIKE '%retail%' THEN 'retail'
+          WHEN LOWER(platform) LIKE '%pos%' THEN 'retail'
           ELSE 'retail'
         END AS platform,
 
-        -- Force date into YYYY-MM-01 to match history endpoint
         TO_CHAR(DATE_TRUNC('month', ds), 'YYYY-MM-01') AS ds,
 
         forecast_value AS y,
@@ -165,8 +161,9 @@ app.get("/api/forecast", async (req, res) => {
         rmse,
         mape,
         smape
+
       FROM forecast
-      WHERE DATE_PART('year', ds) = 2025   -- ensure same year as history
+      WHERE DATE_PART('year', ds) = 2025
       ORDER BY ds ASC, platform ASC;
     `;
 
@@ -178,7 +175,6 @@ app.get("/api/forecast", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 
 
