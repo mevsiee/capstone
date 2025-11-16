@@ -146,13 +146,25 @@ app.get("/api/forecast", async (req, res) => {
     const sql = `
       SELECT
         CASE
-          WHEN LOWER(platform) LIKE '%shopee%' THEN 'shopee'
-          WHEN LOWER(platform) LIKE '%tiktok%' THEN 'tiktok'
-          WHEN LOWER(platform) LIKE '%tiktoc%' THEN 'tiktok'
-          WHEN LOWER(platform) LIKE '%retail%' THEN 'retail'
-          WHEN LOWER(platform) LIKE '%pos%' THEN 'retail'
-          ELSE 'retail'
-        END AS platform,
+      -- Detect Shopee-related platforms
+      WHEN LOWER(platform) LIKE '%shopee%'
+        OR LOWER(platform) LIKE '%shop%'
+        OR LOWER(platform) LIKE '%ecom%'
+          THEN 'shopee'
+
+      -- Detect TikTok
+      WHEN LOWER(platform) LIKE '%tiktok%'
+        OR LOWER(platform) LIKE '%tiktoc%'
+          THEN 'tiktok'
+
+      -- Detect Retail
+      WHEN LOWER(platform) LIKE '%retail%'
+        OR LOWER(platform) LIKE '%pos%'
+        OR LOWER(platform) LIKE '%store%'
+          THEN 'retail'
+
+      ELSE 'retail'
+    END AS platform,
 
         TO_CHAR(DATE_TRUNC('month', ds), 'YYYY-MM-01') AS ds,
 
