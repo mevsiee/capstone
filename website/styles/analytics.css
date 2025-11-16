@@ -109,7 +109,7 @@ body {
     border-radius: 15px;
     padding: 20px;
     border: 1px solid #222;
-    margin-bottom: 22px;
+    margin-bottom: 12px;       /* slightly tighter default spacing */
 }
 
 .card-header h3 {
@@ -122,20 +122,6 @@ body {
     font-size: 0.85rem;
 }
 
-/* ==== SUMMARY CARD ==== */
-
-.summary-card h3 {
-    margin-bottom: 10px;
-    font-size: 1.3rem;
-    font-weight: 600;
-}
-
-.summary-card p {
-    font-size: 0.95rem;
-    line-height: 1.5;
-    color: #ddd;
-}
-
 /* ==== KPI ROW ==== */
 
 .kpi-row {
@@ -145,7 +131,6 @@ body {
     margin-bottom: 25px;
 }
 
-/* LEFT-ALIGN ALL KPI CARD TEXT */
 .kpi-card {
     display: flex;
     flex-direction: column;
@@ -198,23 +183,27 @@ body {
 
 .analytics-main-grid {
     display: grid;
-    grid-template-columns: 1.6fr 0.8fr;
-    gap: 20px;
+    grid-template-columns: 2fr 1fr;   /* bigger chart vs side stack */
+    gap: 22px;
     width: 100%;
-    margin-bottom: 25px;
+    align-items: stretch;             /* chart column matches right height */
+    margin-bottom: 0 !important;               /* ⬅ remove extra gap under grid */
 }
 
-/* Expand and center the chart */
+/* Chart column fills whole grid row height */
 .chart-card {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    align-self: stretch;     /* stretch to full height of grid row */
+    height: auto !important; /* override previous height */
+    margin-bottom: 25px;
 }
 
+
 .chart-wrapper {
+    flex: 1;                          /* ⬅ occupy remaining height */
     width: 100%;
-    height: 500px;
+    min-height: 580px;                /* keeps it tall enough */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -240,6 +229,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    width: 100%;
 }
 
 /* Side panel */
@@ -278,12 +268,19 @@ body {
     font-weight: 600;
 }
 
-/* ==== OPTIMAL BUDGET ALLOCATION ==== */
+/* ==== PRODUCT STOCK ALLOCATION ==== */
 
 .allocation-card {
     background: #15120a;
     border: 1px solid #f5b400;
+    width: 100%;
+    padding: 30px 28px;          /* more inner padding */
+    box-sizing: border-box;
+    min-height: 400px;           /* taller panel */
+    border-radius: 14px;         /* smoother corners */
+    font-size: 1.3rem;
 }
+
 
 .allocation-list {
     list-style: none;
@@ -299,8 +296,7 @@ body {
     padding: 4px 0;
 }
 
-/* ==== Allocation Input Fields (NEW) ==== */
-
+/* Allocation input styling */
 .allocation-input {
     width: 80px;
     background: #222;
@@ -345,77 +341,35 @@ body {
     justify-content: center;
 }
 
-/* ==== SLIDERS (orders tab) ==== */
-
-.slider-group {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.slider-row {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.slider-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9rem;
-}
-
-input[type="range"] {
-    width: 100%;
-    appearance: none;
-    height: 6px;
-    border-radius: 4px;
-    background: #333;
-    cursor: pointer;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    background: #f5b400;
-    border-radius: 50%;
-}
-
-.slider-caption {
-    font-size: 0.75rem;
-    color: #888;
-}
-
-/* ==== WHAT-IF IMPACT ==== */
-
-.impact-summary {
-    margin-top: 15px;
-    padding-top: 12px;
+/* allocation result text */
+.allocation-result {
+    margin-top: 18px;
+    padding-top: 10px;
     border-top: 1px solid #222;
 }
 
-.impact-title {
+.allocation-result-title {
     font-size: 0.95rem;
-    color: #ccc;
+    font-weight: 600;
+    margin-bottom: 6px;
 }
 
-.impact-figure {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-top: 10px;
+.manual-override {
+    background: #113d11 !important;
+    color: #c8ffc8 !important;
 }
 
-.impact-subtitle {
-    margin-top: 5px;
-    font-size: 0.85rem;
-    color: #bbb;
+.manual-tag {
+  font-size: 11px;
+  color: #00e676;
+  margin-left: 6px;
+  font-weight: bold;
 }
 
-/* ==== PLATFORM ALLOCATION GRID ==== */
+/* ==== PLATFORM ALLOCATION GRID (UNDER SALES CHART) ==== */
 
 .breakdown-card {
-    margin-top: 10px;
+     margin-top: 0 !important;               /* ⬅ very small gap under grid */
 }
 
 .platform-allocation-grid {
@@ -454,35 +408,7 @@ input[type="range"]::-webkit-slider-thumb {
     color: #f5b400;
 }
 
-/* allocation result text */
-
-.allocation-result {
-    margin-top: 18px;
-    padding-top: 10px;
-    border-top: 1px solid #222;
-}
-
-.allocation-result-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin-bottom: 6px;
-}
-
-.manual-override {
-    background: #113d11 !important;
-    color: #c8ffc8 !important;
-}
-
-
-.manual-tag {
-  font-size: 11px;
-  color: #00e676;
-  margin-left: 6px;
-  font-weight: bold;
-}
-
-
-/* ==== SIMPLE ORDERS BREAKDOWN (unchanged) ==== */
+/* ==== SIMPLE ORDERS BREAKDOWN (UNDER ORDERS CHART) ==== */
 
 .breakdown-grid {
     display: grid;
@@ -510,7 +436,39 @@ input[type="range"]::-webkit-slider-thumb {
     font-weight: 700;
 }
 
+/* Scale up all text & inputs inside the allocation card */
+.allocation-card {
+    font-size: 1.3rem;    /* increase overall size */
+}
+
+/* Make inputs match the larger text size */
+.allocation-card select,
+.allocation-card input {
+    font-size: 1.2rem;
+    padding: 10px 12px;
+}
+
+/* Scale labels inside the card */
+.allocation-card label,
+.allocation-card .side-description,
+.allocation-card .allocation-list li,
+.allocation-card .allocation-result-title {
+    font-size: 1.3rem;
+}
+
+/* Button bigger too */
+.allocation-card button {
+    font-size: 1rem;
+    padding: 12px 16px;
+}
+
+
 /* ==== RESPONSIVE ==== */
+
+#sales-tab .allocation-card,
+#orders-tab .allocation-card {
+    max-width: 100%;
+}
 
 @media (max-width: 1100px) {
     .analytics-main-grid {

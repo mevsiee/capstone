@@ -35,17 +35,15 @@ app.get("/api/inventory", async (req, res) => {
   try {
     const query = `
       SELECT 
-        'E-Commerce' AS platform,
         p.product_name,
-        pv.size,
-        pv.variation AS color,
-        COALESCE(pv.original_price, 0) AS price,
-        COALESCE(p.cost, 0) AS cost,
-        COALESCE(pv.stock, 0) AS stock_count
+        SUM(COALESCE(pv.stock, 0)) AS total_stock,
+        AVG(COALESCE(pv.original_price, 0)) AS average_price,
+        AVG(COALESCE(p.cost, 0)) AS average_cost
       FROM product_dimension p
       JOIN product_variation_dimension pv 
           ON p.product_id = pv.product_id
       WHERE p.product_status = 'A'
+      GROUP BY p.product_name
       ORDER BY p.product_name ASC;
     `;
 
@@ -186,7 +184,39 @@ app.get("/api/forecast", async (req, res) => {
     console.error("❌ Error fetching forecast:", err);
     res.status(500).json({ error: err.message });
   }
+
+  app.get("/api/sales-breakdown", async (req, res) => {
+  try {
+    const sql = `
+      SELECT 
+        LOWER(platform_name) AS platform,
+        SUM(order_amount) AS total_sales
+      FROM denormalized_table
+      WHERE LOWER(order_status) = 'completed'
+        AND DATE_PART('year', order_date) = 2025
+      GROUP BY LOWER(platform_name);
+    `;
+
+    const result = await pool.query(sql);
+
+    // Compute percentages
+    const total = result.rows.reduce((acc, row) => acc + Number(row.total_sales), 0);
+
+    const breakdown = result.rows.map(row => ({
+      platform: row.platform,
+      percent: total > 0 ? (row.total_sales / total) * 100 : 0
+    }));
+
+    res.json(breakdown);
+
+  } catch (err) {
+    console.error("❌ Error calculating breakdown:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
+
+});
+
 
 
 
