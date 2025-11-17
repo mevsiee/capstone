@@ -386,6 +386,7 @@ function renderTrendChart(labels, datasetMap, mode) {
       }))
     },
     options: {
+      maintainAspectRatio: false,
       responsive: true,
       plugins: {
         legend: { position: "right" }
@@ -448,27 +449,28 @@ function updateTopSellingProducts(data) {
     if (topProductsChart) topProductsChart.destroy();
 
     const labels = data.map(item => item.product_name);
-    const values = data.map(item => item.total_sales);
+    const values = data.map(item => item.total_quantity);
 
     topProductsChart = new Chart(ctx, {
         type: "bar",
         data: {
             labels: labels,
             datasets: [{
-                label: "Revenue (₱)",
+                label: "Units Sold",
                 data: values,
                 borderRadius: 6,
-                backgroundColor: "#4ade80", // green bar
+                backgroundColor: "#4ade80",
             }]
         },
         options: {
-            indexAxis: "y", // ← horizontal mode
+            maintainAspectRatio: false,
+            indexAxis: "y",
             responsive: true,
             plugins: {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
-                        label: (ctx) => "₱" + ctx.raw.toLocaleString()
+                        label: (ctx) => ctx.raw.toLocaleString()   // ✅ NO PESO
                     }
                 }
             },
@@ -476,7 +478,7 @@ function updateTopSellingProducts(data) {
                 x: {
                     ticks: {
                         color: "#fff",
-                        callback: (value) => "₱" + Number(value).toLocaleString()
+                        callback: (value) => Number(value).toLocaleString() // ✅ NO PESO
                     },
                     grid: { color: "#333" }
                 },

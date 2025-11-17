@@ -53,12 +53,12 @@ def get_top_selling_products(engine, year, month, platform):
     # remove empty names
     df = df[df["clean_name"].str.strip() != ""]
 
-    # group by cleaned name
+    # group by order quantity
     grouped = (
-        df.groupby("clean_name")["total_sales"]
+        df.groupby("clean_name")["total_quantity"]
         .sum()
         .reset_index()
-        .sort_values("total_sales", ascending=False)
+        .sort_values("total_quantity", ascending=False)
     )
 
     # take top 5
@@ -67,7 +67,8 @@ def get_top_selling_products(engine, year, month, platform):
     return [
         {
             "product_name": row["clean_name"],
-            "total_sales": float(row["total_sales"])
+            "total_quantity": int(row["total_quantity"])
         }
         for _, row in grouped.iterrows()
     ]
+

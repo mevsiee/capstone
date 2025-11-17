@@ -1,12 +1,15 @@
 WITH filtered AS (
     SELECT *,
         CASE 
-            WHEN platform_name ILIKE '%retail%' AND order_status = 'Completed'
+            WHEN platform_name ILIKE '%retail%' 
+                 AND order_status = 'Completed'
                 THEN TRUE
+
             WHEN platform_name NOT ILIKE '%retail%'
                  AND order_status = 'Completed'
                  AND delivered_date IS NOT NULL
                 THEN TRUE
+
             ELSE FALSE
         END AS is_completed
     FROM denormalized_table
@@ -16,7 +19,7 @@ WITH filtered AS (
 
 SELECT
     product_name,
-    CASE WHEN is_completed THEN product_subtotal_after ELSE 0 END AS total_sales
+    CASE WHEN is_completed THEN COALESCE(quantity, 0) ELSE 0 END AS total_quantity
 FROM filtered
 WHERE 
     (:platform = 'all')
