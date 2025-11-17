@@ -186,7 +186,7 @@ body.dashboard-body {
 
 .kpi-section {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 28px;
 }
@@ -201,23 +201,19 @@ body.dashboard-body {
 
 /* Exact-ish mockup gradients */
 #kpi-net {
-  background: linear-gradient(135deg, #1b5728, #1a6d35);
+  background: linear-gradient(135deg, #022009, #1a6d35);
 }
 
 #kpi-gross {
-  background: linear-gradient(135deg, #0c3e7a, #0a4d99);
-}
-
-#kpi-completed {
-  background: linear-gradient(135deg, #1e265c, #28307a);
+  background: linear-gradient(135deg, #02142b, #1a3f6a);
 }
 
 #kpi-discounts {
-  background: linear-gradient(135deg, #7c4b00, #a7680b);
+  background: linear-gradient(135deg, #233d07, #66a70b);
 }
 
-#kpi-cancelled {
-  background: linear-gradient(135deg, #7e1f2a, #a72736);
+#kpi-aov {
+  background: linear-gradient(135deg, #01322a, #10918d);
 }
 
 .kpi-title {
@@ -274,15 +270,15 @@ body.dashboard-body {
 
 /* Mockup platform colors */
 #platform-shopee {
-  background: #8c5432;
+  background: linear-gradient(135deg, #571702, #be774d);
 }
 
 #platform-tiktok {
-  background: #8c3a5c;
+  background: linear-gradient(135deg, #470621, #9c4d69);
 }
 
 #platform-retail {
-  background: #9a7b2c;
+  background: linear-gradient(135deg, #826500, #c9b158);
 }
 
 .platform-card {
@@ -401,26 +397,69 @@ body.dashboard-body {
 /* BOTTOM ROW                    */
 /* ============================= */
 
+/* Make both sides align perfectly */
 .bottom-row {
-  display: grid;
-  grid-template-columns: 1.7fr 1fr;
-  gap: 22px;
-  align-items: stretch; /* ensures equal height */
+    display: grid;
+    grid-template-columns: 1.7fr 1fr;
+    gap: 22px;
+    align-items: stretch;
+}
+
+/* Title outside container */
+.top-products-wrapper,
+.aov-platform-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Actual black container */
+.top-products-container,
+.aov-platform-container {
+    background: #101010;
+    border-radius: 14px;
+    border: 1px solid #1c1c1c;
+    padding: 22px;
+    flex: 1;
+    box-sizing: border-box;
+}
+
+/* Ensure section headers match spacing */
+.top-products-wrapper .section-header,
+.aov-platform-wrapper .section-header {
+    margin-bottom: 14px;
+}
+
+/* ============================= */
+/* AOV ROW                    */
+/* ============================= */
+
+/* AOV wrapper (title above container) */
+.aov-platform-wrapper {
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1; /* ensures equal height inside bottom-row */
+}
+
+/* Black Box */
+.aov-platform-container {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Internal bar list */
+#aovBarList {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
 }
 
 /* ============================= */
 /* TOP-SELLING PRODUCTS          */
 /* ============================= */
-
-.top-products-section {
-  background: #101010;
-  border-radius: 14px;
-  border: 1px solid #1c1c1c;
-  padding: 18px 22px 22px;
-  min-height: 260px;    /* 🔥 makes it visible */
-  display: flex;
-  flex-direction: column;
-}
 
 .top-products-list {
   margin-top: 15px;
@@ -536,24 +575,6 @@ body.dashboard-body {
   align-items: center;
 }
 
-/* Black container */
-.top-products-section {
-  background: #101010;
-  border-radius: 14px;
-  border: 1px solid #1c1c1c;
-  padding: 20px 20px;
-  min-height: 260px;
-}
-
-.top-products-chart-container {
-  background: #111;
-  border-radius: 12px;
-  padding: 24px;
-  width: 100%;
-  height: 380px;
-  position: relative;
-}
-
 /* Dropdown styling */
 .top-products-dropdown {
   position: relative;
@@ -637,93 +658,35 @@ body.dashboard-body {
   transform: rotate(180deg);
 }
 s
-/* ================================
-   Digital vs Physical Sales (Clean Final)
-   ================================ */
+/* ============================= */
+/* AOV DISTRIBUTION              */
+/* ============================= */
 
-.digital-physical-section {
-  margin-top: 30px;
-}
-
-.digital-physical-section h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.digital-physical-section .section-subtitle {
-  font-size: 0.78rem;
-  color: #bdbdbd;
-  margin-top: 6px;
-}
-
-/* Black container (same as Top 5 Products) */
-.digital-physical-container {
-  margin-top: 10px;
-  background: #101010;
-  border-radius: 10px;
-  border: 1px solid #1c1c1c;
-  padding: 20px;
-  flex: 1 !important;                  /* allow equal height with top products */
+#aovBarList {
   display: flex;
   flex-direction: column;
+  gap: 18px;
 }
 
-/* Internal layout */
-.digital-physical-layout {
+.aov-row {
   display: flex;
   align-items: center;
-  gap: 26px;
-}
-
-/* Pie Chart */
-.digital-physical-chart-wrapper {
-  flex: 1;                  /* allow flexible growth */
-  min-height: 350px;        /* guaranteed visibility */
-  height: 100%;             /* expands with container */
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;  /* center the pie */
-}
-
-.digital-physical-section canvas {
-  max-width: 100%;
-  max-height: 100%;
-}
-
-/* Legend */
-.digital-physical-legend {
-  flex: 1;
-  display: none;
-  flex-direction: column;
   gap: 16px;
 }
 
-.legend-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.aov-bar-outer {
+  flex: 1;
+  height: 16px;
+  background: #1e1e1e;
+  border-radius: 10px;
+  border: 1px solid #333;
 }
 
-.legend-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-}
-
-.legend-label {
-  font-size: 0.85rem;
-  color: #e4e4e4;
-}
-
-.legend-value {
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.legend-percent {
-  font-size: 0.78rem;
-  opacity: 0.8;
+.aov-bar-inner {
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #00897b, #00c853);
+  transition: width 0.6s ease;
 }
 
 /* ============================= */
@@ -757,18 +720,5 @@ s
 
   .main-inner {
     padding: 0 16px 32px;
-  }
-}
-
-/* Responsive */
-@media (max-width: 1100px) {
-  .digital-physical-layout {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .digital-physical-chart-wrapper {
-    width: 100%;
-    height: 260px;
   }
 }

@@ -3,18 +3,34 @@ from sqlalchemy import text
 from .utils import pct_change
 
 
-def get_completed_orders(engine, year, month):
-    from pathlib import Path
-    sql_path = Path(__file__).resolve().parent.parent / "sql" / "kpi_completed.sql"
+def get_aov_kpi(engine, year, month):
+    """
+    Computes the Average Order Value KPI using sql/kpi_aov.sql.
+    
+    Returns:
+        {
+            "current": float,
+            "previous": float,
+            "delta": float
+        }
+    """
 
+    from pathlib import Path
+    sql_path = Path(__file__).resolve().parent.parent / "sql" / "kpi_aov.sql"
+
+    # Load SQL file
     with open(sql_path, "r", encoding="utf-8") as f:
         sql = f.read()
 
+    # Execute SQL
     with engine.connect() as conn:
         df = pd.read_sql(
-            text(sql), conn, params={"year": year, "month": month}
+            text(sql),
+            conn,
+            params={"year": year, "month": month}
         )
 
+    # Parse results
     row = df.iloc[0]
     current = float(row["current_value"])
     previous = float(row["previous_value"])

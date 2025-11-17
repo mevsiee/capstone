@@ -82,21 +82,15 @@
             <div class="kpi-delta">0% from last month</div>
           </div>
 
-          <div class="kpi-card" id="kpi-completed">
-            <div class="kpi-title">Completed Orders</div>
-            <div class="kpi-value">0</div>
-            <div class="kpi-delta">0% from last month</div>
-          </div>
-
           <div class="kpi-card" id="kpi-discounts">
             <div class="kpi-title">Total Discounts</div>
             <div class="kpi-value">₱0.00</div>
             <div class="kpi-delta">0% from last month</div>
           </div>
 
-          <div class="kpi-card" id="kpi-cancelled">
-            <div class="kpi-title">Cancelled Orders</div>
-            <div class="kpi-value">0</div>
+          <div class="kpi-card" id="kpi-aov">
+            <div class="kpi-title">Average Order Value</div>
+            <div class="kpi-value">₱0.00</div>
             <div class="kpi-delta">0% from last month</div>
           </div>
 
@@ -157,54 +151,61 @@
         <!-- BOTTOM ROW: TOP PRODUCTS + DIGITAL VS PHYSICAL -->
         <div class="bottom-row">
 
-          <!-- Top-Selling Products -->
-          <section class="top-products-wrapper">
+            <!-- ======================= -->
+            <!-- TOP PRODUCTS (TITLE OUTSIDE) -->
+            <!-- ======================= -->
+            <div class="top-products-wrapper">
 
-            <div class="section-header">
-              <div>
-                <h2>Top 5 Products by Revenue Contribution</h2>
-                <p class="section-subtitle">
-                  A breakdown of your best-performing items during the month.
-                </p>
-              </div>
+                <!-- Title outside -->
+                <div class="section-header">
+                    <div>
+                        <h2>Top 5 Products by Revenue Contribution</h2>
+                        <p class="section-subtitle">
+                            A breakdown of your best-performing items during the month.
+                        </p>
+                    </div>
 
-              <!-- Dropdown -->
-              <div class="top-products-dropdown" id="topProductsDropdown">
-                <button id="topProductsBtn">
-                  Top Performers (All) <i class="fas fa-chevron-down"></i>
-                </button>
+                    <!-- Dropdown -->
+                    <div class="dropdown" id="topProductsDropdown">
+                        <button class="dropdown-btn" id="topProductsBtn">
+                            Top Performers (All) <i class="fas fa-chevron-down"></i>
+                        </button>
 
-                <ul class="top-products-menu" id="topProductsMenu">
-                  <li class="dropdown-item" data-value="all">Top Performers (All)</li>
-                  <li class="dropdown-item" data-value="shopee">Shopee</li>
-                  <li class="dropdown-item" data-value="tiktok">TikTok</li>
-                  <li class="dropdown-item" data-value="retail">Retail</li>
-                </ul>
-              </div>
+                        <div class="dropdown-menu" id="topProductsMenu">
+                            <div class="dropdown-item" data-value="all">Top Performers (All)</div>
+                            <div class="dropdown-item" data-value="shopee">Shopee</div>
+                            <div class="dropdown-item" data-value="tiktok">TikTok</div>
+                            <div class="dropdown-item" data-value="retail">Retail</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dark box ONLY here -->
+                <div class="top-products-container">
+                    <canvas id="topProductsChart"></canvas>
+                </div>
             </div>
 
-            <div class="top-products-chart-container">
-                <canvas id="topProductsChart"></canvas>
+            <!-- ======================= -->
+            <!-- AOV (TITLE OUTSIDE) -->
+            <!-- ======================= -->
+            <div class="aov-platform-wrapper">
+
+                <div class="section-header">
+                    <div>
+                        <h2>AOV Distribution per Platform</h2>
+                        <p class="section-subtitle">
+                            Average Order Value comparison across platforms.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Dark box ONLY here -->
+                <div class="aov-platform-container">
+                    <div id="aovBarList"></div>
+                </div>
+
             </div>
-          
-          </section>
-
-          <!-- DIGITAL VS PHYSICAL SALES -->
-            <section class="digital-physical-section">
-              <h2>Sales Performance on Store Channels</h2>
-              <p class="section-subtitle">Comparing online sales with retail store performance.</p>
-
-              <div class="digital-physical-container">
-                  <div class="digital-physical-layout">
-                      <div class="digital-physical-chart-wrapper">
-                          <canvas id="digitalPhysicalChart"></canvas>
-                      </div>
-
-                      <div class="digital-physical-legend" id="digitalLegend"></div>
-                  </div>
-              </div>
-            </section>
-
 
         </div>
       </div>

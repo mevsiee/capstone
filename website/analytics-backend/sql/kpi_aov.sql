@@ -1,21 +1,23 @@
--- CANCELLED ORDERS KPI
+-- AVERAGE ORDER VALUE KPI (PRODUCT_SUBTOTAL_AFTER ON COMPLETED ORDERS)
 
 WITH raw AS (
     SELECT
         dt.*,
         date_trunc('month', order_date)::date AS order_month_date,
 
-        -- Cancelled logic
+        -- Completed logic (same logic as gross KPI)
         CASE
             WHEN platform_name ILIKE '%retail%'
-                 AND order_status = 'Cancelled'
+                 AND order_status = 'Completed'
                 THEN TRUE
+
             WHEN platform_name NOT ILIKE '%retail%'
-                 AND order_status = 'Cancelled'
-                 AND cancelled_date IS NOT NULL
+                 AND order_status = 'Completed'
+                 AND delivered_date IS NOT NULL
                 THEN TRUE
+
             ELSE FALSE
-        END AS is_cancelled
+        END AS is_completed
 
     FROM denormalized_table AS dt
     WHERE order_year >= 2023
@@ -30,18 +32,25 @@ months AS (
 base AS (
     SELECT
         r.*,
-        (r.order_month_date = m.current_month) AS is_current_month,
+        (r.order_month_date = m.current_month)  AS is_current_month,
         (r.order_month_date = m.previous_month) AS is_previous_month
     FROM raw r
     CROSS JOIN months m
 )
 
 SELECT
-    COALESCE(SUM(
-        CASE WHEN is_current_month AND is_cancelled THEN 1 END
+    -- Average AOV for current month
+    COALESCE(AVG(
+        CASE WHEN is_current_month AND is_completed
+            THEN COALESCE(product_subtotal_after, 0)
+        END
     ), 0) AS current_value,
 
-    COALESCE(SUM(
-        CASE WHEN is_previous_month AND is_cancelled THEN 1 END
+    -- Average AOV for previous month
+    COALESCE(AVG(
+        CASE WHEN is_previous_month AND is_completed
+            THEN COALESCE(product_subtotal_after, 0)
+        END
     ), 0) AS previous_value
+
 FROM base;

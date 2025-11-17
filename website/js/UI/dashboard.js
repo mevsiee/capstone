@@ -106,7 +106,8 @@ function handleLogout() {
 // Helpers
 // ================================
 function formatPeso(value) {
-  return "₱" + Number(value).toLocaleString();
+  const num = Number(value) || 0;
+  return "₱" + num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 // Build query string for current filter
@@ -128,7 +129,7 @@ async function initDashboard() {
   await loadPlatformDistribution();
   await loadSalesTrend();
   await loadTopSellingProducts();
-  await loadDigitalVsPhysical();
+  await loadAovDistribution();
 }
 
 // ================================
@@ -139,9 +140,8 @@ async function loadKPIs() {
   const endpoints = {
     net: "/kpi/net-sales",
     gross: "/kpi/gross-sales",
-    completed: "/kpi/completed-orders",
     discounts: "/kpi/discounts",
-    cancelled: "/kpi/cancelled-orders",
+    aov: "/kpi/aov" // <-- Added AOV KPI
   };
 
   for (const [key, route] of Object.entries(endpoints)) {
@@ -162,12 +162,13 @@ function updateKpiCard(type, data) {
   const val = card.querySelector(".kpi-value");
   const delta = card.querySelector(".kpi-delta");
 
-  const isMoneyType = ["net", "gross", "discounts"].includes(type);
+  // Net, Gross, Discounts, and NEW: AOV are all ₱ money values
+  const isMoneyType = ["net", "gross", "discounts", "aov"].includes(type);
 
   if (isMoneyType) {
-    val.textContent = isNaN(data.current) ? "₱0" : formatPeso(data.current);
+    val.textContent = isNaN(data.current) ? "₱0.00" : formatPeso(data.current);
   } else {
-    // completed / cancelled: show plain integer
+    // completed / cancelled — integers
     const n = Number.isFinite(data.current) ? data.current : 0;
     val.textContent = n.toLocaleString();
   }
@@ -489,101 +490,51 @@ function updateTopSellingProducts(data) {
 }
 
 // ================================
-// 5. DIGITAL VS PHYSICAL PIE CHART
+// 5. AOV DISTRIBUTION
 // ================================
-let digitalPhysicalChart;
 
-// Register plugin FIRST
-if (window.ChartDataLabels) {
-  Chart.register(window.ChartDataLabels);
-}
+async function loadAovDistribution() {
+    try {
+        const qs = buildFilterQuery(true);
+        const res = await fetch(`${API_BASE}/aov/distribution${qs}`);
+        const data = await res.json();
 
-// THEN disable datalabels globally
-Chart.defaults.set('plugins.datalabels', {
-  display: false
-});
+        // Extract platforms
+        const getAOV = (needle) =>
+            data.find((x) =>
+                x.platform_name?.toLowerCase().includes(needle.toLowerCase())
+            )?.average_aov || 0;
 
-async function loadDigitalVsPhysical() {
-  try {
-    const qs = buildFilterQuery(true);
-    const res = await fetch(`${API_BASE}/sales/digital-vs-physical` + qs);
-    const data = await res.json();
+        const items = [
+            { name: "Shopee", value: getAOV("shopee") },
+            { name: "TikTok", value: getAOV("tiktok") },
+            { name: "Retail", value: getAOV("retail") },
+        ];
 
-    const online = data.find(x => x.sales_channel === "Online")?.total_sales || 0;
-    const retail = data.find(x => x.sales_channel === "Retail")?.total_sales || 0;
+        const maxAOV = Math.max(...items.map(i => i.value), 1);
 
-    const total = online + retail;
+        const container = document.getElementById("aovBarList");
+        container.innerHTML = "";
 
-    const ctx = document.getElementById("digitalPhysicalChart");
+        items.forEach(item => {
+            const row = document.createElement("div");
+            row.className = "aov-row";
 
-    if (digitalPhysicalChart) digitalPhysicalChart.destroy();
+            const widthPercent = (item.value / maxAOV) * 100;
 
-    digitalPhysicalChart = new Chart(ctx, {
-      type: "pie",
-      data: {
-        labels: ["Online", "Retail"],
-        datasets: [{
-          data: [online, retail],
-          backgroundColor: ["#62374E", "#AE7C34"],
-          borderColor: "#0f0f0f",
-          borderWidth: 3
-        }]
-      },
-      options: {
-        maintainAspectRatio: false,
-        responsive: true,
-        plugins: {
-          legend: {
-            display: true,
-            position: "right",
-            labels: {
-              color: "#fff",
-              usePointStyle: true,
-              pointStyle: "circle"
-            }
-          },
+            row.innerHTML = `
+                <span class="aov-name">${item.name}</span>
 
-          // ← ENABLE ONLY HERE
-          datalabels: {
-            display: true,
-            color: "#fff",
-            font: {
-              size: 18,
-              weight: "700"
-            },
-            formatter: (value, ctx) => {
-              const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-              return Math.round((value / total) * 100) + "%";
-            },
-            anchor: "center",
-            align: "center"
-          }
-        }
-      }
-    });
+                <div class="aov-bar-outer">
+                    <div class="aov-bar-inner" style="width: ${widthPercent}%"></div>
+                </div>
 
+                <span class="aov-value">${formatPeso(item.value)}</span>
+            `;
 
-    // Custom legend box
-    document.getElementById("digitalLegend").innerHTML = `
-      <div class="legend-row">
-        <div class="legend-dot online"></div>
-        <div class="legend-text">
-          <span class="legend-label">Online Stores</span>
-          <span class="legend-value">₱${online.toLocaleString()}</span>
-          <span class="legend-percent">${((online / total) * 100).toFixed(0)}%</span>
-        </div>
-      </div>
-
-      <div class="legend-row">
-        <div class="legend-dot retail"></div>
-        <div class="legend-text">
-          <span class="legend-label">Retail Store</span>
-          <span class="legend-value">₱${retail.toLocaleString()}</span>
-          <span class="legend-percent">${((retail / total) * 100).toFixed(0)}%</span>
-        </div>
-      </div>
-    `;
-  } catch (err) {
-    console.error("Digital vs Physical chart failed:", err);
-  }
+            container.appendChild(row);
+        });
+    } catch (err) {
+        console.error("Failed to load AOV distribution:", err);
+    }
 }

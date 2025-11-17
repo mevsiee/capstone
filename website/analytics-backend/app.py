@@ -6,9 +6,8 @@ from sqlalchemy import text
 # KPI endpoints
 from endpoints.kpi_net import get_net_sales
 from endpoints.kpi_gross import get_gross_sales
-from endpoints.kpi_completed import get_completed_orders
 from endpoints.kpi_discounts import get_discounts
-from endpoints.kpi_cancelled import get_cancelled_orders
+from endpoints.kpi_aov import get_aov_kpi
 
 # Other endpoints
 from endpoints.platform_distribution import get_platform_distribution
@@ -16,7 +15,7 @@ from endpoints.sales_trend_daily import get_sales_trend_daily
 from endpoints.sales_trend_hourly import get_sales_trend_hourly
 from endpoints.sales_trend_monthly import get_sales_trend_monthly
 from endpoints.top_selling_products import get_top_selling_products
-from endpoints.digital_vs_physical import get_digital_vs_physical
+from endpoints.aov_platform_distribution import get_aov_platform_distribution
 
 app = FastAPI()
 
@@ -77,23 +76,6 @@ def route_gross_sales(request: Request):
         month = int(month_param)
     return get_gross_sales(engine, year, month)
 
-
-@app.get("/kpi/completed-orders")
-def route_completed_orders(request: Request):
-    year_param = request.query_params.get("year")
-    month_param = request.query_params.get("month")
-
-    if year_param is None or month_param is None:
-        # If no filter provided → use DB latest year/month
-        latest = get_latest_year_month_from_db()   # You already have this
-        year = latest["year"]
-        month = latest["month"]
-    else:
-        year = int(year_param)
-        month = int(month_param)
-    return get_completed_orders(engine, year, month)
-
-
 @app.get("/kpi/discounts")
 def route_discounts(request: Request):
     year_param = request.query_params.get("year")
@@ -109,22 +91,21 @@ def route_discounts(request: Request):
         month = int(month_param)
     return get_discounts(engine, year, month)
 
-
-@app.get("/kpi/cancelled-orders")
-def route_cancelled_orders(request: Request):
+@app.get("/kpi/aov")
+def route_aov(request: Request):
     year_param = request.query_params.get("year")
     month_param = request.query_params.get("month")
 
     if year_param is None or month_param is None:
-        # If no filter provided → use DB latest year/month
-        latest = get_latest_year_month_from_db()   # You already have this
+        # No filter provided → use latest year/month from DB
+        latest = get_latest_year_month_from_db()
         year = latest["year"]
         month = latest["month"]
     else:
         year = int(year_param)
         month = int(month_param)
-    return get_cancelled_orders(engine, year, month)
 
+    return get_aov_kpi(engine, year, month)
 
 # --------------------------
 # OTHER ROUTES
@@ -205,8 +186,8 @@ def route_top_products(request: Request):
 
 
 
-@app.get("/sales/digital-vs-physical")
-def route_digital_physical(request: Request):
+@app.get("/aov/distribution")
+def route_aov_distribution(request: Request):
     year_param = request.query_params.get("year")
     month_param = request.query_params.get("month")
 
@@ -218,4 +199,4 @@ def route_digital_physical(request: Request):
         year = int(year_param)
         month = int(month_param)
 
-    return get_digital_vs_physical(engine, year, month)
+    return get_aov_platform_distribution(engine, year, month)
