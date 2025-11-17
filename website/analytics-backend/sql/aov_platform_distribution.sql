@@ -5,7 +5,7 @@ WITH raw AS (
         dt.*,
         date_trunc('month', order_date)::date AS order_month_date,
 
-        -- Completed logic (same as KPI AOV / Gross) :contentReference[oaicite:0]{index=0}
+        -- Completed logic (same as KPI AOV / Gross)
         CASE
             WHEN platform_name ILIKE '%retail%'
                  AND order_status = 'Completed'

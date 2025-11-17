@@ -129,7 +129,7 @@ async function initDashboard() {
   await loadPlatformDistribution();
   await loadSalesTrend();
   await loadTopSellingProducts();
-  await loadAovDistribution();
+  await loadAOVDistribution();
 }
 
 // ================================
@@ -489,52 +489,44 @@ function updateTopSellingProducts(data) {
     });
 }
 
+// Title case helper
+function toTitleCase(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
 // ================================
 // 5. AOV DISTRIBUTION
 // ================================
-
-async function loadAovDistribution() {
+async function loadAOVDistribution() {
     try {
         const qs = buildFilterQuery(true);
         const res = await fetch(`${API_BASE}/aov/distribution${qs}`);
         const data = await res.json();
 
-        // Extract platforms
-        const getAOV = (needle) =>
-            data.find((x) =>
-                x.platform_name?.toLowerCase().includes(needle.toLowerCase())
-            )?.average_aov || 0;
-
-        const items = [
-            { name: "Shopee", value: getAOV("shopee") },
-            { name: "TikTok", value: getAOV("tiktok") },
-            { name: "Retail", value: getAOV("retail") },
-        ];
-
-        const maxAOV = Math.max(...items.map(i => i.value), 1);
-
         const container = document.getElementById("aovBarList");
         container.innerHTML = "";
 
-        items.forEach(item => {
-            const row = document.createElement("div");
-            row.className = "aov-row";
+        const maxAOV = Math.max(...data.map(d => d.average_aov));
+        const scale = 1.2; // tune as needed
 
-            const widthPercent = (item.value / maxAOV) * 100;
+        data.forEach(item => {
+            const row = document.createElement("div");
+            row.classList.add("aov-row", item.platform_name.toLowerCase());
+
+            const barWidth = item.average_aov * scale;
 
             row.innerHTML = `
-                <span class="aov-name">${item.name}</span>
-
+                <div class="aov-name">${toTitleCase(item.platform_name)}</div>
                 <div class="aov-bar-outer">
-                    <div class="aov-bar-inner" style="width: ${widthPercent}%"></div>
+                    <div class="aov-bar-inner" style="width:${barWidth}px"></div>
                 </div>
-
-                <span class="aov-value">${formatPeso(item.value)}</span>
+                <div class="aov-value">₱${item.average_aov.toFixed(2)}</div>
             `;
 
             container.appendChild(row);
         });
+
     } catch (err) {
-        console.error("Failed to load AOV distribution:", err);
+        console.error("AOV load error:", err);
     }
 }
