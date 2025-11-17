@@ -22,5 +22,5 @@ SELECT
     CASE WHEN is_completed THEN COALESCE(quantity, 0) ELSE 0 END AS total_quantity
 FROM filtered
 WHERE 
-    (:platform = 'all')
-    OR (LOWER(platform_name) = :platform);
+    ((:platform = 'all') OR (LOWER(platform_name) = :platform))
+    AND product_name != 'UNKNOWN';
