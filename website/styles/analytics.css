@@ -38,13 +38,6 @@ body {
     color: #fff;
 }
 
-.analytics-header .subtitle {
-    margin-top: 5px;
-    font-size: 0.95rem;
-    color: #bbb;
-}
-
-/* Export buttons */
 .export-container {
     display: flex;
     gap: 10px;
@@ -77,23 +70,33 @@ body {
 }
 
 .tab-button {
-    padding: 10px 20px;
-    background: #1f1f1f;
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 30px;
     border: none;
-    border-radius: 999px;
-    color: #fff;
-    font-size: 0.95rem;
     cursor: pointer;
-    transition: 0.2s;
-    font-weight: 500;
+    transition: all 0.25s ease;
+    margin-right: 10px;
+
+    background: #1a1a1a;   /* inactive */
+    color: #e0e0e0;
+    box-shadow: inset 0 0 0 1px #333;
 }
 
 .tab-button.active {
-    background: #f5b400;
+    background: linear-gradient(135deg, #ffcc00, #ffb700);
     color: #000;
+    box-shadow: 0 0 12px rgba(255, 204, 0, 0.7);
 }
 
-/* Content toggling */
+/* Hover effect, but subtle */
+.tab-button:not(.active):hover {
+    background: #2a2a2a;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
 .tab-content {
     display: none;
 }
@@ -109,7 +112,7 @@ body {
     border-radius: 15px;
     padding: 20px;
     border: 1px solid #222;
-    margin-bottom: 12px;       /* slightly tighter default spacing */
+    margin-bottom: 12px;
 }
 
 .card-header h3 {
@@ -134,14 +137,10 @@ body {
 .kpi-card {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: flex-start;
-    text-align: left;
     padding: 20px 25px;
-    border-width: 0;
 }
 
-/* colored KPI variants */
 .kpi-card-green {
     background: #0f3a24;
     border: 1px solid #1e6540;
@@ -166,44 +165,29 @@ body {
 .kpi-value {
     font-size: 2rem;
     font-weight: 700;
-    line-height: 1.2;
-    margin-top: 0;
     white-space: nowrap;
 }
 
-.kpi-value.positive {
-    color: #3fd965;
-}
+.kpi-value.positive { color: #3fd965; }
+.kpi-value.negative { color: #ff4e4e; }
 
-.kpi-value.negative {
-    color: #ff4e4e;
-}
-
-/* ==== GRID: CHART LEFT + SIDE RIGHT ==== */
+/* ==== GRID ==== */
 
 .analytics-main-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;   /* bigger chart vs side stack */
+    grid-template-columns: 2fr 1fr;
     gap: 22px;
-    width: 100%;
-    align-items: stretch;             /* chart column matches right height */
-    margin-bottom: 0 !important;               /* ⬅ remove extra gap under grid */
 }
 
-/* Chart column fills whole grid row height */
 .chart-card {
     display: flex;
     flex-direction: column;
-    align-self: stretch;     /* stretch to full height of grid row */
-    height: auto !important; /* override previous height */
-    margin-bottom: 25px;
 }
 
-
 .chart-wrapper {
-    flex: 1;                          /* ⬅ occupy remaining height */
+    flex: 1;
     width: 100%;
-    min-height: 580px;                /* keeps it tall enough */
+    min-height: 580px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -215,57 +199,17 @@ body {
     height: 100% !important;
 }
 
-/* LEFT ALIGN TEXT INSIDE CHART CARD */
 .chart-card h3,
-.chart-card p,
 .chart-card .card-subtitle {
     text-align: left !important;
-    width: 100%;
 }
 
-/* ==== SIDE STACK (Validation + Allocation) ==== */
+/* ==== SIDE STACK ==== */
 
 .right-stack {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    width: 100%;
-}
-
-/* Side panel */
-.side-card {
-    padding: 20px;
-}
-
-.side-title {
-    font-weight: 600;
-    font-size: 1.1rem;
-    margin-bottom: 8px;
-}
-
-.side-description {
-    font-size: 0.85rem;
-    color: #bbb;
-    margin-bottom: 15px;
-}
-
-/* Validation list */
-.validation-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.validation-list li {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-    border-bottom: 1px solid #222;
-    font-size: 0.9rem;
-}
-
-.validation-list span {
-    font-weight: 600;
+    gap: 16px;    
 }
 
 /* ==== PRODUCT STOCK ALLOCATION ==== */
@@ -273,75 +217,23 @@ body {
 .allocation-card {
     background: #15120a;
     border: 1px solid #f5b400;
-    width: 100%;
-    padding: 30px 28px;          /* more inner padding */
-    box-sizing: border-box;
-    min-height: 400px;           /* taller panel */
-    border-radius: 14px;         /* smoother corners */
+    padding: 30px 28px;
+    border-radius: 14px;
+    min-height: 400px;
     font-size: 1.3rem;
 }
 
-
-.allocation-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 10px 0;
-    font-size: 0.9rem;
-}
-
-.allocation-list li {
-    display: grid;
-    grid-template-columns: 1.4fr 0.5fr 0.3fr 1fr;
-    align-items: center;
-    padding: 4px 0;
-}
-
-/* Allocation input styling */
-.allocation-input {
-    width: 80px;
+.allocation-input,
+.allocation-card select,
+.allocation-card input {
     background: #222;
     border: 1px solid #444;
-    padding: 6px 8px;
-    border-radius: 6px;
     color: #fff;
-    font-size: 0.9rem;
-    text-align: right;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 1.2rem;
 }
 
-.budget-input {
-    width: 100px;
-}
-
-.allocation-percent {
-    margin-left: 4px;
-    margin-right: 12px;
-    color: #bbb;
-}
-
-.allocation-label {
-    color: #ddd;
-}
-
-.allocation-total {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    padding-top: 8px;
-    border-top: 1px solid #333;
-    font-size: 0.9rem;
-}
-
-.allocation-total span:last-child {
-    font-weight: 700;
-}
-
-.allocation-recalc {
-    margin-top: 12px;
-    width: 100%;
-    justify-content: center;
-}
-
-/* allocation result text */
 .allocation-result {
     margin-top: 18px;
     padding-top: 10px;
@@ -349,72 +241,41 @@ body {
 }
 
 .allocation-result-title {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 6px;
 }
 
-.manual-override {
-    background: #113d11 !important;
-    color: #c8ffc8 !important;
-}
-
-.manual-tag {
-  font-size: 11px;
-  color: #00e676;
-  margin-left: 6px;
-  font-weight: bold;
-}
-
-/* ==== PLATFORM ALLOCATION GRID (UNDER SALES CHART) ==== */
+/* ==== BREAKDOWN CARDS (now inside right column) ==== */
 
 .breakdown-card {
-     margin-top: 0 !important;               /* ⬅ very small gap under grid */
+    margin-top: 5px !important;
+    padding-bottom: 25px;   
 }
 
 .platform-allocation-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 18px;
-    margin-top: 15px;
 }
 
 .platform-card {
     background: #1a1a1a;
-    border-radius: 10px;
     border: 1px solid #222;
-    padding: 14px 14px 16px 14px;
+    border-radius: 10px;
+    padding: 14px;
+    min-height: 200px;
 }
 
-.platform-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin-bottom: 8px;
+/* SALES TAB — increase height of projection cards */
+#sales-tab .platform-card {
+    min-height: 260px !important;
 }
 
-.platform-metric-label {
-    font-size: 0.8rem;
-    color: #b3b3b3;
-    margin-top: 4px;
-}
-
-.platform-metric-value {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-top: 2px;
-}
-
-.platform-metric-value.accent {
-    color: #f5b400;
-}
-
-/* ==== SIMPLE ORDERS BREAKDOWN (UNDER ORDERS CHART) ==== */
 
 .breakdown-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 18px;
-    margin-top: 15px;
 }
 
 .breakdown-item {
@@ -425,59 +286,129 @@ body {
     border: 1px solid #222;
 }
 
-.breakdown-label {
-    font-size: 0.9rem;
-    color: #bbb;
-}
-
+.breakdown-label { color: #bbb; }
 .breakdown-value {
     margin-top: 8px;
     font-size: 1.4rem;
     font-weight: 700;
 }
 
-/* Scale up all text & inputs inside the allocation card */
-.allocation-card {
-    font-size: 1.3rem;    /* increase overall size */
+.channel-card {
+    background: #1a1a1a;
+    padding: 18px 20px;
+    border-radius: 12px;
+    border: 1px solid #2a2a2a;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-/* Make inputs match the larger text size */
-.allocation-card select,
-.allocation-card input {
+/* Title */
+.channel-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+/* Label text */
+.channel-label {
+    font-size: 0.85rem;
+    color: #bbbbbb;
+    margin-bottom: -4px;
+}
+
+/* Base Forecast Value */
+.channel-value {
     font-size: 1.2rem;
-    padding: 10px 12px;
+    font-weight: 700;
+    color: #e0e0e0;
 }
 
-/* Scale labels inside the card */
-.allocation-card label,
-.allocation-card .side-description,
-.allocation-card .allocation-list li,
-.allocation-card .allocation-result-title {
+/* After Allocation (highlighted) */
+.channel-after {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #3fd965;   /* green positive default */
+}
+
+/* If 0 or negative, tone it down */
+.channel-after.negative {
+    color: #ff4e4e;
+}
+
+/* Add spacing between sections */
+.channel-section {
+    margin-top: 6px;
+}
+
+#sales-tab .breakdown-card {
+    min-height: 320px !important;
+}
+
+#sales-tab .platform-allocation-grid {
+    min-height: 250px !important;
+}
+
+#sales-tab .channel-card {
+    min-height: 200px !important;
+}
+
+.contrib-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.contrib-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 18px 20px;
+    min-height: 60px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+/* Retail = red */
+.contrib-retail {
+    background: rgba(200, 40, 40, 0.25);
+    border: 1px solid rgba(255, 70, 70, 0.5);
+}
+
+/* Shopee = orange */
+.contrib-shopee {
+    background: rgba(255, 140, 0, 0.22);
+    border: 1px solid rgba(255, 160, 0, 0.55);
+}
+
+/* TikTok = lively gray (with neon accents hint) */
+.contrib-tiktok {
+    background: #1f1f1f;
+    border: 1px solid #333;
+    box-shadow: inset 0 0 0 1px rgba(0,255,255,0.1), 
+                inset 0 0 12px rgba(255,0,255,0.05);
+}
+
+/* Text adjustments */
+.contrib-label {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.contrib-value {
     font-size: 1.3rem;
 }
 
-/* Button bigger too */
-.allocation-card button {
-    font-size: 1rem;
-    padding: 12px 16px;
-}
+
 
 
 /* ==== RESPONSIVE ==== */
 
-#sales-tab .allocation-card,
-#orders-tab .allocation-card {
-    max-width: 100%;
-}
-
 @media (max-width: 1100px) {
     .analytics-main-grid {
         grid-template-columns: 1fr;
-    }
-
-    .platform-allocation-grid,
-    .breakdown-grid {
-        grid-template-columns: 1fr 1fr;
     }
 }
 
@@ -485,7 +416,6 @@ body {
     .kpi-row {
         grid-template-columns: 1fr;
     }
-
     .platform-allocation-grid,
     .breakdown-grid {
         grid-template-columns: 1fr;

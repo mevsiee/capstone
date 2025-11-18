@@ -144,34 +144,23 @@ app.get("/api/forecast", async (req, res) => {
     const sql = `
       SELECT
         CASE
-      -- Detect Shopee-related platforms
-      WHEN LOWER(platform) LIKE '%shopee%'
-        OR LOWER(platform) LIKE '%shop%'
-        OR LOWER(platform) LIKE '%ecom%'
-          THEN 'shopee'
-
-      -- Detect TikTok
-      WHEN LOWER(platform) LIKE '%tiktok%'
-        OR LOWER(platform) LIKE '%tiktoc%'
-          THEN 'tiktok'
-
-      -- Detect Retail
-      WHEN LOWER(platform) LIKE '%retail%'
-        OR LOWER(platform) LIKE '%pos%'
-        OR LOWER(platform) LIKE '%store%'
-          THEN 'retail'
-
-      ELSE 'retail'
-    END AS platform,
+          WHEN LOWER(platform) LIKE '%shopee%'
+            OR LOWER(platform) LIKE '%shop%'
+            OR LOWER(platform) LIKE '%ecom%'
+              THEN 'shopee'
+          WHEN LOWER(platform) LIKE '%tiktok%'
+            OR LOWER(platform) LIKE '%tiktoc%'
+              THEN 'tiktok'
+          WHEN LOWER(platform) LIKE '%retail%'
+            OR LOWER(platform) LIKE '%pos%'
+            OR LOWER(platform) LIKE '%store%'
+              THEN 'retail'
+          ELSE 'retail'
+        END AS platform,
 
         TO_CHAR(DATE_TRUNC('month', ds), 'YYYY-MM-01') AS ds,
-
         forecast_value AS y,
-        mae,
-        rmse,
-        mape,
-        smape
-
+        mae, rmse, mape, smape
       FROM forecast
       WHERE DATE_PART('year', ds) = 2025
       ORDER BY ds ASC, platform ASC;
@@ -184,8 +173,9 @@ app.get("/api/forecast", async (req, res) => {
     console.error("❌ Error fetching forecast:", err);
     res.status(500).json({ error: err.message });
   }
+});
 
-  app.get("/api/sales-breakdown", async (req, res) => {
+app.get("/api/sales-breakdown", async (req, res) => {
   try {
     const sql = `
       SELECT 
@@ -199,8 +189,10 @@ app.get("/api/forecast", async (req, res) => {
 
     const result = await pool.query(sql);
 
-    // Compute percentages
-    const total = result.rows.reduce((acc, row) => acc + Number(row.total_sales), 0);
+    const total = result.rows.reduce(
+      (acc, row) => acc + Number(row.total_sales), 
+      0
+    );
 
     const breakdown = result.rows.map(row => ({
       platform: row.platform,
@@ -215,9 +207,36 @@ app.get("/api/forecast", async (req, res) => {
   }
 });
 
+// =============================================================
+// GET /api/prescriptive-products
+// Returns products from NeonDB prescriptive_stock_allocation table
+// =============================================================
+app.get("/api/prescriptive-products", async (req, res) => {
+  try {
+    const sql = `
+      SELECT 
+        id,
+        product_id,
+        product_name,
+        current_stock,
+        demand,
+        allocated,
+        shortage,
+        excess_stock,
+        weight
+      FROM prescriptive_stock_allocation
+      ORDER BY weight DESC;
+    `;
+
+    const result = await pool.query(sql);
+
+    res.json(result.rows);
+
+  } catch (err) {
+    console.error("❌ Error fetching prescriptive products:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
-
-
 
 
 const PORT = 5000;

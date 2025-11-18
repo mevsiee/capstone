@@ -95,35 +95,6 @@ function setupFirebaseAuth() {
   });
 }
 
-/* ---------- METRIC COMPUTATION ---------- */
-function computePlatformMetrics(historyRows, forecastRows) {
-  const currentSales = historyRows.length ? Number(historyRows[0].y) : 0;
-  const nextSales = forecastRows.length ? Number(forecastRows[0].y) : 0;
-
-  const mae = forecastRows.reduce((a, r) => a + (r.mae || 0), 0) / forecastRows.length;
-  const rmse = forecastRows.reduce((a, r) => a + (r.rmse || 0), 0) / forecastRows.length;
-  const mape = forecastRows.reduce((a, r) => a + (r.mape || 0), 0) / forecastRows.length;
-
-  return { currentSales, nextSales, mae, rmse, mape };
-}
-
-/* ---------- SMAPE ---------- */
-function computeSMAPE(actual, predicted) {
-  let sum = 0;
-  let count = 0;
-
-  for (let i = 0; i < actual.length; i++) {
-    const a = actual[i];
-    const p = predicted[i];
-    const denom = (Math.abs(a) + Math.abs(p)) / 2;
-    if (denom !== 0) {
-      sum += Math.abs(a - p) / denom;
-      count++;
-    }
-  }
-  return (sum / count) * 100;
-}
-
 /* ---------- CHART SERIES PREP ---------- */
 function computeChartSeries(history, forecast) {
 
@@ -158,56 +129,93 @@ function computeChartSeries(history, forecast) {
 /* ============================================================
    Budget Allocation, Channel Cards, Sales & Orders Tabs
    ============================================================ */
+
+/* ---------- QUARTER HELPERS ---------- */
+function getQuarterMonths(dateObj) {
+  const m = dateObj.getMonth() + 1;
+  if (m <= 3) return ["01", "02", "03"];  // Q1
+  if (m <= 6) return ["04", "05", "06"];  // Q2
+  if (m <= 9) return ["07", "08", "09"];  // Q3
+  return ["10", "11", "12"];              // Q4
+}
+
+function getNextQuarterMonths(dateObj) {
+  const m = dateObj.getMonth() + 1;
+  if (m <= 3) return ["04", "05", "06"];  // next: Q2
+  if (m <= 6) return ["07", "08", "09"];  // next: Q3
+  if (m <= 9) return ["10", "11", "12"];  // next: Q4
+  return ["01", "02", "03"];              // next: Q1
+}
+
+function computeQuarterTotal(rows, months, year) {
+  return rows
+    .filter(r => {
+      const [y, m] = r.ds.split("-");
+      return Number(y) === year && months.includes(m);
+    })
+    .reduce((sum, r) => sum + Number(r.y || 0), 0);
+}
+
 /* ---------- METRICS FROM ROWS (MAIN ENGINE) ---------- */
 function computeMetricsFromRows({ historyByPlatform, forecastByPlatform }) {
 
-  // ---- 1) Compute totals ----
-  const totalCurrent = [...historyByPlatform.retail, ...historyByPlatform.ecommerce]
-    .reduce((sum, r) => sum + Number(r.y || 0), 0);
+  // ---- A) Combine rows ----
+  const allHistory = [...historyByPlatform.retail, ...historyByPlatform.ecommerce];
+  const allForecast = [...forecastByPlatform.retail, ...forecastByPlatform.ecommerce];
 
-  const totalNext = [...forecastByPlatform.retail, ...forecastByPlatform.ecommerce]
-    .reduce((sum, r) => sum + Number(r.y || 0), 0);
+  // Sort to detect latest date
+  allHistory.sort((a, b) => new Date(a.ds) - new Date(b.ds));
+  allForecast.sort((a, b) => new Date(a.ds) - new Date(b.ds));
 
+  // ---- B) Determine current + next quarter ----
+  const lastHistoryDate = new Date(allHistory[allHistory.length - 1].ds);
+  const currentYear = lastHistoryDate.getFullYear();
+
+  const currentQMonths = getQuarterMonths(lastHistoryDate);
+  const nextQMonths = getNextQuarterMonths(lastHistoryDate);
+
+  const nextYear =
+    nextQMonths[0] === "01" ? currentYear + 1 : currentYear;
+
+  // ---- C) Compute quarter totals ----
+  const totalCurrent = computeQuarterTotal(allHistory, currentQMonths, currentYear);
+  const totalNext = computeQuarterTotal(allForecast, nextQMonths, nextYear);
+
+  // ---- D) Growth ----
   const growthRate =
     totalCurrent > 0 ? ((totalNext - totalCurrent) / totalCurrent) * 100 : 0;
 
-  // ---- 2) Per-platform NEXT forecast (used for budget allocation) ----
+  // ---- E) Update platform sales (for allocation engine) ----
   platformNextSales.retail =
-    forecastByPlatform.retail.reduce((a, r) => a + Number(r.y || 0), 0);
-  platformNextSales.shopee =
-    forecastByPlatform.ecommerce
-      .filter(r => r.platform === "shopee")
-      .reduce((a, r) => a + Number(r.y || 0), 0);
-  platformNextSales.tiktok =
-    forecastByPlatform.ecommerce
-      .filter(r => r.platform === "tiktok")
+    forecastByPlatform.retail
+      .filter(r => nextQMonths.includes(r.ds.split("-")[1]))
       .reduce((a, r) => a + Number(r.y || 0), 0);
 
-  // ---- 3) Baseline Orders (AOV = 500) ----
+  platformNextSales.shopee =
+    forecastByPlatform.ecommerce
+      .filter(r => r.platform === "shopee" && nextQMonths.includes(r.ds.split("-")[1]))
+      .reduce((a, r) => a + Number(r.y || 0), 0);
+
+  platformNextSales.tiktok =
+    forecastByPlatform.ecommerce
+      .filter(r => r.platform === "tiktok" && nextQMonths.includes(r.ds.split("-")[1]))
+      .reduce((a, r) => a + Number(r.y || 0), 0);
+
+  // ---- F) ORDERS QUARTER FIX (AOV = 500) ----
   baselineOrdersCurrent = totalCurrent / 500;
   baselineOrdersNext = totalNext / 500;
 
-  // ---- 4) Compute MAE/RMSE/MAPE averages ----
-  const allForecast = [...forecastByPlatform.retail, ...forecastByPlatform.ecommerce];
-
-  const mae = allForecast.reduce((sum, r) => sum + (r.mae || 0), 0) / allForecast.length;
-  const rmse = allForecast.reduce((sum, r) => sum + (r.rmse || 0), 0) / allForecast.length;
-  const mape = allForecast.reduce((sum, r) => sum + (r.mape || 0), 0) / allForecast.length;
-
-  // ---- 5) Chart Data ----
+  // ---- G) Chart Data ----
   const chartData = computeChartSeries(historyByPlatform, forecastByPlatform);
 
-  // ---- 6) Return metrics object ----
   return {
     totalCurrent,
     totalNext,
     growthRate,
-    mae,
-    rmse,
-    mape,
     chartData,
   };
 }
+
 
 console.log("📊 analytics.js PART 2 loaded");
 
@@ -394,26 +402,6 @@ function populateSalesTab(m) {
     ).toFixed(1)}%</span>`
   );
 
-  setText("salesMAE", m.mae.toFixed(2));
-  setText("salesRMSE", m.rmse.toFixed(2));
-  setText("salesMAPE", m.mape.toFixed(2) + "%");
-
-  /* ---------- SMAPE for Sales ---------- */
-  const salesActual = m.chartData.labels.map((_, i) => {
-    const ec = m.chartData.currentEcom[i] ?? 0;
-    const rt = m.chartData.currentRetail[i] ?? 0;
-    return ec + rt;
-  });
-
-  const salesPredicted = m.chartData.labels.map((_, i) => {
-    const ec = m.chartData.forecastEcomSeries[i] ?? 0;
-    const rt = m.chartData.forecastRetailSeries[i] ?? 0;
-    return ec + rt;
-  });
-
-  const smapeSales = computeSMAPE(salesActual, salesPredicted);
-  setText("salesSMAPE", smapeSales.toFixed(2) + "%");
-
   renderSalesChart(m.chartData);
 }
 
@@ -442,26 +430,6 @@ function populateOrdersTab(m) {
       growth
     ).toFixed(1)}%</span>`
   );
-
-  setText("ordersMAE", m.mae.toFixed(2));
-  setText("ordersRMSE", m.rmse.toFixed(2));
-  setText("ordersMAPE", m.mape.toFixed(2) + "%");
-
-  /* ---------- SMAPE for Orders ---------- */
-  const ordersActual = m.chartData.labels.map((_, i) => {
-    const ec = (m.chartData.currentEcom[i] ?? 0) / 500;
-    const rt = (m.chartData.currentRetail[i] ?? 0) / 500;
-    return ec + rt;
-  });
-
-  const ordersPredicted = m.chartData.labels.map((_, i) => {
-    const ec = (m.chartData.forecastEcomSeries[i] ?? 0) / 500;
-    const rt = (m.chartData.forecastRetailSeries[i] ?? 0) / 500;
-    return ec + rt;
-  });
-
-  const smapeOrders = computeSMAPE(ordersActual, ordersPredicted);
-  setText("ordersSMAPE", smapeOrders.toFixed(2) + "%");
 
   const AOV = 500;
   setText(
@@ -734,6 +702,9 @@ async function loadNeonData() {
 
     lastMetrics = metrics;
 
+    baselineSalesCurrent = metrics.totalCurrent;
+    baselineSalesNext = metrics.totalNext;
+
     populateSalesTab(metrics);
     populateOrdersTab(metrics);
     initSliders();
@@ -744,6 +715,70 @@ async function loadNeonData() {
   }
 }
 
+ /* ============================================================
+   LOAD PRESCRIPTIVE ALLOCATION PRODUCTS (from NeonDB)
+   ============================================================ */
+  async function loadPrescriptiveProducts() {
+  try {
+    const resp = await fetch("http://localhost:5000/api/prescriptive-products");
+    const products = await resp.json();
+
+    console.log("📦 Prescriptive Allocation Products:", products);
+
+    // Two selectors (Sales + Orders)
+    const selSales = document.getElementById("productSelectorSales");
+    const selOrders = document.getElementById("productSelectorOrders");
+
+    // Clear existing
+    if (selSales) selSales.innerHTML = "";
+    if (selOrders) selOrders.innerHTML = "";
+
+    products.forEach(p => {
+      const opt1 = document.createElement("option");
+      opt1.value = p.product_id;
+      opt1.textContent = p.product_name;
+
+      const opt2 = opt1.cloneNode(true);
+
+      if (selSales) selSales.appendChild(opt1);
+      if (selOrders) selOrders.appendChild(opt2);
+    });
+
+    // Auto-fill first product summary (SALES tab only)
+    if (products.length > 0) {
+      updateProductSummary(products[0], "sales");
+      selSales.value = products[0].product_id;
+    }
+
+    // Change listener for SALES tab
+    if (selSales) {
+      selSales.addEventListener("change", () => {
+        const selected = products.find(p => p.product_id == selSales.value);
+        updateProductSummary(selected, "sales");
+      });
+    }
+
+    // Change listener for ORDERS tab
+    if (selOrders) {
+      selOrders.addEventListener("change", () => {
+        const selected = products.find(p => p.product_id == selOrders.value);
+        updateProductSummary(selected, "orders");
+      });
+    }
+
+  } catch (err) {
+    console.error("❌ Error loading prescriptive products:", err);
+  }
+}
+
+  /* ============================================================
+    UPDATE PRODUCT SUMMARY PANEL
+    ============================================================ */
+  function updateProductSummary(p) {
+    setText("summaryStock", p?.current_stock ?? "--");
+    setText("summaryDemand", p?.demand ?? "--");
+  }
+
 /* ============================================================
    INIT
    ============================================================ */
@@ -751,6 +786,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFirebaseAuth();
   setupTabs();
   loadNeonData();
+  loadPrescriptiveProducts();
+
 
   attachOverrideWatcher("retailMarginInput");
   attachOverrideWatcher("shopeeMarginInput");
