@@ -771,13 +771,21 @@ async function loadNeonData() {
   }
 }
 
+
+
   /* ============================================================
     UPDATE PRODUCT SUMMARY PANEL
     ============================================================ */
-  function updateProductSummary(p) {
+  function updateProductSummary(p, tab) {
+  if (tab === "sales") {
     setText("summaryStock", p?.current_stock ?? "--");
     setText("summaryDemand", p?.demand ?? "--");
   }
+  if (tab === "orders") {
+    setText("summaryStockOrders", p?.current_stock ?? "--");
+    setText("summaryDemandOrders", p?.demand ?? "--");
+  }
+}
 
 /* ============================================================
    INIT
