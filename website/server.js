@@ -34,21 +34,24 @@ pool.connect()
 app.get("/api/inventory", async (req, res) => {
   try {
     const query = `
-      SELECT 
+      SELECT
         p.product_name,
-        SUM(COALESCE(pv.stock, 0)) AS total_stock,
-        AVG(COALESCE(pv.original_price, 0)) AS average_price,
-        AVG(COALESCE(p.cost, 0)) AS average_cost
-      FROM product_dimension p
-      JOIN product_variation_dimension pv 
-          ON p.product_id = pv.product_id
+        pv.size,
+        pv.variation AS color,
+        'Retail' AS platform,
+        pv.original_price AS price,
+        p.cost AS cost,
+        pv.stock
+      FROM product_variation_dimension pv
+      JOIN product_dimension p
+        ON p.product_id = pv.product_id
       WHERE p.product_status = 'A'
-      GROUP BY p.product_name
-      ORDER BY p.product_name ASC;
+      ORDER BY p.product_name, pv.size, pv.variation;
     `;
 
     const result = await pool.query(query);
     res.json(result.rows);
+
   } catch (err) {
     console.error("❌ Database error:", err.message);
     res.status(500).json({ error: err.message });
