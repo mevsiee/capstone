@@ -513,22 +513,32 @@ function renderOrdersChart(chartData, aov) {
     ordersChartInstance.destroy();
   }
 
-  const historyEndIndex = chartData.currentEcom.findLastIndex(v => v !== null);
+  // Convert sales series → orders series per platform
+  const currentEcomOrders = chartData.currentEcom.map(v =>
+    v == null ? null : v / aov
+  );
+  const forecastEcomOrders = chartData.forecastEcomSeries.map(v =>
+    v == null ? null : v / aov
+  );
 
-  const currentOrders = chartData.labels.map((_, i) => {
-    if (i > historyEndIndex) return null;
-    const ec = chartData.currentEcom[i] ?? 0;
-    const rt = chartData.currentRetail[i] ?? 0;
-    return (ec + rt) / aov;
-  });
+  const currentRetailOrders = chartData.currentRetail.map(v =>
+    v == null ? null : v / aov
+  );
+  const forecastRetailOrders = chartData.forecastRetailSeries.map(v =>
+    v == null ? null : v / aov
+  );
 
-  const forecastOrders = chartData.labels.map((_, i) => {
-    const ec = chartData.forecastEcomSeries[i] ?? 0;
-    const rt = chartData.forecastRetailSeries[i] ?? 0;
-    return (ec + rt) / aov;
-  });
+  // Compute max for y-axis
+  const allValues = [
+    ...currentEcomOrders,
+    ...forecastEcomOrders,
+    ...currentRetailOrders,
+    ...forecastRetailOrders,
+  ].filter(v => v != null && !isNaN(v));
 
-  const maxOrders = Math.max(...currentOrders, ...forecastOrders, 10);
+  const maxOrders = allValues.length
+    ? Math.max(...allValues, 10)
+    : 10;
 
   ordersChartInstance = new Chart(ctx, {
     type: "line",
@@ -536,16 +546,31 @@ function renderOrdersChart(chartData, aov) {
       labels: chartData.labels,
       datasets: [
         {
-          label: "Current Orders",
-          data: currentOrders,
+          label: "E-Commerce (Current Orders)",
+          data: currentEcomOrders,
           borderColor: "#00c2ff",
           borderWidth: 2,
           tension: 0.3,
         },
         {
-          label: "Projected Orders",
-          data: forecastOrders,
+          label: "E-Commerce (Projected Orders)",
+          data: forecastEcomOrders,
           borderColor: "#00c2ff",
+          borderDash: [6, 6],
+          borderWidth: 2,
+          tension: 0.3,
+        },
+        {
+          label: "Retail (Current Orders)",
+          data: currentRetailOrders,
+          borderColor: "#f5b400",
+          borderWidth: 2,
+          tension: 0.3,
+        },
+        {
+          label: "Retail (Projected Orders)",
+          data: forecastRetailOrders,
+          borderColor: "#f5b400",
           borderDash: [6, 6],
           borderWidth: 2,
           tension: 0.3,
@@ -570,7 +595,7 @@ function renderOrdersChart(chartData, aov) {
           grid: { color: "#333" },
           beginAtZero: true,
           min: 0,
-          max: Math.ceil(maxOrders * 1.3),
+          max: 5000,
         },
       },
     },
@@ -793,16 +818,24 @@ async function calculateProductAllocationForSales() {
 
     // Update channel cards (ONLY retail + tiktok)
     // Shopee
-    setText("shopeeBaseForecast", "₱ 0");
-    setText("shopeeAfterAllocation", "₱ 0");
+    setText("shopeeBaseForecast", "-");
+    setText("shopeeAfterAllocation", "-");
 
     // Retail
     setText("retailBaseForecast", formatPeso(baseRetail));
-    setText("retailAfterAllocation", formatPeso(baseRetail + addedRetailRevenue));
+    if (rpuRetail > 0) {
+      setText("retailAfterAllocation", formatPeso(baseRetail + addedRetailRevenue));
+    } else {
+      setText("retailAfterAllocation", "—"); // hide until real RPU exists
+    }
 
     // TikTok
     setText("tiktokBaseForecast", formatPeso(baseTiktok));
-    setText("tiktokAfterAllocation", formatPeso(baseTiktok + addedTiktokRevenue));
+    if (rpuTiktok > 0) {
+      setText("tiktokAfterAllocation", formatPeso(baseTiktok + addedTiktokRevenue));
+    } else {
+      setText("tiktokAfterAllocation", "—"); // hide until valid
+    }
 
 
     // Show result panel
