@@ -1,8 +1,7 @@
 /* ============================================================
-   Global State, Helpers, Auth, CSV Loading, Metrics, Chart Prep
+   Global State, Helpers, Auth, Metrics, Chart Prep
    ============================================================ */
 
-console.log("📊 analytics.js PART 1 loaded");
 
 /* ---------- GLOBAL STATE ---------- */
 let baselineSalesCurrent = 0;
@@ -12,13 +11,15 @@ let baselineOrdersNext = 0;
 
 let platformNextSales = {
   retail: 0,
-  shopee: 0,
   tiktok: 0,
 };
 
 let salesChartInstance = null;
 let ordersChartInstance = null;
 let lastMetrics = null; // store metrics object for allocation recalculation
+
+let prescriptiveProducts = []; // holds products from /api/prescriptive-products
+
 
 /* ---------- HELPERS ---------- */
 function formatPeso(value) {
@@ -216,9 +217,6 @@ function computeMetricsFromRows({ historyByPlatform, forecastByPlatform }) {
   };
 }
 
-
-console.log("📊 analytics.js PART 2 loaded");
-
 /* ---------- WATCH USER OVERRIDES ---------- */
 function attachOverrideWatcher(inputId) {
   const el = document.getElementById(inputId);
@@ -241,35 +239,28 @@ function updateBudgetAllocation(m) {
 
   /* ---------- A) Grab Inputs ---------- */
   const retailMarginEl = document.getElementById("retailMarginInput");
-  const shopeeMarginEl = document.getElementById("shopeeMarginInput");
   const tiktokMarginEl = document.getElementById("tiktokMarginInput");
 
   const retailBudgetEl = document.getElementById("retailBudgetInput");
-  const shopeeBudgetEl = document.getElementById("shopeeBudgetInput");
   const tiktokBudgetEl = document.getElementById("tiktokBudgetInput");
 
   /* ---------- B) Read Inputs ---------- */
   const retailMarginInput = Number(retailMarginEl?.value) / 100;
-  const shopeeMarginInput = Number(shopeeMarginEl?.value) / 100;
   const tiktokMarginInput = Number(tiktokMarginEl?.value) / 100;
 
   const retailBudgetInput = Number(retailBudgetEl?.value);
-  const shopeeBudgetInput = Number(shopeeBudgetEl?.value);
   const tiktokBudgetInput = Number(tiktokBudgetEl?.value);
 
   /* ---------- C) Detect Per-Field Overrides ---------- */
   const retailMarginOverride = retailMarginEl?.value.trim() !== "";
-  const shopeeMarginOverride = shopeeMarginEl?.value.trim() !== "";
   const tiktokMarginOverride = tiktokMarginEl?.value.trim() !== "";
 
   const retailBudgetOverride = retailBudgetEl?.value.trim() !== "";
-  const shopeeBudgetOverride = shopeeBudgetEl?.value.trim() !== "";
   const tiktokBudgetOverride = tiktokBudgetEl?.value.trim() !== "";
 
   /* ---------- D) Compute Profit Margins ---------- */
   const profitMargins = {
     retail: retailMarginOverride ? retailMarginInput : 0.30,
-    shopee: shopeeMarginOverride ? shopeeMarginInput : 0.22,
     tiktok: tiktokMarginOverride ? tiktokMarginInput : 0.25,
   };
 
@@ -278,17 +269,17 @@ function updateBudgetAllocation(m) {
   let totalBudget = totalNext * 0.2; // default 20%
 
   const anyBudgetOverride =
-    retailBudgetOverride || shopeeBudgetOverride || tiktokBudgetOverride;
+    retailBudgetOverride || tiktokBudgetOverride;
 
   if (anyBudgetOverride) {
     totalBudget =
       (retailBudgetOverride ? retailBudgetInput : 0) +
-      (shopeeBudgetOverride ? shopeeBudgetInput : 0) +
+      0 +
       (tiktokBudgetOverride ? tiktokBudgetInput : 0);
   }
 
   /* ---------- F) Compute Allocation Scores ---------- */
-  const platforms = ["retail", "shopee", "tiktok"];
+  const platforms = ["retail", "tiktok"];
   const scores = {};
   let totalScore = 0;
 
@@ -318,16 +309,12 @@ function updateBudgetAllocation(m) {
   /* ---------- H) Update Placeholders (Margins) ---------- */
   if (!retailMarginOverride)
     retailMarginEl.placeholder = `(${Math.round(profitMargins.retail * 100)}%)`;
-  if (!shopeeMarginOverride)
-    shopeeMarginEl.placeholder = `(${Math.round(profitMargins.shopee * 100)}%)`;
   if (!tiktokMarginOverride)
     tiktokMarginEl.placeholder = `(${Math.round(profitMargins.tiktok * 100)}%)`;
 
   /* ---------- I) Update Placeholders (Budgets) ---------- */
   if (!retailBudgetOverride)
     retailBudgetEl.placeholder = `(${formatPeso(budgets.retail)})`;
-  if (!shopeeBudgetOverride)
-    shopeeBudgetEl.placeholder = `(${formatPeso(budgets.shopee)})`;
   if (!tiktokBudgetOverride)
     tiktokBudgetEl.placeholder = `(${formatPeso(budgets.tiktok)})`;
 
@@ -336,11 +323,9 @@ function updateBudgetAllocation(m) {
 
   /* ---------- K) Update UI Cards ---------- */
   setText("allocationRetail", formatPeso(budgets.retail));
-  setText("allocationShopee", formatPeso(budgets.shopee));
   setText("allocationTiktok", formatPeso(budgets.tiktok));
 
   setText("allocationRetailPct", allocPercents.retail.toFixed(1) + "%");
-  setText("allocationShopeePct", allocPercents.shopee.toFixed(1) + "%");
   setText("allocationTiktokPct", allocPercents.tiktok.toFixed(1) + "%");
 
   /* ============================================================
@@ -348,7 +333,7 @@ function updateBudgetAllocation(m) {
      ============================================================ */
   function updateChannelCards(m, budgets, margins) {
     const retailBase = platformNextSales.retail || 0;
-    const shopeeBase = platformNextSales.shopee || 0;
+
     const tiktokBase = platformNextSales.tiktok || 0;
 
     const efficiency = {
@@ -365,16 +350,11 @@ function updateBudgetAllocation(m) {
 
     const retailAfter =
       retailBase + budgets.retail * efficiency.retail * marginFactor.retail;
-    const shopeeAfter =
-      shopeeBase + budgets.shopee * efficiency.shopee * marginFactor.shopee;
     const tiktokAfter =
       tiktokBase + budgets.tiktok * efficiency.tiktok * marginFactor.tiktok;
 
     setText("retailBaseForecast", formatPeso(retailBase));
     setText("retailAfterAllocation", formatPeso(retailAfter));
-
-    setText("shopeeBaseForecast", formatPeso(shopeeBase));
-    setText("shopeeAfterAllocation", formatPeso(shopeeAfter));
 
     setText("tiktokBaseForecast", formatPeso(tiktokBase));
     setText("tiktokAfterAllocation", formatPeso(tiktokAfter));
@@ -435,10 +415,6 @@ function populateOrdersTab(m) {
   setText(
     "ordersRetail",
     Math.round((platformNextSales.retail || 0) / AOV).toLocaleString()
-  );
-  setText(
-    "ordersShopee",
-    Math.round((platformNextSales.shopee || 0) / AOV).toLocaleString()
   );
   setText(
     "ordersTiktok",
@@ -719,49 +695,58 @@ async function loadNeonData() {
    LOAD PRESCRIPTIVE ALLOCATION PRODUCTS (from NeonDB)
    ============================================================ */
   async function loadPrescriptiveProducts() {
-  try {
-    const resp = await fetch("http://localhost:5000/api/prescriptive-products");
-    const products = await resp.json();
+    try {
+      const resp = await fetch("http://localhost:5000/api/prescriptive-products");
+      const products = await resp.json();
 
-    console.log("📦 Prescriptive Allocation Products:", products);
+      prescriptiveProducts = products;
 
-    // Two selectors (Sales + Orders)
-    const selSales = document.getElementById("productSelectorSales");
-    const selOrders = document.getElementById("productSelectorOrders");
+      console.log("📦 Prescriptive Allocation Products:", products);
 
-    // Clear existing
-    if (selSales) selSales.innerHTML = "";
-    if (selOrders) selOrders.innerHTML = "";
+      const selSales = document.getElementById("productSelectorSales");
+      const selOrders = document.getElementById("productSelectorOrders");
 
-    products.forEach(p => {
-      const opt1 = document.createElement("option");
-      opt1.value = p.product_id;
-      opt1.textContent = p.product_name;
+      if (selSales) selSales.innerHTML = "";
+      if (selOrders) selOrders.innerHTML = "";
 
-      const opt2 = opt1.cloneNode(true);
+      products.forEach(p => {
+        const cleanId = Number(String(p.product_id).split(":")[0]);
 
-      if (selSales) selSales.appendChild(opt1);
-      if (selOrders) selOrders.appendChild(opt2);
+        const opt1 = document.createElement("option");
+        opt1.value = cleanId;
+        opt1.textContent = p.product_name;
+
+        const opt2 = document.createElement("option");
+        opt2.value = cleanId;
+        opt2.textContent = p.product_name;
+
+        if (selSales) selSales.appendChild(opt1);
+        if (selOrders) selOrders.appendChild(opt2);
     });
 
-    // Auto-fill first product summary (SALES tab only)
+    // Auto-fill first product summary
     if (products.length > 0) {
+      const cleanId = Number(String(products[0].product_id).split(":")[0]);
+      selSales.value = cleanId;
       updateProductSummary(products[0], "sales");
-      selSales.value = products[0].product_id;
     }
 
-    // Change listener for SALES tab
+    // Sales dropdown listener
     if (selSales) {
       selSales.addEventListener("change", () => {
-        const selected = products.find(p => p.product_id == selSales.value);
+        const selected = products.find(
+          p => Number(String(p.product_id).split(":")[0]) == selSales.value
+        );
         updateProductSummary(selected, "sales");
       });
     }
 
-    // Change listener for ORDERS tab
+    // Orders dropdown listener
     if (selOrders) {
       selOrders.addEventListener("change", () => {
-        const selected = products.find(p => p.product_id == selOrders.value);
+        const selected = products.find(
+          p => Number(String(p.product_id).split(":")[0]) == selOrders.value
+        );
         updateProductSummary(selected, "orders");
       });
     }
@@ -772,20 +757,102 @@ async function loadNeonData() {
 }
 
 
+async function calculateProductAllocationForSales() {
+  const selector = document.getElementById("productSelectorSales");
+  if (!selector) return;
+
+  const productId = Number(selector.value);
+  if (!productId) return;
+
+  try {
+    const resp = await fetch("http://localhost:5000/api/prescriptive-allocation?productId=" + productId);
+    const data = await resp.json();
+
+    const allocRetail = data.allocations.retail;
+    const allocTiktok = data.allocations.tiktok;
+    const allocShopee = data.allocations.shopee ?? 0;
+
+    // Update allocation result UI
+    setText("allocRetail", allocRetail.toLocaleString());
+    setText("allocTikTok", allocTiktok.toLocaleString());
+    setText("allocShopee", allocShopee.toLocaleString()); 
+
+    setText("allocTotal", (allocRetail + allocTiktok + allocShopee).toLocaleString());
+
+
+    // Revenue per unit
+    const rpuRetail = data.rpu.retail;   // always 0
+    const rpuTiktok = data.rpu.tiktok;
+
+    const addedRetailRevenue = allocRetail * rpuRetail;
+    const addedTiktokRevenue = allocTiktok * rpuTiktok;
+
+    // Base forecasts
+    const baseRetail = platformNextSales.retail || 0;
+    const baseTiktok = platformNextSales.tiktok || 0;
+
+    // Update channel cards (ONLY retail + tiktok)
+    // Shopee
+    setText("shopeeBaseForecast", "₱ 0");
+    setText("shopeeAfterAllocation", "₱ 0");
+
+    // Retail
+    setText("retailBaseForecast", formatPeso(baseRetail));
+    setText("retailAfterAllocation", formatPeso(baseRetail + addedRetailRevenue));
+
+    // TikTok
+    setText("tiktokBaseForecast", formatPeso(baseTiktok));
+    setText("tiktokAfterAllocation", formatPeso(baseTiktok + addedTiktokRevenue));
+
+
+    // Show result panel
+    const el = document.getElementById("allocationResult");
+    if (el) el.style.display = "block";
+
+  } catch (err) {
+    console.error("❌ Error calculating product allocation:", err);
+    alert("Error computing allocation. See console.");
+  }
+}
 
   /* ============================================================
     UPDATE PRODUCT SUMMARY PANEL
     ============================================================ */
   function updateProductSummary(p, tab) {
+  if (!p) return;
+
   if (tab === "sales") {
-    setText("summaryStock", p?.current_stock ?? "--");
-    setText("summaryDemand", p?.demand ?? "--");
+    setText("summaryStock", p.current_stock ?? "--");
+    setText("summaryDemand", p.demand ?? "--");
   }
+
   if (tab === "orders") {
-    setText("summaryStockOrders", p?.current_stock ?? "--");
-    setText("summaryDemandOrders", p?.demand ?? "--");
+    setText("summaryStockOrders", p.current_stock ?? "--");
+    setText("summaryDemandOrders", p.demand ?? "--");
+
+    setText("summaryAllocatedOrders", p.allocated ?? "--");
+    setText("summaryShortageOrders", p.shortage ?? "--");
+    setText("summaryExcessOrders", p.excess_stock ?? "--");
+    setText("summaryWeightOrders", p.weight ?? "--");
   }
 }
+
+
+function getRevenuePerUnitForPlatform(product, platformKey) {
+  if (!product || !product.revenue_breakdown) return 0;
+
+  // platformKey: "retail" | "shopee" | "tiktok"
+  const row = product.revenue_breakdown.find(r => {
+    const p = (r.platform_name || "").toLowerCase();
+    if (platformKey === "shopee") return p.includes("shopee");
+    if (platformKey === "tiktok") return p.includes("tiktok");
+    if (platformKey === "retail") return p.includes("retail");
+    return false;
+  });
+
+  return row ? Number(row.revenue_per_unit || 0) : 0;
+}
+
 
 /* ============================================================
    INIT
@@ -800,10 +867,16 @@ document.addEventListener("DOMContentLoaded", () => {
   attachOverrideWatcher("retailMarginInput");
   attachOverrideWatcher("shopeeMarginInput");
   attachOverrideWatcher("tiktokMarginInput");
+  
 
   attachOverrideWatcher("retailBudgetInput");
   attachOverrideWatcher("shopeeBudgetInput");
   attachOverrideWatcher("tiktokBudgetInput");
+  const calcBtn = document.getElementById("calculateAllocationBtn");
+  if (calcBtn) {
+      calcBtn.addEventListener("click", calculateProductAllocationForSales);
+  }
+
 
   const recalcBtn = document.getElementById("recalcAllocationBtn");
   if (recalcBtn) {

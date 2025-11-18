@@ -214,36 +214,135 @@ body {
 
 /* ==== PRODUCT STOCK ALLOCATION ==== */
 
+/* ================================================
+   IMPROVED PRODUCT ALLOCATION CARD (Premium UI)
+   ================================================ */
+
 .allocation-card {
-    background: #15120a;
-    border: 1px solid #f5b400;
-    padding: 30px 28px;
-    border-radius: 14px;
-    min-height: 400px;
-    font-size: 1.3rem;
+    background: linear-gradient(145deg, #1b1b1b, #111);
+    border: 1px solid rgba(255, 200, 60, 0.35);
+    padding: 28px 26px;
+    border-radius: 16px;
+    min-height: 420px;
+
+    box-shadow:
+        0 0 25px rgba(255, 200, 60, 0.08),
+        inset 0 0 12px rgba(255, 200, 60, 0.05);
+
+    position: relative;
+    overflow: hidden;
 }
 
-.allocation-input,
+/* Subtle neon border glow */
+.allocation-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    pointer-events: none;
+    box-shadow:
+        0 0 25px rgba(255, 200, 60, 0.15),
+        inset 0 0 15px rgba(255, 200, 60, 0.1);
+}
+
+/* Title inside allocation card */
+.allocation-card .side-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #ffdd66;
+    text-shadow: 0 0 8px rgba(255, 220, 100, 0.5);
+}
+
+.allocation-card .side-description {
+    color: #cfcfcf;
+    opacity: 0.85;
+    font-size: 0.95rem;
+    margin-bottom: 18px;
+}
+
+/* Labels */
+.allocation-label {
+    font-size: 1rem;
+    color: #e6e6e6;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+/* Inputs & dropdown */
 .allocation-card select,
 .allocation-card input {
-    background: #222;
-    border: 1px solid #444;
-    color: #fff;
-    border-radius: 6px;
+    background: #1f1f1f;
+    border: 1px solid #333;
     padding: 10px 12px;
-    font-size: 1.2rem;
+    color: #fff;
+    font-size: 1.05rem;
+    border-radius: 8px;
+    transition: border 0.2s, box-shadow 0.2s;
 }
 
+.allocation-card select:focus,
+.allocation-card input:focus {
+    border-color: #ffcc44;
+    box-shadow: 0 0 10px rgba(255, 200, 50, 0.4);
+    outline: none;
+}
+
+/* Calculation Button */
+.allocation-recalc {
+    margin-top: 12px;
+    width: 100%;
+    background: linear-gradient(135deg, #ffcc00, #ffb700);
+    color: #000 !important;
+    font-weight: 700;
+    padding: 12px 14px;
+    border-radius: 10px;
+    text-align: center;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.allocation-recalc:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 18px rgba(255, 200, 50, 0.5);
+}
+
+/* Results box */
 .allocation-result {
-    margin-top: 18px;
-    padding-top: 10px;
-    border-top: 1px solid #222;
+    margin-top: 22px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 200, 60, 0.4);
 }
 
 .allocation-result-title {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #ffe28d;
 }
+
+.allocation-result div {
+    font-size: 1rem;
+    margin-bottom: 6px;
+    color: #eaeaea;
+}
+
+/* Bigger text for allocation summaries */
+#productSummary p,
+#productSummaryOrders p {
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: #e6e6e6;
+    margin: 6px 0;
+}
+
+/* Bigger values */
+#productSummary span,
+#productSummaryOrders span {
+    font-weight: 700;
+    color: #fff;
+}
+
 
 /* ==== BREAKDOWN CARDS (now inside right column) ==== */
 
