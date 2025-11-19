@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
         name: item.product_name,
         size: item.size || "-",
         color: item.color || "-",
-        platform: item.platform || "-", 
+        platform: item.platform || "-",
         price: parseFloat(item.price) || 0,
         cost: parseFloat(item.cost) || 0,
         stock: item.stock === null ? 0 : parseInt(item.stock)
@@ -121,17 +121,25 @@ document.addEventListener("DOMContentLoaded", () => {
   function applyFilters() {
     let data = [...inventoryData];
 
+    // platform filter
     if (selectedPlatform) {
-      data = data.filter(item => item.platform.toLowerCase() === selectedPlatform);
+      data = data.filter(item => {
+        if (!item.platform) return false;
+        return item.platform.toLowerCase() === selectedPlatform.toLowerCase();
+      });
     }
 
+    // stock filter
     if (selectedStock) {
-      data = data.filter(item => getStockLevelClass(item.stock) === selectedStock);
+      data = data.filter(item => {
+        return getStockLevelClass(item.stock) === selectedStock;
+      });
     }
 
     filteredData = data;
     currentPage = 1;
-    populateTable(filteredData);
+    populateTable(data);
+    updateStockCounts();
   }
 
   document.querySelector(".clear-filters")?.addEventListener("click", () => {

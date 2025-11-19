@@ -34,19 +34,19 @@ pool.connect()
 app.get("/api/inventory", async (req, res) => {
   try {
     const query = `
-      SELECT
-        p.product_name,
-        pv.size,
-        pv.variation AS color,
-        'Retail' AS platform,
-        pv.original_price AS price,
-        p.cost AS cost,
-        pv.stock
-      FROM product_variation_dimension pv
-      JOIN product_dimension p
-        ON p.product_id = pv.product_id
-      WHERE p.product_status = 'A'
-      ORDER BY p.product_name, pv.size, pv.variation;
+      SELECT 
+            p.product_name,
+            pv.size,
+            pv.variation AS color,
+            'E-commerce' AS platform,   -- 🔥 HARD CODED PLATFORM
+            pv.original_price AS price,
+            p.cost AS cost,
+            pv.stock
+        FROM product_variation_dimension pv
+        JOIN product_dimension p
+            ON p.product_id = pv.product_id
+        WHERE p.product_status = 'A'
+        ORDER BY p.product_name, pv.size, pv.variation;
     `;
 
     const result = await pool.query(query);
