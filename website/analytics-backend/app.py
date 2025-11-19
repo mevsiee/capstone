@@ -17,6 +17,9 @@ from endpoints.sales_trend_monthly import get_sales_trend_monthly
 from endpoints.top_selling_products import get_top_selling_products
 from endpoints.aov_platform_distribution import get_aov_platform_distribution
 
+# Settings endpoint
+from endpoints.platform_integration import get_platform_integration
+
 app = FastAPI()
 
 # CORS
@@ -200,3 +203,7 @@ def route_aov_distribution(request: Request):
         month = int(month_param)
 
     return get_aov_platform_distribution(engine, year, month)
+
+@app.get("/platform/integration")
+def platform_integration():
+    return get_platform_integration(engine)
