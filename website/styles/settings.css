@@ -249,6 +249,17 @@
     color: #4bbf4f;
 }
 
+.platform-item.inactive-container {
+    background: #3b0000;      /* dark red */
+    border: 1px solid #5c0000;
+}
+
+.platform-status.inactive-pill {
+    background: #5c0000;      /* slightly brighter red */
+    color: #ffb3b3;
+    border: 1px solid #7a0000;
+}
+
 /* Button Styles */
 .save-btn {
     background: #F0B810;
