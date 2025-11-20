@@ -39,13 +39,13 @@ base AS (
 SELECT
     COALESCE(SUM(
         CASE WHEN is_current_month AND is_completed
-            THEN COALESCE(product_subtotal_before, 0)
+            THEN COALESCE(product_subtotal_after, 0)
         END
     ), 0) AS current_value,
 
     COALESCE(SUM(
         CASE WHEN is_previous_month AND is_completed
-            THEN COALESCE(product_subtotal_before, 0)
+            THEN COALESCE(product_subtotal_after, 0)
         END
     ), 0) AS previous_value
 FROM base;

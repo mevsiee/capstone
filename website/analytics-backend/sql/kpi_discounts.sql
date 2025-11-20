@@ -1,11 +1,9 @@
 -- TOTAL DISCOUNTS KPI (last_total_discount ON COMPLETED ORDERS)
-
 WITH raw AS (
-    SELECT
+    SELECT DISTINCT ON (order_id)
         dt.*,
         date_trunc('month', order_date)::date AS order_month_date,
 
-        -- Completed logic
         CASE
             WHEN platform_name ILIKE '%retail%'
                  AND order_status = 'Completed'
@@ -19,6 +17,9 @@ WITH raw AS (
 
     FROM denormalized_table AS dt
     WHERE order_year >= 2023
+
+    -- Ensure stable DISTINCT ON ordering
+    ORDER BY order_id, order_date DESC
 ),
 
 months AS (
