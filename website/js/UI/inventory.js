@@ -294,6 +294,10 @@ document.addEventListener("DOMContentLoaded", () => {
     thresholdsModal.classList.remove("active");
   });
 
+  thresholdsModal?.querySelector(".close-btn")?.addEventListener("click", () => {
+      thresholdsModal.classList.remove("active");
+  });
+
   function applyThresholds() {
     document.querySelector(".stock-card.high .stock-description").textContent =
       `Items with ${thresholds.high}+ units in stock`;
@@ -307,6 +311,79 @@ document.addEventListener("DOMContentLoaded", () => {
     updateStockCounts();
     populateTable();
   }
+
+  // =============================
+  // UPDATE PRODUCT COST MODAL
+  // =============================
+  const updateCostModal = document.getElementById("updateCostModal");
+
+  // Open Update Product Cost Modal (4th control button)
+  document.querySelector(".control-btn:nth-child(4)")?.addEventListener("click", () => {
+      updateCostModal.classList.add("active");
+  });
+
+  // Close button (X)
+  updateCostModal?.querySelector(".close-btn")?.addEventListener("click", () => {
+      updateCostModal.classList.remove("active");
+  });
+
+  // Cancel button
+  updateCostModal?.querySelector(".cancel-btn")?.addEventListener("click", () => {
+      updateCostModal.classList.remove("active");
+  });
+
+  // Save button
+  updateCostModal?.querySelector(".save-btn")?.addEventListener("click", async () => {
+    const selector = document.getElementById("productSelector");
+    const newCostInput = document.getElementById("newCost");
+
+    const selectedValue = selector.value;
+    const newCost = parseFloat(newCostInput.value);
+
+    if (!selectedValue) {
+        alert("Please select a product.");
+        return;
+    }
+
+    if (!Number.isFinite(newCost) || newCost <= 0) {
+        alert("Please enter a valid cost.");
+        return;
+    }
+
+    let payload = {};
+
+    // For "All Products"
+    if (selectedValue === "all") {
+        payload = { product: "all", platform: null, newCost };
+    } else {
+        const [productName, platform] = selectedValue.split("|");
+        payload = {
+            product: productName.trim(),
+            platform: platform?.trim() || null,
+            newCost
+        };
+    }
+
+    try {
+        const res = await fetch("http://localhost:5000/api/update-cost", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) return alert("Error: " + data.message);
+
+        alert(data.message);
+        updateCostModal.classList.remove("active");
+
+        // Refresh inventory
+        fetchInventoryData();
+    } catch (err) {
+        console.error(err);
+        alert("Server error updating cost.");
+    }
+});
 
   // =============================
   // PRODUCT SELECTOR (Cost Update)
