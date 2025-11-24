@@ -476,12 +476,6 @@ body {
     border: 1px solid rgba(255, 70, 70, 0.5);
 }
 
-/* Shopee = orange */
-.contrib-shopee {
-    background: rgba(255, 140, 0, 0.22);
-    border: 1px solid rgba(255, 160, 0, 0.55);
-}
-
 /* TikTok = lively gray (with neon accents hint) */
 .contrib-tiktok {
     background: #1f1f1f;
@@ -500,8 +494,87 @@ body {
     font-size: 1.3rem;
 }
 
+/* ============================================================
+   MODEL INFORMATION & VALIDATION
+   ============================================================ */
 
+.model-info-card {
+    background: #181818;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    padding: 22px 24px;
+}
 
+.model-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 22px;
+    margin-top: 15px;
+}
+
+.model-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.model-info-label {
+    font-size: 0.85rem;
+    color: #bbbbbb;
+    font-weight: 500;
+}
+
+.model-info-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* ============================================================
+   TOP FORECASTED SELLING ITEMS (RANKED)
+   ============================================================ */
+
+.top-items-card {
+    background: #181818;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    padding: 22px 24px;
+}
+
+.top-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.top-item {
+    display: grid;
+    grid-template-columns: 50px 1fr auto;
+    align-items: center;
+    padding: 12px 16px;
+    background: #1f1f1f;
+    border-radius: 10px;
+    border: 1px solid #2e2e2e;
+}
+
+.top-item-rank {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffdd66;
+}
+
+.top-item-name {
+    font-size: 1rem;
+    color: #eaeaea;
+    font-weight: 500;
+}
+
+.top-item-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #3fd965; /* green, consistent with positive forecast coloring */
+}
 
 /* ==== RESPONSIVE ==== */
 

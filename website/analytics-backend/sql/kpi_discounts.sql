@@ -50,3 +50,4 @@ SELECT
         END
     ), 0) AS previous_value
 FROM base;
+    

@@ -62,10 +62,10 @@ function formatMonthKey(dateObj) {
 
 function normalizePlatformName(raw) {
   const p = (raw || "").toLowerCase();
-  if (p.includes("shopee")) return "shopee";
   if (p.includes("tiktok")) return "tiktok";
   return "retail";
 }
+
 
 /* ---------- AUTH ---------- */
 function setupFirebaseAuth() {
@@ -99,14 +99,11 @@ function setupFirebaseAuth() {
 /* ---------- CHART SERIES PREP ---------- */
 function computeChartSeries(history, forecast) {
 
-  const retailForecast3 = forecast.retail.slice(-3);
-  const ecomForecast3 = forecast.ecommerce.slice(-3);
-
   const allRows = [
     ...history.retail,
     ...history.ecommerce,
-    ...retailForecast3,
-    ...ecomForecast3,
+    ...forecast.retail,
+    ...forecast.ecommerce,
   ].sort((a, b) => parseDate(a.ds) - parseDate(b.ds));
 
   const labels = [...new Set(allRows.map(r => r.ds))];
@@ -190,11 +187,6 @@ function computeMetricsFromRows({ historyByPlatform, forecastByPlatform }) {
   platformNextSales.retail =
     forecastByPlatform.retail
       .filter(r => nextQMonths.includes(r.ds.split("-")[1]))
-      .reduce((a, r) => a + Number(r.y || 0), 0);
-
-  platformNextSales.shopee =
-    forecastByPlatform.ecommerce
-      .filter(r => r.platform === "shopee" && nextQMonths.includes(r.ds.split("-")[1]))
       .reduce((a, r) => a + Number(r.y || 0), 0);
 
   platformNextSales.tiktok =
@@ -299,7 +291,6 @@ function updateBudgetAllocation(m) {
     let bud = totalScore > 0 ? (totalBudget * scores[p]) / totalScore : 0;
 
     if (p === "retail" && retailBudgetOverride) bud = retailBudgetInput;
-    if (p === "shopee" && shopeeBudgetOverride) bud = shopeeBudgetInput;
     if (p === "tiktok" && tiktokBudgetOverride) bud = tiktokBudgetInput;
 
     budgets[p] = bud;
@@ -338,13 +329,11 @@ function updateBudgetAllocation(m) {
 
     const efficiency = {
       retail: 1.3,
-      shopee: 1.1,
       tiktok: 1.8,
     };
 
     const marginFactor = {
       retail: 1 + (margins.retail || 0),
-      shopee: 1 + (margins.shopee || 0),
       tiktok: 1 + (margins.tiktok || 0),
     };
 
@@ -445,15 +434,15 @@ function renderSalesChart(chartData) {
     data: {
       labels: chartData.labels,
       datasets: [
-        {
-          label: "E-Commerce (Current)",
+                {
+          label: "TikTok (Current)",
           data: chartData.currentEcom,
           borderColor: "#00c2ff",
           borderWidth: 2,
           tension: 0.3,
         },
         {
-          label: "E-Commerce (Projected)",
+          label: "TikTok (Projected)",
           data: chartData.forecastEcomSeries,
           borderColor: "#00c2ff",
           borderDash: [6, 6],
@@ -545,16 +534,16 @@ function renderOrdersChart(chartData, aov) {
     data: {
       labels: chartData.labels,
       datasets: [
-        {
-          label: "E-Commerce (Current Orders)",
-          data: currentEcomOrders,
+                {
+          label: "TikTok (Current Orders)",
+          data: currentEcomOrders,    
           borderColor: "#00c2ff",
           borderWidth: 2,
           tension: 0.3,
         },
         {
-          label: "E-Commerce (Projected Orders)",
-          data: forecastEcomOrders,
+          label: "TikTok (Projected Orders)",
+          data: forecastEcomOrders,  
           borderColor: "#00c2ff",
           borderDash: [6, 6],
           borderWidth: 2,
@@ -684,15 +673,27 @@ async function loadNeonData() {
     history.forEach(r => r.isHistory = true);
     forecast.forEach(r => r.isHistory = false);
 
+    /* ---------- MODEL INFORMATION POPULATION ---------- */
+    if (forecast.length > 0) {
+      const stats = forecast[0]; // every row includes model metrics
+
+      setText("modelUsed", "XGBoost (JS Native)");
+      setText("trainingWindow", "Jan 2023 – Dec 2024");
+
+      setText("modelRMSE", (stats.rmse ?? 0).toFixed(2));
+      setText("modelMAPE", (stats.mape ?? 0).toFixed(2) + "%");
+      setText("modelSMAPE", (stats.smape ?? 0).toFixed(2) + "%");
+    }
+
     /* ---------- PLATFORM GROUPING (OPTION A) ---------- */
     const historyByPlatform = {
       retail: history.filter(r => r.platform === "retail"),
-      ecommerce: history.filter(r => r.platform === "shopee" || r.platform === "tiktok"),
+      ecommerce: history.filter(r => r.platform === "tiktok"),  // 👈 FIXED
     };
 
     const forecastByPlatform = {
       retail: forecast.filter(r => r.platform === "retail"),
-      ecommerce: forecast.filter(r => r.platform === "shopee" || r.platform === "tiktok"),
+      ecommerce: forecast.filter(r => r.platform === "tiktok"), // 👈 FIXED
     };
 
     /* ---------- METRICS ---------- */
@@ -779,6 +780,29 @@ async function loadNeonData() {
   } catch (err) {
     console.error("❌ Error loading prescriptive products:", err);
   }
+
+  /* ---------- TOP FORECASTED SELLING ITEMS (Ranked) ---------- */
+  const topBox = document.getElementById("topForecastedItems");
+  if (topBox) {
+    topBox.innerHTML = "";
+
+    const topFive = [...products]
+      .sort((a, b) => Number(b.demand || 0) - Number(a.demand || 0))
+      .slice(0, 5);
+
+    topFive.forEach((p, index) => {
+      const row = document.createElement("div");
+      row.className = "top-item";
+
+      row.innerHTML = `
+        <div class="top-item-rank">#${index + 1}</div>
+        <div class="top-item-name">${p.product_name}</div>
+        <div class="top-item-value">₱ ${Math.round((p.demand || 0) * 1).toLocaleString()}</div>
+      `;
+
+      topBox.appendChild(row);
+    });
+  }
 }
 
 
@@ -795,18 +819,15 @@ async function calculateProductAllocationForSales() {
 
     const allocRetail = data.allocations.retail;
     const allocTiktok = data.allocations.tiktok;
-    const allocShopee = data.allocations.shopee ?? 0;
 
-    // Update allocation result UI
+    // Update allocation result UI (Retail + TikTok only)
     setText("allocRetail", allocRetail.toLocaleString());
     setText("allocTikTok", allocTiktok.toLocaleString());
-    setText("allocShopee", allocShopee.toLocaleString()); 
 
-    setText("allocTotal", (allocRetail + allocTiktok + allocShopee).toLocaleString());
-
+    setText("allocTotal", (allocRetail + allocTiktok).toLocaleString());
 
     // Revenue per unit
-    const rpuRetail = data.rpu.retail;   // always 0
+    const rpuRetail = data.rpu.retail;   // may be 0 for now
     const rpuTiktok = data.rpu.tiktok;
 
     const addedRetailRevenue = allocRetail * rpuRetail;
@@ -816,17 +837,12 @@ async function calculateProductAllocationForSales() {
     const baseRetail = platformNextSales.retail || 0;
     const baseTiktok = platformNextSales.tiktok || 0;
 
-    // Update channel cards (ONLY retail + tiktok)
-    // Shopee
-    setText("shopeeBaseForecast", "-");
-    setText("shopeeAfterAllocation", "-");
-
     // Retail
     setText("retailBaseForecast", formatPeso(baseRetail));
     if (rpuRetail > 0) {
       setText("retailAfterAllocation", formatPeso(baseRetail + addedRetailRevenue));
     } else {
-      setText("retailAfterAllocation", "—"); // hide until real RPU exists
+      setText("retailAfterAllocation", "—");
     }
 
     // TikTok
@@ -834,9 +850,8 @@ async function calculateProductAllocationForSales() {
     if (rpuTiktok > 0) {
       setText("tiktokAfterAllocation", formatPeso(baseTiktok + addedTiktokRevenue));
     } else {
-      setText("tiktokAfterAllocation", "—"); // hide until valid
+      setText("tiktokAfterAllocation", "—");
     }
-
 
     // Show result panel
     const el = document.getElementById("allocationResult");
@@ -870,14 +885,11 @@ async function calculateProductAllocationForSales() {
   }
 }
 
-
 function getRevenuePerUnitForPlatform(product, platformKey) {
   if (!product || !product.revenue_breakdown) return 0;
 
-  // platformKey: "retail" | "shopee" | "tiktok"
   const row = product.revenue_breakdown.find(r => {
     const p = (r.platform_name || "").toLowerCase();
-    if (platformKey === "shopee") return p.includes("shopee");
     if (platformKey === "tiktok") return p.includes("tiktok");
     if (platformKey === "retail") return p.includes("retail");
     return false;
@@ -885,7 +897,6 @@ function getRevenuePerUnitForPlatform(product, platformKey) {
 
   return row ? Number(row.revenue_per_unit || 0) : 0;
 }
-
 
 /* ============================================================
    INIT
@@ -896,15 +907,12 @@ document.addEventListener("DOMContentLoaded", () => {
   loadNeonData();
   loadPrescriptiveProducts();
 
-
   attachOverrideWatcher("retailMarginInput");
-  attachOverrideWatcher("shopeeMarginInput");
   attachOverrideWatcher("tiktokMarginInput");
   
-
   attachOverrideWatcher("retailBudgetInput");
-  attachOverrideWatcher("shopeeBudgetInput");
   attachOverrideWatcher("tiktokBudgetInput");
+
   const calcBtn = document.getElementById("calculateAllocationBtn");
   if (calcBtn) {
       calcBtn.addEventListener("click", calculateProductAllocationForSales);
@@ -920,10 +928,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const allocationInputs = [
     "retailMarginInput",
-    "shopeeMarginInput",
     "tiktokMarginInput",
     "retailBudgetInput",
-    "shopeeBudgetInput",
     "tiktokBudgetInput",
   ];
 
