@@ -178,8 +178,8 @@ body {
 
 .analytics-main-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 22px;
+    grid-template-columns: 1fr 1fr;
+    gap: 0px 20px;  /* row gap = 0, col gap = 20 */
 }
 
 .chart-card {

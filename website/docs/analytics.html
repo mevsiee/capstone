@@ -81,7 +81,7 @@
 
             <div class="analytics-main-grid">
 
-              <!-- SALES CHART -->
+              <!-- SALES CHART (LEFT COLUMN) -->
               <div class="card chart-card">
                 <div class="card-header">
                   <h3>Projected Sales for Upcoming Quarter</h3>
@@ -103,24 +103,35 @@
                   </div>
 
                   <div class="model-info-grid">
+
                     <div class="model-info-item">
                       <div class="model-info-label">Model Used</div>
-                      <div class="model-info-value" id="modelUsed">XGBoost (JS Native)</div>
+                      <div class="model-info-value" id="modelUsed">XGBoost with Lags</div>
                     </div>
 
                     <div class="model-info-item">
-                      <div class="model-info-label">RMSE</div>
-                      <div class="model-info-value" id="modelRMSE">--</div>
+                      <div class="model-info-label">Confidence Interval</div>
+                      <div class="model-info-value" id="confidenceInterval">95.00%</div>
                     </div>
 
                     <div class="model-info-item">
-                      <div class="model-info-label">MAPE</div>
-                      <div class="model-info-value" id="modelMAPE">--</div>
+                      <div class="model-info-label">TikTok RMSE</div>
+                      <div class="model-info-value" id="rmseTiktok">--</div>
                     </div>
 
                     <div class="model-info-item">
-                      <div class="model-info-label">SMAPE</div>
-                      <div class="model-info-value" id="modelSMAPE">--</div>
+                      <div class="model-info-label">TikTok SMAPE</div>
+                      <div class="model-info-value" id="smapeTiktok">--</div>
+                    </div>
+
+                    <div class="model-info-item">
+                      <div class="model-info-label">Retail RMSE</div>
+                      <div class="model-info-value" id="rmseRetail">--</div>
+                    </div>
+
+                    <div class="model-info-item">
+                      <div class="model-info-label">Retail SMAPE</div>
+                      <div class="model-info-value" id="smapeRetail">--</div>
                     </div>
 
                   </div>
@@ -141,40 +152,40 @@
               <!-- SALES SHARE PROJECTION — FULL WIDTH -->
               <div class="share-container-row full-width-row">
                 <div class="share-box tiktok-share">
-                    <div class="share-title">TikTok Sales Share Projection</div>
-                    <div class="share-main-value" id="tiktokShareBase">--</div>
+                  <div class="share-title">TikTok Sales Share Projection</div>
+                  <div class="share-main-value" id="tiktokShareBase">--</div>
 
-                    <div class="share-scenarios">
-                        <div class="scenario-row">
-                            <span>Optimistic Scenario</span>
-                            <span id="tiktokShareOptimistic">--</span>
-                        </div>
-                        <div class="scenario-row">
-                            <span>Conservative Scenario</span>
-                            <span id="tiktokShareConservative">--</span>
-                        </div>
+                  <div class="share-scenarios">
+                    <div class="scenario-row">
+                      <span>Optimistic Scenario</span>
+                      <span id="tiktokShareOptimistic">--</span>
                     </div>
+                    <div class="scenario-row">
+                      <span>Conservative Scenario</span>
+                      <span id="tiktokShareConservative">--</span>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="share-box retail-share">
-                    <div class="share-title">Retail Sales Share Projection</div>
-                    <div class="share-main-value" id="retailShareBase">--</div>
+                  <div class="share-title">Retail Sales Share Projection</div>
+                  <div class="share-main-value" id="retailShareBase">--</div>
 
-                    <div class="share-scenarios">
-                        <div class="scenario-row">
-                            <span>Optimistic Scenario</span>
-                            <span id="retailShareOptimistic">--</span>
-                        </div>
-                        <div class="scenario-row">
-                            <span>Conservative Scenario</span>
-                            <span id="retailShareConservative">--</span>
-                        </div>
+                  <div class="share-scenarios">
+                    <div class="scenario-row">
+                      <span>Optimistic Scenario</span>
+                      <span id="retailShareOptimistic">--</span>
                     </div>
+                    <div class="scenario-row">
+                      <span>Conservative Scenario</span>
+                      <span id="retailShareConservative">--</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-            </div><!-- end analytics-main-grid -->
-          </section><!-- END SALES TAB -->
+            </div>
+          </section>
 
           <!-- ========================= -->
           <!--        ORDERS TAB         -->
@@ -220,24 +231,35 @@
                   </div>
 
                   <div class="model-info-grid">
+
                     <div class="model-info-item">
                       <div class="model-info-label">Model Used</div>
-                      <div class="model-info-value" id="modelUsed">XGBoost (JS Native)</div>
+                      <div class="model-info-value" id="modelUsedOrders">XGBoost with Lags</div>
                     </div>
 
                     <div class="model-info-item">
-                      <div class="model-info-label">RMSE</div>
-                      <div class="model-info-value" id="modelRMSE">--</div>
+                      <div class="model-info-label">Confidence Interval</div>
+                      <div class="model-info-value" id="confidenceIntervalOrders">95.00%</div>
                     </div>
 
                     <div class="model-info-item">
-                      <div class="model-info-label">MAPE</div>
-                      <div class="model-info-value" id="modelMAPE">--</div>
+                      <div class="model-info-label">TikTok RMSE</div>
+                      <div class="model-info-value" id="rmseTiktokOrders">--</div>
                     </div>
 
                     <div class="model-info-item">
-                      <div class="model-info-label">SMAPE</div>
-                      <div class="model-info-value" id="modelSMAPE">--</div>
+                      <div class="model-info-label">TikTok SMAPE</div>
+                      <div class="model-info-value" id="smapeTiktokOrders">--</div>
+                    </div>
+
+                    <div class="model-info-item">
+                      <div class="model-info-label">Retail RMSE</div>
+                      <div class="model-info-value" id="rmseRetailOrders">--</div>
+                    </div>
+
+                    <div class="model-info-item">
+                      <div class="model-info-label">Retail SMAPE</div>
+                      <div class="model-info-value" id="smapeRetailOrders">--</div>
                     </div>
 
                   </div>
@@ -250,48 +272,49 @@
                     <span class="card-subtitle">Expected highest-performing products for the next cycle.</span>
                   </div>
 
-                  <div id="topForecastedItems" class="top-items-list"></div>
+                  <div id="topForecastedOrders" class="top-items-list"></div>
                 </div>
 
               </div><!-- end right-stack -->
 
-              <!-- ORDERS SHARE PROJECTION — FULL WIDTH -->
+
+              <!-- ORDERS SHARE PROJECTION -->
               <div class="share-container-row full-width-row">
                 <div class="share-box tiktok-share">
-                    <div class="share-title">TikTok Orders Share Projection</div>
-                    <div class="share-main-value" id="tiktokOrdersShareBase">--</div>
+                  <div class="share-title">TikTok Orders Share Projection</div>
+                  <div class="share-main-value" id="tiktokOrdersShareBase">--</div>
 
-                    <div class="share-scenarios">
-                        <div class="scenario-row">
-                            <span>Optimistic Scenario</span>
-                            <span id="tiktokOrdersShareOptimistic">--</span>
-                        </div>
-                        <div class="scenario-row">
-                            <span>Conservative Scenario</span>
-                            <span id="tiktokOrdersShareConservative">--</span>
-                        </div>
+                  <div class="share-scenarios">
+                    <div class="scenario-row">
+                      <span>Optimistic Scenario</span>
+                      <span id="tiktokOrdersShareOptimistic">--</span>
                     </div>
+                    <div class="scenario-row">
+                      <span>Conservative Scenario</span>
+                      <span id="tiktokOrdersShareConservative">--</span>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="share-box retail-share">
-                    <div class="share-title">Retail Orders Share Projection</div>
-                    <div class="share-main-value" id="retailOrdersShareBase">--</div>
+                  <div class="share-title">Retail Orders Share Projection</div>
+                  <div class="share-main-value" id="retailOrdersShareBase">--</div>
 
-                    <div class="share-scenarios">
-                        <div class="scenario-row">
-                            <span>Optimistic Scenario</span>
-                            <span id="retailOrdersShareOptimistic">--</span>
-                        </div>
-                        <div class="scenario-row">
-                            <span>Conservative Scenario</span>
-                            <span id="retailOrdersShareConservative">--</span>
-                        </div>
+                  <div class="share-scenarios">
+                    <div class="scenario-row">
+                      <span>Optimistic Scenario</span>
+                      <span id="retailOrdersShareOptimistic">--</span>
                     </div>
+                    <div class="scenario-row">
+                      <span>Conservative Scenario</span>
+                      <span id="retailOrdersShareConservative">--</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-            </div><!-- end analytics-main-grid -->
-          </section><!-- END ORDERS TAB -->
+            </div>
+          </section>
 
         </section>
       </div>

@@ -279,6 +279,49 @@ function populateOrdersTab(m) {
 
   renderOrdersChart(m.chartData, AOV);
 }
+
+/* ============================================================
+   TOP PRODUCTS RENDERING (SALES + ORDERS)
+   ============================================================ */
+
+function renderTopProductsSales(items) {
+  const container = document.getElementById("topForecastedItems");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  items.forEach((item, index) => {
+    const rank = index + 1;
+    const row = document.createElement("div");
+    row.className = "top-item";
+    row.innerHTML = `
+      <div class="top-item-rank">${rank}</div>
+      <div class="top-item-name">${item.product_name}</div>
+      <div class="top-item-value">${formatPeso(item.total_sales || 0)}</div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function renderTopProductsOrders(items) {
+  const container = document.getElementById("topForecastedOrders");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  items.forEach((item, index) => {
+    const rank = index + 1;
+    const row = document.createElement("div");
+    row.className = "top-item";
+    row.innerHTML = `
+      <div class="top-item-rank">${rank}</div>
+      <div class="top-item-name">${item.product_name}</div>
+      <div class="top-item-value">${(item.total_orders || 0).toLocaleString()}</div>
+    `;
+    container.appendChild(row);
+  });
+}
+
 /* ============================================================
    Charts, Sliders, Tabs, NeonDB Fetch, Initialization
    ============================================================ */
@@ -524,6 +567,83 @@ function setupTabs() {
 }
 
 /* ============================================================
+   LOAD TOP PRODUCTS (SALES + ORDERS)
+   ============================================================ */
+async function loadTopProducts() {
+  try {
+    // Top 5 by SALES (for Sales tab)
+    const salesResp = await fetch("http://localhost:5000/api/top-products?metric=sales&platform=all");
+    const salesTop = await salesResp.json();
+    renderTopProductsSales(salesTop);
+
+    // Top 5 by ORDERS (for Orders tab)
+    const ordersResp = await fetch("http://localhost:5000/api/top-products?metric=orders&platform=all");
+    const ordersTop = await ordersResp.json();
+    renderTopProductsOrders(ordersTop);
+  } catch (err) {
+    console.error("❌ Failed to load top products:", err);
+  }
+}
+
+/* ============================================================
+   LOAD SHARE PROJECTIONS (SALES + ORDERS)
+   ============================================================ */
+async function loadShareProjection() {
+  renderSalesShare();  
+  renderOrdersShare();
+}
+
+/* ---------- RENDER SALES SHARE ---------- */
+function renderSalesShare() {
+  // Base values come from forecast totals
+  const tiktokBase = platformNextSales.tiktok;
+  const retailBase = platformNextSales.retail;
+
+  // Optimistic +15%, Conservative –10%
+  const tiktokOpt = tiktokBase * 1.15;
+  const tiktokCon = tiktokBase * 0.90;
+
+  const retailOpt = retailBase * 1.15;
+  const retailCon = retailBase * 0.90;
+
+  // Populate UI — Peso formatting
+  setText("tiktokShareBase", formatPeso(tiktokBase));
+  setText("tiktokShareOptimistic", formatPeso(tiktokOpt));
+  setText("tiktokShareConservative", formatPeso(tiktokCon));
+
+  setText("retailShareBase", formatPeso(retailBase));
+  setText("retailShareOptimistic", formatPeso(retailOpt));
+  setText("retailShareConservative", formatPeso(retailCon));
+}
+
+
+/* ---------- RENDER ORDERS SHARE ---------- */
+function renderOrdersShare() {
+  const AOV = 500;
+
+  // Base order counts
+  const tiktokBase = Math.round(platformNextSales.tiktok / AOV);
+  const retailBase = Math.round(platformNextSales.retail / AOV);
+
+  // Optimistic +15%, Conservative –10%
+  const tiktokOpt = Math.round(tiktokBase * 1.15);
+  const tiktokCon = Math.round(tiktokBase * 0.90);
+
+  const retailOpt = Math.round(retailBase * 1.15);
+  const retailCon = Math.round(retailBase * 0.90);
+
+  // Populate UI — Count formatting (NO pesos, NO percent)
+  setText("tiktokOrdersShareBase", tiktokBase.toLocaleString());
+  setText("tiktokOrdersShareOptimistic", tiktokOpt.toLocaleString());
+  setText("tiktokOrdersShareConservative", tiktokCon.toLocaleString());
+
+  setText("retailOrdersShareBase", retailBase.toLocaleString());
+  setText("retailOrdersShareOptimistic", retailOpt.toLocaleString());
+  setText("retailOrdersShareConservative", retailCon.toLocaleString());
+}
+
+
+/* ============================================================
    LOAD DATA FROM NEON DATABASE
    ============================================================ */
 async function loadNeonData() {
@@ -540,16 +660,32 @@ async function loadNeonData() {
     history.forEach(r => r.isHistory = true);
     forecast.forEach(r => r.isHistory = false);
 
-    /* ---------- MODEL INFORMATION POPULATION ---------- */
+    /* ---------- MODEL INFORMATION POPULATION (PER PLATFORM) ---------- */
     if (forecast.length > 0) {
-      const stats = forecast[0]; // every row includes model metrics
 
-      setText("modelUsed", "XGBoost (JS Native)");
-      setText("trainingWindow", "Jan 2023 – Dec 2024");
+      // TikTok rows always contain the same RMSE/SMAPE repeated
+      const tiktokRow = forecast.find(r => r.platform === "tiktok");
+      const retailRow = forecast.find(r => r.platform === "retail");
 
-      setText("modelRMSE", (stats.rmse ?? 0).toFixed(2));
-      setText("modelMAPE", (stats.mape ?? 0).toFixed(2) + "%");
-      setText("modelSMAPE", (stats.smape ?? 0).toFixed(2) + "%");
+      const tiktokRMSE  = tiktokRow ? Number(tiktokRow.rmse)  : 0;
+      const tiktokSMAPE = tiktokRow ? Number(tiktokRow.smape) : 0;
+
+      const retailRMSE  = retailRow ? Number(retailRow.rmse)  : 0;
+      const retailSMAPE = retailRow ? Number(retailRow.smape) : 0;
+
+      // Populate sales tab
+      setText("rmseTiktok", tiktokRMSE.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+      setText("smapeTiktok", tiktokSMAPE.toFixed(2) + "%");
+
+      setText("rmseRetail", retailRMSE.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+      setText("smapeRetail", retailSMAPE.toFixed(2) + "%");
+
+      // Populate orders tab
+      setText("rmseTiktokOrders", tiktokRMSE.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+      setText("smapeTiktokOrders", tiktokSMAPE.toFixed(2) + "%");
+
+      setText("rmseRetailOrders", retailRMSE.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+      setText("smapeRetailOrders", retailSMAPE.toFixed(2) + "%");
     }
 
     /* ---------- PLATFORM GROUPING (OPTION A) ---------- */
@@ -576,6 +712,8 @@ async function loadNeonData() {
     populateOrdersTab(metrics);
     initSliders();
 
+    loadShareProjection();
+
   } catch (err) {
     console.error("❌ Failed to load NeonDB analytics:", err);
     alert("Failed to load analytics data. Check console for details.");
@@ -589,4 +727,5 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFirebaseAuth();
   setupTabs();
   loadNeonData();
+  loadTopProducts();
 });
