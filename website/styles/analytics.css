@@ -65,37 +65,40 @@ body {
 
 .tab-container {
     display: flex;
-    gap: 12px;
+    gap: 15px;
+    width: 100%;
     margin: 5px 0 25px 0;
 }
 
 .tab-button {
-    padding: 10px 22px;
-    font-size: 14px;
+    flex: 1;
+    text-align: center;
+    padding: 14px 0;
+    font-size: 15px;
     font-weight: 600;
-    border-radius: 30px;
     border: none;
     cursor: pointer;
     transition: all 0.25s ease;
-    margin-right: 10px;
 
-    background: #1a1a1a;   /* inactive */
+    background: #1a1a1a;
     color: #e0e0e0;
+    border-radius: 0;           
     box-shadow: inset 0 0 0 1px #333;
 }
 
 .tab-button.active {
     background: linear-gradient(135deg, #ffcc00, #ffb700);
     color: #000;
-    box-shadow: 0 0 12px rgba(255, 204, 0, 0.7);
+    box-shadow: 0 0 12px rgba(255, 204, 0, 0.6);
+    border-radius: 0;               /* <-- also remove rounding */
 }
 
-/* Hover effect, but subtle */
+/* Hover (for inactive tabs) */
 .tab-button:not(.active):hover {
     background: #2a2a2a;
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
     color: #fff;
 }
+
 
 .tab-content {
     display: none;
@@ -575,6 +578,92 @@ body {
     font-weight: 700;
     color: #3fd965; /* green, consistent with positive forecast coloring */
 }
+
+/* ============================================================
+   SHARE PROJECTION BOXES (SALES + ORDERS)
+   Cleaner, consolidated, no duplicates
+   ============================================================ */
+
+/* 2-column layout for TikTok + Retail */
+.share-container-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-top: 24px;
+}
+
+/* Base box */
+.share-box {
+    background: #181818;
+    padding: 26px 28px;
+    border-radius: 14px;
+    border: 1px solid #2a2a2a;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Bottom accent strip (dynamic per platform) */
+.share-box::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    border-radius: 0 0 14px 14px;
+}
+
+/* TikTok Blue */
+.tiktok-share::after {
+    background: #00c2ff;
+}
+
+/* Retail Yellow */
+.retail-share::after {
+    background: #ffb700;
+}
+
+/* Title */
+.share-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #e9e9e9;
+    letter-spacing: 0.3px;
+}
+
+/* Main numeric value */
+.share-main-value {
+    font-size: 2.15rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 8px 0 14px 0;
+}
+
+/* Rows containing the optimistic / conservative values */
+.share-scenarios {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.scenario-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    color: #d6d6d6;
+}
+
+.scenario-row span:last-child {
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.full-width-row {
+    grid-column: 1 / -1;
+}
+
 
 /* ==== RESPONSIVE ==== */
 
