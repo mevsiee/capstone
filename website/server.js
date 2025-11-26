@@ -106,21 +106,37 @@ app.get("/api/history", async (req, res) => {
   try {
     const sql = `
           SELECT 
-            LOWER(platform_name) AS platform,
-            TO_CHAR(DATE_TRUNC('month', order_date), 'YYYY-MM-01') AS ds,
-            SUM(order_amount) AS y
-          FROM denormalized_table
-          WHERE LOWER(order_status) = 'completed'
-            AND EXTRACT(YEAR FROM order_date) = 2025
-            AND LOWER(platform_name) NOT LIKE '%shopee%'
-            AND LOWER(platform_name) NOT LIKE '%shop%'
-            AND LOWER(platform_name) NOT LIKE '%ecom%'
-          GROUP BY 
-            LOWER(platform_name),
-            DATE_TRUNC('month', order_date)
-          ORDER BY 
-            platform ASC,
-            ds ASC;
+          CASE
+            WHEN LOWER(platform_name) LIKE '%tiktok%' THEN 'tiktok'
+            WHEN LOWER(platform_name) LIKE '%retail%' 
+              OR LOWER(platform_name) LIKE '%pos%'
+              OR LOWER(platform_name) LIKE '%store%' THEN 'retail'
+            ELSE 'other'
+          END AS platform,
+
+          TO_CHAR(DATE_TRUNC('month', order_date), 'YYYY-MM-01') AS ds,
+          SUM(order_amount) AS y
+
+        FROM denormalized_table
+        WHERE LOWER(order_status) = 'completed'
+          AND EXTRACT(YEAR FROM order_date) = 2025
+          AND LOWER(platform_name) NOT LIKE '%shopee%'
+          AND LOWER(platform_name) NOT LIKE '%shop%'
+          AND LOWER(platform_name) NOT LIKE '%ecom%'
+
+        GROUP BY
+          CASE
+            WHEN LOWER(platform_name) LIKE '%tiktok%' THEN 'tiktok'
+            WHEN LOWER(platform_name) LIKE '%retail%' 
+              OR LOWER(platform_name) LIKE '%pos%'
+              OR LOWER(platform_name) LIKE '%store%' THEN 'retail'
+            ELSE 'other'
+          END,
+          DATE_TRUNC('month', order_date)
+
+        ORDER BY 
+          platform ASC,
+          ds ASC;
           `;
 
     const result = await pool.query(sql);
@@ -163,6 +179,41 @@ app.get("/api/forecast", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// ========================================
+// GET /api/order-forecast
+// Pulls order forecasting values from NEW table
+// ========================================
+app.get("/api/order-forecast", async (req, res) => {
+  try {
+    const sql = `
+      SELECT
+        CASE
+          WHEN LOWER(platform_name) LIKE '%tiktok%' THEN 'tiktok'
+          WHEN LOWER(platform_name) LIKE '%retail%' THEN 'retail'
+          ELSE 'other'
+        END AS platform,
+
+        TO_CHAR(DATE_TRUNC('month', forecast_date), 'YYYY-MM-01') AS ds,
+        forecast_value AS orders,
+
+        rmse,
+        smape
+      FROM order_forecast
+      WHERE DATE_PART('year', forecast_date) = 2025
+      ORDER BY forecast_date ASC, platform_name ASC;
+    `;
+
+    const result = await pool.query(sql);
+    res.json(result.rows);
+
+  } catch (err) {
+    console.error("❌ Error fetching order forecast:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 
 app.get("/api/sales-breakdown", async (req, res) => {
   try {

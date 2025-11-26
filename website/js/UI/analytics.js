@@ -14,6 +14,12 @@ let platformNextSales = {
   tiktok: 0,
 };
 
+let platformNextOrders = { 
+  tiktok: 0, 
+  retail: 0 
+};
+
+
 let salesChartInstance = null;
 let ordersChartInstance = null;
 
@@ -190,19 +196,18 @@ function computeMetricsFromRows({ historyByPlatform, forecastByPlatform }) {
       .filter(r => r.platform === "tiktok" && nextQMonths.includes(r.ds.split("-")[1]))
       .reduce((a, r) => a + Number(r.y || 0), 0);
 
-  // ---- F) ORDERS QUARTER FIX (AOV = 500) ----
-  baselineOrdersCurrent = totalCurrent / 500;
-  baselineOrdersNext = totalNext / 500;
+
 
   // ---- G) Chart Data ----
   const chartData = computeChartSeries(historyByPlatform, forecastByPlatform);
 
   return {
-    totalCurrent,
-    totalNext,
-    growthRate,
-    chartData,
-  };
+  totalCurrent,
+  totalNext,
+  growthRate,
+  chartData,
+  nextQMonths,  
+  }; 
 }
 
 /* ---------- WATCH USER OVERRIDES ---------- */
@@ -241,43 +246,45 @@ function populateSalesTab(m) {
   renderSalesChart(m.chartData);
 }
 
+function computeOrdersFromForecast(orderForecast, nextQMonths) {
+  const tiktok = orderForecast
+    .filter(r => r.platform === "tiktok" && nextQMonths.includes(r.ds.split("-")[1]))
+    .reduce((a, r) => a + Number(r.orders), 0);
+
+  const retail = orderForecast
+    .filter(r => r.platform === "retail" && nextQMonths.includes(r.ds.split("-")[1]))
+    .reduce((a, r) => a + Number(r.orders), 0);
+
+  return {
+    tiktok,
+    retail,
+    total: tiktok + retail
+  };
+}
+
 /* ============================================================
    ORDERS TAB RENDERING
    ============================================================ */
 function populateOrdersTab(m) {
-  const ordersCurrent = Math.round(baselineOrdersCurrent);
-  const ordersNext = Math.round(baselineOrdersNext);
+  const ordersCurrent = Math.round(m.current);
+  const ordersNext = Math.round(m.next);
 
-  const growth =
-    ordersCurrent > 0
-      ? ((ordersNext - ordersCurrent) / ordersCurrent) * 100
-      : 0;
+  const growth = ordersCurrent > 0
+    ? ((ordersNext - ordersCurrent) / ordersCurrent) * 100
+    : 0;
 
   setText("ordersCurrent", ordersCurrent.toLocaleString());
   setText("ordersNext", ordersNext.toLocaleString());
 
   const arrow = growth > 0 ? "▲" : growth < 0 ? "▼" : "";
-  const color =
-    growth > 0 ? "#3fd965" : growth < 0 ? "#ff4e4e" : "#b5b5b5";
+  const color = growth > 0 ? "#3fd965" : growth < 0 ? "#ff4e4e" : "#b5b5b5";
 
   setHTML(
     "ordersGrowth",
-    `<span style="color:${color}; font-weight:700;">${arrow} ${Math.abs(
-      growth
-    ).toFixed(1)}%</span>`
+    `<span style="color:${color}; font-weight:700;">${arrow} ${Math.abs(growth).toFixed(1)}%</span>`
   );
 
-  const AOV = 500;
-  setText(
-    "ordersRetail",
-    Math.round((platformNextSales.retail || 0) / AOV).toLocaleString()
-  );
-  setText(
-    "ordersTiktok",
-    Math.round((platformNextSales.tiktok || 0) / AOV).toLocaleString()
-  );
-
-  renderOrdersChart(m.chartData, AOV);
+  renderOrdersChart(m.chartData);
 }
 
 /* ============================================================
@@ -404,100 +411,41 @@ function renderSalesChart(chartData) {
 /* ============================================================
    ORDERS CHART
    ============================================================ */
-function renderOrdersChart(chartData, aov) {
+function renderOrdersChart(chartData) {
   const ctx = document.getElementById("ordersChart");
   if (!ctx) return;
 
-  if (ordersChartInstance) {
-    ordersChartInstance.destroy();
-  }
+  if (ordersChartInstance) ordersChartInstance.destroy();
 
-  // Convert sales series → orders series per platform
-  const currentEcomOrders = chartData.currentEcom.map(v =>
-    v == null ? null : v / aov
-  );
-  const forecastEcomOrders = chartData.forecastEcomSeries.map(v =>
-    v == null ? null : v / aov
-  );
-
-  const currentRetailOrders = chartData.currentRetail.map(v =>
-    v == null ? null : v / aov
-  );
-  const forecastRetailOrders = chartData.forecastRetailSeries.map(v =>
-    v == null ? null : v / aov
-  );
-
-  // Compute max for y-axis
-  const allValues = [
-    ...currentEcomOrders,
-    ...forecastEcomOrders,
-    ...currentRetailOrders,
-    ...forecastRetailOrders,
-  ].filter(v => v != null && !isNaN(v));
-
-  const maxOrders = allValues.length
-    ? Math.max(...allValues, 10)
-    : 10;
+  const maxY = Math.max(...chartData.tiktok, ...chartData.retail, 10);
 
   ordersChartInstance = new Chart(ctx, {
     type: "line",
     data: {
       labels: chartData.labels,
       datasets: [
-                {
-          label: "TikTok (Current Orders)",
-          data: currentEcomOrders,    
+        {
+          label: "TikTok Orders",
+          data: chartData.tiktok,
           borderColor: "#00c2ff",
           borderWidth: 2,
           tension: 0.3,
         },
         {
-          label: "TikTok (Projected Orders)",
-          data: forecastEcomOrders,  
-          borderColor: "#00c2ff",
-          borderDash: [6, 6],
-          borderWidth: 2,
-          tension: 0.3,
-        },
-        {
-          label: "Retail (Current Orders)",
-          data: currentRetailOrders,
+          label: "Retail Orders",
+          data: chartData.retail,
           borderColor: "#f5b400",
           borderWidth: 2,
           tension: 0.3,
-        },
-        {
-          label: "Retail (Projected Orders)",
-          data: forecastRetailOrders,
-          borderColor: "#f5b400",
-          borderDash: [6, 6],
-          borderWidth: 2,
-          tension: 0.3,
-        },
-      ],
+        }
+      ]
     },
-
     options: {
       responsive: true,
-      plugins: {
-        legend: {
-          labels: { color: "#fff" },
-        },
-      },
       scales: {
-        x: {
-          ticks: { color: "#fff" },
-          grid: { color: "#333" },
-        },
-        y: {
-          ticks: { color: "#fff" },
-          grid: { color: "#333" },
-          beginAtZero: true,
-          min: 0,
-          max: 5000,
-        },
-      },
-    },
+        y: { beginAtZero: true, max: maxY }
+      }
+    }
   });
 }
 
@@ -619,20 +567,15 @@ function renderSalesShare() {
 
 /* ---------- RENDER ORDERS SHARE ---------- */
 function renderOrdersShare() {
-  const AOV = 500;
+  const tiktokBase = Math.round(platformNextOrders.tiktok);
+  const retailBase = Math.round(platformNextOrders.retail);
 
-  // Base order counts
-  const tiktokBase = Math.round(platformNextSales.tiktok / AOV);
-  const retailBase = Math.round(platformNextSales.retail / AOV);
-
-  // Optimistic +15%, Conservative –10%
   const tiktokOpt = Math.round(tiktokBase * 1.15);
   const tiktokCon = Math.round(tiktokBase * 0.90);
 
   const retailOpt = Math.round(retailBase * 1.15);
   const retailCon = Math.round(retailBase * 0.90);
 
-  // Populate UI — Count formatting (NO pesos, NO percent)
   setText("tiktokOrdersShareBase", tiktokBase.toLocaleString());
   setText("tiktokOrdersShareOptimistic", tiktokOpt.toLocaleString());
   setText("tiktokOrdersShareConservative", tiktokCon.toLocaleString());
@@ -641,7 +584,6 @@ function renderOrdersShare() {
   setText("retailOrdersShareOptimistic", retailOpt.toLocaleString());
   setText("retailOrdersShareConservative", retailCon.toLocaleString());
 }
-
 
 /* ============================================================
    LOAD DATA FROM NEON DATABASE
@@ -653,6 +595,10 @@ async function loadNeonData() {
 
     const foreResp = await fetch("http://localhost:5000/api/forecast");
     const forecast = await foreResp.json();
+
+    const orderResp = await fetch("http://localhost:5000/api/order-forecast");
+    const orderForecast = await orderResp.json();
+
 
     console.log("🔥 RAW HISTORY ROWS:", history);
     console.log("🔥 RAW FORECAST ROWS:", forecast);
@@ -700,16 +646,34 @@ async function loadNeonData() {
     };
 
     /* ---------- METRICS ---------- */
-    const metrics = computeMetricsFromRows({
+    const salesMetrics = computeMetricsFromRows({
       historyByPlatform,
       forecastByPlatform,
     });
 
-    baselineSalesCurrent = metrics.totalCurrent;
-    baselineSalesNext = metrics.totalNext;
+    const nextQMonths = salesMetrics.nextQMonths;
+    const ordersData = computeOrdersFromForecast(orderForecast, nextQMonths);
 
-    populateSalesTab(metrics);
-    populateOrdersTab(metrics);
+    const ordersMetrics = {
+      current: salesMetrics.totalCurrent / 500,  // still the current quarter = sales/AOV
+      next: ordersData.total,
+      chartData: {
+        labels: [...new Set(orderForecast.map(r => r.ds))],
+        tiktok: orderForecast.filter(r => r.platform === "tiktok").map(r => r.orders),
+        retail: orderForecast.filter(r => r.platform === "retail").map(r => r.orders)
+      }
+    };
+
+    platformNextOrders = {
+    tiktok: ordersData.tiktok,
+    retail: ordersData.retail
+    };
+
+    baselineSalesCurrent = salesMetrics.totalCurrent;
+    baselineSalesNext = salesMetrics.totalNext;
+
+    populateSalesTab(salesMetrics);
+    populateOrdersTab(ordersMetrics);
     initSliders();
 
     loadShareProjection();
