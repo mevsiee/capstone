@@ -283,8 +283,6 @@ function populateOrdersTab(m) {
     "ordersGrowth",
     `<span style="color:${color}; font-weight:700;">${arrow} ${Math.abs(growth).toFixed(1)}%</span>`
   );
-
-  renderOrdersChart(m.chartData);
 }
 
 /* ============================================================
@@ -417,7 +415,14 @@ function renderOrdersChart(chartData) {
 
   if (ordersChartInstance) ordersChartInstance.destroy();
 
-  const maxY = Math.max(...chartData.tiktok, ...chartData.retail, 10);
+  // Compute max Y from all 4 series
+  const maxY = Math.max(
+    ...chartData.tiktokCurrent,
+    ...chartData.retailCurrent,
+    ...chartData.tiktokForecast,
+    ...chartData.retailForecast,
+    10
+  );
 
   ordersChartInstance = new Chart(ctx, {
     type: "line",
@@ -425,16 +430,32 @@ function renderOrdersChart(chartData) {
       labels: chartData.labels,
       datasets: [
         {
-          label: "TikTok Orders",
-          data: chartData.tiktok,
+          label: "TikTok (Current)",
+          data: chartData.tiktokCurrent,
           borderColor: "#00c2ff",
           borderWidth: 2,
           tension: 0.3,
         },
         {
-          label: "Retail Orders",
-          data: chartData.retail,
+          label: "TikTok (Projected)",
+          data: chartData.tiktokForecast,
+          borderColor: "#00c2ff",
+          borderDash: [6, 6],
+          borderWidth: 2,
+          tension: 0.3,
+        },
+        {
+          label: "Retail (Current)",
+          data: chartData.retailCurrent,
           borderColor: "#f5b400",
+          borderWidth: 2,
+          tension: 0.3,
+        },
+        {
+          label: "Retail (Projected)",
+          data: chartData.retailForecast,
+          borderColor: "#f5b400",
+          borderDash: [6, 6],
           borderWidth: 2,
           tension: 0.3,
         }
@@ -442,8 +463,14 @@ function renderOrdersChart(chartData) {
     },
     options: {
       responsive: true,
+      plugins: {
+        legend: { labels: { color: "#fff" } }
+      },
       scales: {
-        y: { beginAtZero: true, max: maxY }
+        y: {
+          beginAtZero: true,
+          max: 7000
+        }
       }
     }
   });
@@ -585,6 +612,48 @@ function renderOrdersShare() {
   setText("retailOrdersShareConservative", retailCon.toLocaleString());
 }
 
+function buildOrdersChartSeries(history, forecast) {
+  const AOV = 500;
+
+  const all = [...history, ...forecast].sort(
+    (a, b) => new Date(a.ds) - new Date(b.ds)
+  );
+
+  const labels = [...new Set(all.map(r => r.ds))];
+
+  const tiktokCurrent = labels.map(() => null);
+  const retailCurrent = labels.map(() => null);
+  const tiktokForecast = labels.map(() => null);
+  const retailForecast = labels.map(() => null);
+
+  labels.forEach((date, i) => {
+    // Convert historical sales → orders
+    history.forEach(r => {
+      if (r.ds === date) {
+        if (r.platform === "tiktok") tiktokCurrent[i] = r.y / AOV;
+        if (r.platform === "retail") retailCurrent[i] = r.y / AOV;
+      }
+    });
+
+    // Forecasted orders
+    forecast.forEach(r => {
+      if (r.ds === date) {
+        if (r.platform === "tiktok") tiktokForecast[i] = r.orders;
+        if (r.platform === "retail") retailForecast[i] = r.orders;
+      }
+    });
+  });
+
+  return {
+    labels,
+    tiktokCurrent,
+    retailCurrent,
+    tiktokForecast,
+    retailForecast
+  };
+}
+
+
 /* ============================================================
    LOAD DATA FROM NEON DATABASE
    ============================================================ */
@@ -626,12 +695,23 @@ async function loadNeonData() {
       setText("rmseRetail", retailRMSE.toLocaleString(undefined, { maximumFractionDigits: 2 }));
       setText("smapeRetail", retailSMAPE.toFixed(2) + "%");
 
-      // Populate orders tab
-      setText("rmseTiktokOrders", tiktokRMSE.toLocaleString(undefined, { maximumFractionDigits: 2 }));
-      setText("smapeTiktokOrders", tiktokSMAPE.toFixed(2) + "%");
+      /* ---------- MODEL INFORMATION FOR ORDERS TAB (USE order_forecast) ---------- */
+      const tiktokOrderRow = orderForecast.find(r => r.platform === "tiktok");
+      const retailOrderRow = orderForecast.find(r => r.platform === "retail");
 
-      setText("rmseRetailOrders", retailRMSE.toLocaleString(undefined, { maximumFractionDigits: 2 }));
-      setText("smapeRetailOrders", retailSMAPE.toFixed(2) + "%");
+      const tiktokOrdersRMSE  = tiktokOrderRow ? Number(tiktokOrderRow.rmse)  : 0;
+      const tiktokOrdersSMAPE = tiktokOrderRow ? Number(tiktokOrderRow.smape) : 0;
+
+      const retailOrdersRMSE  = retailOrderRow ? Number(retailOrderRow.rmse)  : 0;
+      const retailOrdersSMAPE = retailOrderRow ? Number(retailOrderRow.smape) : 0;
+
+      // Populate ONLY the Orders tab fields
+      setText("rmseTiktokOrders", tiktokOrdersRMSE.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+      setText("smapeTiktokOrders", tiktokOrdersSMAPE.toFixed(2) + "%");
+
+      setText("rmseRetailOrders", retailOrdersRMSE.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+      setText("smapeRetailOrders", retailOrdersSMAPE.toFixed(2) + "%");
+
     }
 
     /* ---------- PLATFORM GROUPING (OPTION A) ---------- */
@@ -657,13 +737,8 @@ async function loadNeonData() {
     const ordersMetrics = {
       current: salesMetrics.totalCurrent / 500,  // still the current quarter = sales/AOV
       next: ordersData.total,
-      chartData: {
-        labels: [...new Set(orderForecast.map(r => r.ds))],
-        tiktok: orderForecast.filter(r => r.platform === "tiktok").map(r => r.orders),
-        retail: orderForecast.filter(r => r.platform === "retail").map(r => r.orders)
-      }
     };
-
+    
     platformNextOrders = {
     tiktok: ordersData.tiktok,
     retail: ordersData.retail
@@ -673,8 +748,16 @@ async function loadNeonData() {
     baselineSalesNext = salesMetrics.totalNext;
 
     populateSalesTab(salesMetrics);
+    const ordersChartData = buildOrdersChartSeries(
+      historyByPlatform.retail.concat(historyByPlatform.ecommerce),
+      orderForecast
+    );
+
+    // Render UI
     populateOrdersTab(ordersMetrics);
+    renderOrdersChart(ordersChartData);
     initSliders();
+
 
     loadShareProjection();
 
