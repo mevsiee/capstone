@@ -1,56 +1,33 @@
--- AVERAGE ORDER VALUE KPI (PRODUCT_SUBTOTAL_AFTER ON COMPLETED ORDERS)
-
 WITH raw AS (
-    SELECT
+    SELECT DISTINCT ON (order_id)
         dt.*,
         date_trunc('month', order_date)::date AS order_month_date,
-
-        -- Completed logic (same logic as gross KPI)
         CASE
-            WHEN platform_name ILIKE '%retail%'
-                 AND order_status = 'Completed'
+            WHEN platform_name ILIKE '%retail%' AND order_status='Completed'
                 THEN TRUE
-
             WHEN platform_name NOT ILIKE '%retail%'
-                 AND order_status = 'Completed'
-                 AND delivered_date IS NOT NULL
+                AND order_status='Completed'
+                AND delivered_date IS NOT NULL
                 THEN TRUE
-
             ELSE FALSE
         END AS is_completed
-
-    FROM denormalized_table AS dt
+    FROM denormalized_table dt
     WHERE order_year >= 2023
+      AND (:platform = 'all' OR LOWER(platform_name) = :platform)
+      AND LOWER(platform_name) NOT LIKE '%shopee%'
+    ORDER BY order_id, order_date DESC
 ),
 
 months AS (
     SELECT
         make_date(:year, :month, 1) AS current_month,
         (make_date(:year, :month, 1) - INTERVAL '1 month')::date AS previous_month
-),
-
-base AS (
-    SELECT
-        r.*,
-        (r.order_month_date = m.current_month)  AS is_current_month,
-        (r.order_month_date = m.previous_month) AS is_previous_month
-    FROM raw r
-    CROSS JOIN months m
 )
 
 SELECT
-    -- Average AOV for current month
-    COALESCE(AVG(
-        CASE WHEN is_current_month AND is_completed
-            THEN COALESCE(product_subtotal_after, 0)
-        END
-    ), 0) AS current_value,
-
-    -- Average AOV for previous month
-    COALESCE(AVG(
-        CASE WHEN is_previous_month AND is_completed
-            THEN COALESCE(product_subtotal_after, 0)
-        END
-    ), 0) AS previous_value
-
-FROM base;
+    COALESCE(AVG(CASE WHEN order_month_date = m.current_month AND is_completed
+                      THEN product_subtotal_after END), 0) AS current_value,
+    COALESCE(AVG(CASE WHEN order_month_date = m.previous_month AND is_completed
+                      THEN product_subtotal_after END), 0) AS previous_value
+FROM raw r
+CROSS JOIN months m;

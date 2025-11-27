@@ -15,6 +15,7 @@ WITH filtered AS (
     FROM denormalized_table
     WHERE order_year = :year
       AND order_month = :month
+      AND LOWER(platform_name) NOT LIKE '%shopee%'   -- EXCLUDE SHOPEE
 )
 
 SELECT
@@ -22,5 +23,8 @@ SELECT
     CASE WHEN is_completed THEN COALESCE(quantity, 0) ELSE 0 END AS total_quantity
 FROM filtered
 WHERE 
-    ((:platform = 'all') OR (LOWER(platform_name) = :platform))
+    (
+        :platform = 'all'
+        OR LOWER(platform_name) = :platform
+    )
     AND product_name != 'UNKNOWN';

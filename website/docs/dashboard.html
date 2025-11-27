@@ -9,10 +9,10 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Chart.js for graphs -->
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- ✅ Firebase SDKs -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -20,35 +20,24 @@
 
 <body class="dashboard-body">
   <div class="dashboard-container">
-    <!-- Header (unchanged) -->
+
+    <!-- HEADER -->
     <header class="main-header">
       <div class="header-content">
-        <h1>EShop InventoryIQ</h1>
+        <h1>EShop InsightIQ</h1>
         <h2>Analytics Dashboard</h2>
       </div>
     </header>
 
-    <!-- Sidebar -->
+    <!-- SIDEBAR -->
     <nav class="sidebar">
       <ul class="sidebar-menu">
-        <li class="menu-item active">
-          <a href="dashboard.html"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
-        </li>
-        <li class="menu-item">
-          <a href="inventory.html"><i class="fas fa-box"></i><span>Inventory</span></a>
-        </li>
-        <li class="menu-item">
-          <a href="analytics.html"><i class="fas fa-chart-bar"></i><span>Analytics</span></a>
-        </li>
-        <li class="menu-item" id="userManagementLink" style="display:none;">
-          <a href="usermanagement.html"><i class="fas fa-users"></i><span>User Management</span></a>
-        </li>
-        <li class="menu-item">
-          <a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a>
-        </li>
-        <li class="menu-item">
-          <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Log Out</span></a>
-        </li>
+        <li class="menu-item active"><a href="dashboard.html"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+        <li class="menu-item"><a href="inventory.html"><i class="fas fa-box"></i><span>Inventory</span></a></li>
+        <li class="menu-item"><a href="analytics.html"><i class="fas fa-chart-bar"></i><span>Analytics</span></a></li>
+        <li class="menu-item" id="userManagementLink" style="display:none;"><a href="usermanagement.html"><i class="fas fa-users"></i><span>User Management</span></a></li>
+        <li class="menu-item"><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+        <li class="menu-item"><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Log Out</span></a></li>
       </ul>
     </nav>
 
@@ -56,164 +45,208 @@
     <main class="main-content">
       <div class="main-inner">
 
-        <!-- Top bar: title + month picker -->
-        <div class="dashboard-top-bar">
-          <h1 class="page-title">Dashboard</h1>
+        <!-- ⭐ 85% SCALE WRAPPER START -->
+        <div class="dashboard-scale">
 
-          <div class="month-picker">
-            <label for="monthPicker">
-              <input type="month" id="monthPicker" />
-            </label>
+          <!-- Platform tabs -->
+          <div class="top-filters">
+            <div class="platform-tabs">
+              <button class="platform-tab active" data-platform="all">All Platforms</button>
+              <button class="platform-tab" data-platform="tiktok">TikTok</button>
+              <button class="platform-tab" data-platform="retail">Retail</button>
+            </div>
+
+            <div class="metric-row">
+              <div class="metric-tabs">
+                <button class="metric-tab active" data-metric="sales">Total Sales</button>
+                <button class="metric-tab" data-metric="orders">Total Orders</button>
+              </div>
+              <div class="month-picker">
+                <label><input type="month" id="monthPicker"></label>
+              </div>
+            </div>
           </div>
+
+          <!-- KPI CARDS -->
+          <section class="kpi-section metric-section metric-sales" id="sales-kpis">
+            <div class="kpi-card" id="kpi-gross">
+              <div class="kpi-title">Total Gross Sales</div>
+              <div class="kpi-value">₱0.00</div>
+              <div class="kpi-delta">0.0% from last month</div>
+            </div>
+
+            <div class="kpi-card" id="kpi-net">
+              <div class="kpi-title">Total Net Sales</div>
+              <div class="kpi-value">₱0.00</div>
+              <div class="kpi-delta">0.0% from last month</div>
+            </div>
+
+            <div class="kpi-card" id="kpi-discounts">
+              <div class="kpi-title">Total Discounts</div>
+              <div class="kpi-value">₱0.00</div>
+              <div class="kpi-delta">0.0% from last month</div>
+            </div>
+
+            <div class="kpi-card" id="kpi-aov">
+              <div class="kpi-title">Average Order Value</div>
+              <div class="kpi-value">₱0.00</div>
+              <div class="kpi-delta">0.0% from last month</div>
+            </div>
+          </section>
+
+          <!-- SALES TREND -->
+          <section class="sales-trend-section metric-section metric-sales">
+            <div class="trend-header">
+              <div>
+                <h2>Sales Trend Over Time</h2>
+                <p class="section-subtitle">Sales performance for the selected period.</p>
+              </div>
+              <div class="sales-toggle-group">
+                <button class="sales-toggle" data-mode="hourly">Hourly</button>
+                <button class="sales-toggle active" data-mode="daily">Daily</button>
+                <button class="sales-toggle" data-mode="monthly">Monthly</button>
+              </div>
+            </div>
+
+            <div class="chart-wrapper">
+              <canvas id="salesTrendChart"></canvas>
+            </div>
+          </section>
+
+          <!-- CATEGORY + TOP PRODUCTS (2 columns) -->
+          <div class="bottom-row metric-section metric-sales">
+            <section class="category-wrapper">
+              <div class="section-header">
+                <div>
+                  <h2>Top Category Performance</h2>
+                  <p class="section-subtitle">Best-performing categories by total sales.</p>
+                </div>
+              </div>
+              <div class="category-container">
+                <canvas id="categoryPieChart"></canvas>
+              </div>
+            </section>
+
+            <section class="top-products-wrapper">
+              <div class="section-header">
+                <div>
+                  <h2>Top-Selling Products</h2>
+                  <p class="section-subtitle">Best-performing items by generated sales.</p>
+                </div>
+              </div>
+              <div class="top-products-container">
+                <canvas id="topProductsChart"></canvas>
+              </div>
+            </section>
+          </div>
+
         </div>
+        <!-- ⭐ 85% SCALE WRAPPER END -->
 
-        <!-- KPI CARDS -->
-        <section class="kpi-section">
-
-          <div class="kpi-card" id="kpi-net">
-            <div class="kpi-title">Total Gross Sales</div>
-            <div class="kpi-value">₱0.00</div>
-            <div class="kpi-delta">0% from last month</div>
+        <!-- ======================= -->
+        <!-- ORDERS VIEW             -->
+        <!-- ======================= -->
+        <!-- KPI CARDS (ORDERS) -->
+        <section class="kpi-section metric-section metric-orders hidden" id="orders-kpis">
+          <div class="kpi-card" id="kpi-orders-completed">
+            <div class="kpi-title">Total Completed Orders</div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-delta">0.0% from last month</div>
           </div>
 
-          <div class="kpi-card" id="kpi-gross">
-            <div class="kpi-title">Total Net Sales</div>
-            <div class="kpi-value">₱0.00</div>
-            <div class="kpi-delta">0% from last month</div>
+          <div class="kpi-card" id="kpi-orders-completion-rate">
+            <div class="kpi-title">Order Completion Rate</div>
+            <div class="kpi-value">00.00%</div>
+            <div class="kpi-delta">0.0% from last month</div>
           </div>
 
-          <div class="kpi-card" id="kpi-discounts">
-            <div class="kpi-title">Total Discounts</div>
-            <div class="kpi-value">₱0.00</div>
-            <div class="kpi-delta">0% from last month</div>
+          <div class="kpi-card" id="kpi-orders-avg-qty">
+            <div class="kpi-title">Average Order Quantity</div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-delta">0.0% from last month</div>
           </div>
 
-          <div class="kpi-card" id="kpi-aov">
-            <div class="kpi-title">Average Order Value</div>
-            <div class="kpi-value">₱0.00</div>
-            <div class="kpi-delta">0% from last month</div>
+          <div class="kpi-card" id="kpi-orders-cancelled">
+            <div class="kpi-title">Total Cancelled Orders</div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-delta">0.0% from last month</div>
           </div>
 
-        </section>
-
-        <!-- PLATFORM DISTRIBUTION -->
-        <section class="platform-section">
-          <div class="section-header">
-            <h2>Platform Performance Overview</h2>
-            <p class="section-subtitle">
-              Total sales share across each channel.
-            </p>
-          </div>
-
-          <div class="platform-cards">
-            <div class="platform-card" id="platform-shopee">
-              <h4>Shopee</h4>
-              <div class="platform-sales">₱0.00</div>
-              <div class="platform-share">0%</div>
-            </div>
-
-            <div class="platform-card" id="platform-tiktok">
-              <h4>TikTok</h4>
-              <div class="platform-sales">₱0.00</div>
-              <div class="platform-share">0%</div>
-            </div>
-
-            <div class="platform-card" id="platform-retail">
-              <h4>Retail</h4>
-              <div class="platform-sales">₱0.00</div>
-              <div class="platform-share">0%</div>
-            </div>
+          <div class="kpi-card" id="kpi-orders-cancel-rate">
+            <div class="kpi-title">Order Cancellation Rate</div>
+            <div class="kpi-value">00.00%</div>
+            <div class="kpi-delta">0.0% from last month</div>
           </div>
         </section>
 
-        <!-- SALES TREND -->
-        <section class="sales-trend-section">
+        <!-- Order Volume Trend -->
+        <section class="sales-trend-section metric-section metric-orders hidden">
           <div class="trend-header">
             <div>
-              <h2>Sales Trends Over Time</h2>
-              <p class="section-subtitle">Patterns and fluctuations in sales across hourly, daily, and monthly intervals.</p>
+              <h2>Order Volume Over Time</h2>
+              <p class="section-subtitle">Total number of orders placed per period.</p>
             </div>
 
             <div class="sales-toggle-group">
-              <button class="sales-toggle active">Hourly</button>
-              <button class="sales-toggle">Daily</button>
-              <button class="sales-toggle">Monthly</button>
+              <button class="sales-toggle active" data-mode="hourly">Hourly</button>
+              <button class="sales-toggle" data-mode="daily">Daily</button>
+              <button class="sales-toggle" data-mode="monthly">Weekly</button>
             </div>
           </div>
 
           <div class="chart-wrapper">
             <div class="sales-trend-chart-container">
-                <canvas id="salesTrendChart"></canvas>
+              <canvas id="ordersTrendChart"></canvas>
             </div>
           </div>
         </section>
 
-        <!-- BOTTOM ROW: TOP PRODUCTS + DIGITAL VS PHYSICAL -->
-        <div class="bottom-row">
-
-            <!-- ======================= -->
-            <!-- TOP PRODUCTS (TITLE OUTSIDE) -->
-            <!-- ======================= -->
-            <div class="top-products-wrapper">
-
-                <!-- Title outside -->
-                <div class="section-header">
-                    <div>
-                        <h2>Top 5 Products by Order Frequency</h2>
-                        <p class="section-subtitle">
-                            Your best-performing items ranked by total orders during the selected period.
-                        </p>
-                    </div>
-
-                    <!-- Dropdown -->
-                    <div class="dropdown" id="topProductsDropdown">
-                        <button class="dropdown-btn" id="topProductsBtn">
-                            Top Performers (All) <i class="fas fa-chevron-down"></i>
-                        </button>
-
-                        <div class="dropdown-menu" id="topProductsMenu">
-                            <div class="dropdown-item" data-value="all">Top Performers (All)</div>
-                            <div class="dropdown-item" data-value="shopee">Shopee</div>
-                            <div class="dropdown-item" data-value="tiktok">TikTok</div>
-                            <div class="dropdown-item" data-value="retail">Retail</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Dark box ONLY here -->
-                <div class="top-products-container">
-                    <canvas id="topProductsChart"></canvas>
-                </div>
+        <!-- Bottom row (Orders): summary cards + demand products -->
+        <div class="bottom-row metric-section metric-orders hidden">
+          <!-- Left: summary cards -->
+          <section class="orders-summary-wrapper">
+            <div class="orders-summary-card">
+              <div class="orders-summary-label">Top Product</div>
+              <div class="orders-summary-main" id="orders-top-product-name">—</div>
             </div>
 
-            <!-- ======================= -->
-            <!-- AOV (TITLE OUTSIDE) -->
-            <!-- ======================= -->
-            <div class="aov-platform-wrapper">
-
-                <div class="section-header">
-                    <div>
-                        <h2>AOV Distribution per Platform</h2>
-                        <p class="section-subtitle">
-                            Comparison of average order value across your sales channels.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Dark box ONLY here -->
-                <div class="aov-platform-container">
-                    <div class="aov-bar-list" id="aovBarList"></div>
-                </div>
-
+            <div class="orders-summary-card">
+              <div class="orders-summary-label">Completed TikTok Orders</div>
+              <div class="orders-summary-main" id="orders-tiktok-completed">0</div>
             </div>
 
+            <div class="orders-summary-card">
+              <div class="orders-summary-label">Completed Retail Orders</div>
+              <div class="orders-summary-main" id="orders-retail-completed">0</div>
+            </div>
+
+            <div class="orders-summary-card">
+              <div class="orders-summary-label">Lowest Product</div>
+              <div class="orders-summary-main" id="orders-lowest-product-name">—</div>
+            </div>
+          </section>
+
+          <!-- Right: Products with High Customer Demand -->
+          <section class="orders-demand-wrapper">
+            <div class="section-header">
+              <div>
+                <h2>Products with High Customer Demand</h2>
+                <p class="section-subtitle">
+                  Best-performing items by order volume.
+                </p>
+              </div>
+            </div>
+            <div class="top-products-container">
+              <canvas id="ordersDemandChart"></canvas>
+            </div>
+          </section>
         </div>
       </div>
     </main>
   </div>
 
-  <!-- Scripts -->
-   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <script src="../js/login-auth/firebase-auth.js"></script>
   <script src="../js/login-auth/dashboard-auth.js"></script>
   <script src="../js/UI/dashboard.js"></script>
@@ -227,23 +260,9 @@
       const ym = now.toISOString().slice(0, 7);
       input.value = ym;
 
-      // Sync global filter variables so backend gets correct month
-      const [y, m] = ym.split("-");
-      selectedYear = parseInt(y);
-      selectedMonth = parseInt(m);
+      window.selectedYear = parseInt(ym.split("-")[0]);
+      window.selectedMonth = parseInt(ym.split("-")[1]);
     })();
   </script>
-
-  <!-- Auto-set month picker to current month -->
-  <script>
-    (function () {
-      const input = document.getElementById("monthPicker");
-      if (!input) return;
-      const now = new Date();
-      const ym = now.toISOString().slice(0, 7);
-      input.value = ym;
-    })();
-  </script>
-
 </body>
 </html>

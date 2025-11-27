@@ -3,7 +3,7 @@ from sqlalchemy import text
 from .utils import pct_change
 
 
-def get_net_sales(engine, year, month):
+def get_net_sales(engine, year, month, platform):
     from pathlib import Path
     sql_path = Path(__file__).resolve().parent.parent / "sql" / "kpi_net.sql"
 
@@ -12,7 +12,13 @@ def get_net_sales(engine, year, month):
 
     with engine.connect() as conn:
         df = pd.read_sql(
-            text(sql), conn, params={"year": year, "month": month}
+            text(sql),
+            conn,
+            params={
+                "year": year,
+                "month": month,
+                "platform": platform,   # 👈 important
+            },
         )
 
     row = df.iloc[0]
@@ -23,5 +29,5 @@ def get_net_sales(engine, year, month):
     return {
         "current": current,
         "previous": previous,
-        "delta": delta
+        "delta": delta,
     }

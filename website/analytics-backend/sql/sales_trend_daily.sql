@@ -1,12 +1,16 @@
 SELECT
     order_date,
     LOWER(platform_name) AS platform_name,
-    SUM(CASE WHEN order_status = 'Completed'
-             THEN COALESCE(price_after_discount, 0)
-             ELSE 0
-        END) AS daily_sales
+    SUM(
+        CASE 
+            WHEN order_status = 'Completed'
+            THEN COALESCE(price_after_discount, 0)
+            ELSE 0
+        END
+    ) AS daily_sales
 FROM denormalized_table
 WHERE order_year = :year
   AND order_month = :month
+  AND LOWER(platform_name) NOT LIKE '%shopee%'   -- EXCLUDE SHOPEE
 GROUP BY order_date, platform_name
 ORDER BY order_date, platform_name;
