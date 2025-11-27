@@ -473,13 +473,13 @@ function updateCategoryChart(data) {
   const labels = data.map(d => d.category);
   const values = data.map(d => d.total_sales);
 
-  // Clean color palette (gray replaces red)
+  // Clean color palette for categories
   const COLORS = [
     "#16375f", // blue
-    "#facc15", // yellow
-    "#16a34a", // green
-    "#0d9488", // teal
-    "#6b7280", // gray (replaced red)
+    "#f0b810", // yellow
+    "#02250a", // green
+    "#075c56", // teal
+    "#919090", // gray 
     "#94a3b8"  // softer gray for overflow categories
   ];
 
