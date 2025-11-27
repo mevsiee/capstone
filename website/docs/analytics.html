@@ -50,10 +50,6 @@
           <div class="analytics-header-wrapper">
             <div class="analytics-header">
               <h1 class="title">Analytics and Forecasting</h1>
-              <div class="export-container">
-                <button class="export-button" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Export Excel</button>
-                <button class="export-button" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> Export PDF</button>
-              </div>
             </div>
           </div>
 
@@ -85,7 +81,7 @@
 
             <div class="analytics-main-grid">
 
-              <!-- SALES CHART -->
+              <!-- SALES CHART (LEFT COLUMN) -->
               <div class="card chart-card">
                 <div class="card-header">
                   <h3>Projected Sales for Upcoming Quarter</h3>
@@ -99,95 +95,97 @@
               <!-- RIGHT SIDE -->
               <div class="right-stack">
 
-                <!-- PRODUCT ALLOCATION -->
-                <div class="card side-card allocation-card">
-                  <div class="side-title">Product Stock Allocation</div>
-                  <p class="side-description">Allocate stock for a selected product across Retail, Shopee, and TikTok.</p>
-
-                  <label class="allocation-label">Select Product</label>
-                  <select id="productSelectorSales" class="allocation-input budget-input" style="width: 100%; margin-bottom: 12px;">
-                    <option value="">Loading...</option>
-                  </select>
-
-                  <div id="productSummary" style="margin-bottom: 15px;">
-                    <p>Total Stock: <span id="summaryStock">--</span></p>
-                    <p>Forecasted Demand: <span id="summaryDemand">--</span></p>
-                  </div>
-
-                  <button class="export-button allocation-recalc" id="calculateAllocationBtn">
-                    <i class="fas fa-calculator"></i> Calculate Product Allocation
-                  </button>
-
-                  <div id="allocationResult" class="allocation-result" style="display:none;">
-                    <div class="allocation-result-title">Recommended Allocation</div>
-                    <div>TikTok: <span id="allocTikTok">--</span></div>
-                    <div>Shopee: <span id="allocShopee">--</span></div>
-                    <div>Retail: <span id="allocRetail">--</span></div>
-                    <div style="margin-top: 10px; font-weight:700;">Total Allocated: <span id="allocTotal">--</span></div>
-                  </div>
-                </div>
-
-                <!-- MOVED: SALES BREAKDOWN -->
-                <div class="card breakdown-card">
+                <!-- MODEL INFORMATION & VALIDATION -->
+                <div class="card model-info-card">
                   <div class="card-header">
-                    <h3>Channel Sales Projection &amp; Allocation</h3>
-                    <span class="card-subtitle">Base forecast versus allocation-adjusted outlook.</span>
+                    <h3>Model Information &amp; Validation</h3>
+                    <span class="card-subtitle">Internal forecasting model performance and diagnostics.</span>
                   </div>
 
-                  <div class="platform-allocation-grid">
+                  <div class="model-info-grid">
 
-    <!-- Shopee -->
-    <div class="channel-card">
-        <div class="channel-card-title">Shopee Sales Projection</div>
+                    <div class="model-info-item">
+                      <div class="model-info-label">Model Used</div>
+                      <div class="model-info-value" id="modelUsed">XGBoost with Lags</div>
+                    </div>
 
-        <div class="channel-section">
-            <div class="channel-label">Base Forecast</div>
-            <div id="shopeeBaseForecast" class="channel-value">₱ 0</div>
-        </div>
+                    <div class="model-info-item">
+                      <div class="model-info-label">Confidence Interval</div>
+                      <div class="model-info-value" id="confidenceInterval">95.00%</div>
+                    </div>
 
-        <div class="channel-section">
-            <div class="channel-label">After Allocation</div>
-            <div id="shopeeAfterAllocation" class="channel-after">₱ 0</div>
-        </div>
-    </div>
+                    <div class="model-info-item">
+                      <div class="model-info-label">TikTok RMSE</div>
+                      <div class="model-info-value" id="rmseTiktok">--</div>
+                    </div>
 
-    <!-- TikTok -->
-    <div class="channel-card">
-        <div class="channel-card-title">TikTok Sales Projection</div>
+                    <div class="model-info-item">
+                      <div class="model-info-label">TikTok SMAPE</div>
+                      <div class="model-info-value" id="smapeTiktok">--</div>
+                    </div>
 
-        <div class="channel-section">
-            <div class="channel-label">Base Forecast</div>
-            <div id="tiktokBaseForecast" class="channel-value">₱ 0</div>
-        </div>
+                    <div class="model-info-item">
+                      <div class="model-info-label">Retail RMSE</div>
+                      <div class="model-info-value" id="rmseRetail">--</div>
+                    </div>
 
-        <div class="channel-section">
-            <div class="channel-label">After Allocation</div>
-            <div id="tiktokAfterAllocation" class="channel-after">₱ 0</div>
-        </div>
-    </div>
+                    <div class="model-info-item">
+                      <div class="model-info-label">Retail SMAPE</div>
+                      <div class="model-info-value" id="smapeRetail">--</div>
+                    </div>
 
-    <!-- Retail -->
-    <div class="channel-card">
-        <div class="channel-card-title">Retail Sales Projection</div>
-
-        <div class="channel-section">
-            <div class="channel-label">Base Forecast</div>
-            <div id="retailBaseForecast" class="channel-value">₱ 0</div>
-        </div>
-
-        <div class="channel-section">
-            <div class="channel-label">After Allocation</div>
-            <div id="retailAfterAllocation" class="channel-after">₱ 0</div>
-        </div>
-    </div>
-
+                  </div>
                 </div>
 
+                <!-- TOP FORECASTED SELLING ITEMS -->
+                <div class="card top-items-card">
+                  <div class="card-header">
+                    <h3>Top Forecasted Selling Items (Ranked)</h3>
+                    <span class="card-subtitle">Expected highest-performing products for the next cycle.</span>
+                  </div>
+
+                  <div id="topForecastedItems" class="top-items-list"></div>
+                </div>
 
               </div><!-- end right-stack -->
-            </div><!-- end grid -->
-            
-          </section><!-- END SALES TAB -->
+
+              <!-- SALES SHARE PROJECTION — FULL WIDTH -->
+              <div class="share-container-row full-width-row">
+                <div class="share-box tiktok-share">
+                  <div class="share-title">TikTok Sales Share Projection</div>
+                  <div class="share-main-value" id="tiktokShareBase">--</div>
+
+                  <div class="share-scenarios">
+                    <div class="scenario-row">
+                      <span>Optimistic Scenario</span>
+                      <span id="tiktokShareOptimistic">--</span>
+                    </div>
+                    <div class="scenario-row">
+                      <span>Conservative Scenario</span>
+                      <span id="tiktokShareConservative">--</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="share-box retail-share">
+                  <div class="share-title">Retail Sales Share Projection</div>
+                  <div class="share-main-value" id="retailShareBase">--</div>
+
+                  <div class="share-scenarios">
+                    <div class="scenario-row">
+                      <span>Optimistic Scenario</span>
+                      <span id="retailShareOptimistic">--</span>
+                    </div>
+                    <div class="scenario-row">
+                      <span>Conservative Scenario</span>
+                      <span id="retailShareConservative">--</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
 
           <!-- ========================= -->
           <!--        ORDERS TAB         -->
@@ -210,7 +208,7 @@
             </div>
 
             <div class="analytics-main-grid">
-              
+
               <!-- ORDERS CHART -->
               <div class="card chart-card">
                 <div class="card-header">
@@ -222,61 +220,101 @@
                 </div>
               </div>
 
-              <!-- RIGHT-SIDE -->
+              <!-- RIGHT SIDE -->
               <div class="right-stack">
 
-                <!-- PRODUCT ALLOCATION -->
-                <div class="card side-card allocation-card">
-                  <div class="side-title">Product Stock Allocation</div>
-                  <p class="side-description">
-                    Allocation details from prescriptive analysis.
-                  </p>
+                <!-- MODEL INFORMATION & VALIDATION -->
+                <div class="card model-info-card">
+                  <div class="card-header">
+                    <h3>Model Information &amp; Validation</h3>
+                    <span class="card-subtitle">Internal forecasting model performance and diagnostics.</span>
+                  </div>
 
-                  <label class="allocation-label">Select Product</label>
-                  <select id="productSelectorOrders" class="allocation-input budget-input" style="width: 100%; margin-bottom: 12px;">
-                    <option value="">Loading...</option>
-                  </select>
+                  <div class="model-info-grid">
 
-                  <div id="productSummaryOrders" style="margin-bottom: 15px;">
-                    <p>Total Stock: <span id="summaryStockOrders">--</span></p>
-                    <p>Forecasted Demand: <span id="summaryDemandOrders">--</span></p>
-                    <p>Allocated: <span id="summaryAllocatedOrders">--</span></p>
-                    <p>Shortage: <span id="summaryShortageOrders">--</span></p>
-                    <p>Excess Stock: <span id="summaryExcessOrders">--</span></p>
-                    <p>Weight: <span id="summaryWeightOrders">--</span></p>
+                    <div class="model-info-item">
+                      <div class="model-info-label">Model Used</div>
+                      <div class="model-info-value" id="modelUsedOrders">XGBoost with Lags</div>
+                    </div>
+
+                    <div class="model-info-item">
+                      <div class="model-info-label">Confidence Interval</div>
+                      <div class="model-info-value" id="confidenceIntervalOrders">95.00%</div>
+                    </div>
+
+                    <div class="model-info-item">
+                      <div class="model-info-label">TikTok RMSE</div>
+                      <div class="model-info-value" id="rmseTiktokOrders">--</div>
+                    </div>
+
+                    <div class="model-info-item">
+                      <div class="model-info-label">TikTok SMAPE</div>
+                      <div class="model-info-value" id="smapeTiktokOrders">--</div>
+                    </div>
+
+                    <div class="model-info-item">
+                      <div class="model-info-label">Retail RMSE</div>
+                      <div class="model-info-value" id="rmseRetailOrders">--</div>
+                    </div>
+
+                    <div class="model-info-item">
+                      <div class="model-info-label">Retail SMAPE</div>
+                      <div class="model-info-value" id="smapeRetailOrders">--</div>
+                    </div>
+
                   </div>
                 </div>
 
-                <!-- MOVED: ORDERS BREAKDOWN -->
-                <div class="card breakdown-card">
+                <!-- TOP FORECASTED SELLING ITEMS -->
+                <div class="card top-items-card">
                   <div class="card-header">
-                    <h3>Channel Contribution Breakdown</h3>
-                    <span class="card-subtitle">Projected order volume distribution per channel.</span>
+                    <h3>Top Forecasted Selling Items (Ranked)</h3>
+                    <span class="card-subtitle">Expected highest-performing products for the next cycle.</span>
                   </div>
 
-                  <div class="contrib-list">
-
-                    <div class="contrib-item contrib-retail">
-                      <div class="contrib-label">Retail Stores</div>
-                      <div class="contrib-value" id="ordersRetail">0</div>
-                    </div>
-
-                    <div class="contrib-item contrib-shopee">
-                      <div class="contrib-label">Shopee</div>
-                      <div class="contrib-value" id="ordersShopee">0</div>
-                    </div>
-
-                    <div class="contrib-item contrib-tiktok">
-                      <div class="contrib-label">TikTok Shop</div>
-                      <div class="contrib-value" id="ordersTiktok">0</div>
-                    </div>
-
-                  </div>
+                  <div id="topForecastedOrders" class="top-items-list"></div>
+                </div>
 
               </div><!-- end right-stack -->
-            </div><!-- end grid -->
 
-          </section><!-- END ORDERS TAB -->
+
+              <!-- ORDERS SHARE PROJECTION -->
+              <div class="share-container-row full-width-row">
+                <div class="share-box tiktok-share">
+                  <div class="share-title">TikTok Orders Share Projection</div>
+                  <div class="share-main-value" id="tiktokOrdersShareBase">--</div>
+
+                  <div class="share-scenarios">
+                    <div class="scenario-row">
+                      <span>Optimistic Scenario</span>
+                      <span id="tiktokOrdersShareOptimistic">--</span>
+                    </div>
+                    <div class="scenario-row">
+                      <span>Conservative Scenario</span>
+                      <span id="tiktokOrdersShareConservative">--</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="share-box retail-share">
+                  <div class="share-title">Retail Orders Share Projection</div>
+                  <div class="share-main-value" id="retailOrdersShareBase">--</div>
+
+                  <div class="share-scenarios">
+                    <div class="scenario-row">
+                      <span>Optimistic Scenario</span>
+                      <span id="retailOrdersShareOptimistic">--</span>
+                    </div>
+                    <div class="scenario-row">
+                      <span>Conservative Scenario</span>
+                      <span id="retailOrdersShareConservative">--</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
 
         </section>
       </div>

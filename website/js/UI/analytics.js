@@ -14,12 +14,14 @@ let platformNextSales = {
   tiktok: 0,
 };
 
+let platformNextOrders = { 
+  tiktok: 0, 
+  retail: 0 
+};
+
+
 let salesChartInstance = null;
 let ordersChartInstance = null;
-let lastMetrics = null; // store metrics object for allocation recalculation
-
-let prescriptiveProducts = []; // holds products from /api/prescriptive-products
-
 
 /* ---------- HELPERS ---------- */
 function formatPeso(value) {
@@ -62,10 +64,10 @@ function formatMonthKey(dateObj) {
 
 function normalizePlatformName(raw) {
   const p = (raw || "").toLowerCase();
-  if (p.includes("shopee")) return "shopee";
   if (p.includes("tiktok")) return "tiktok";
   return "retail";
 }
+
 
 /* ---------- AUTH ---------- */
 function setupFirebaseAuth() {
@@ -99,14 +101,11 @@ function setupFirebaseAuth() {
 /* ---------- CHART SERIES PREP ---------- */
 function computeChartSeries(history, forecast) {
 
-  const retailForecast3 = forecast.retail.slice(-3);
-  const ecomForecast3 = forecast.ecommerce.slice(-3);
-
   const allRows = [
     ...history.retail,
     ...history.ecommerce,
-    ...retailForecast3,
-    ...ecomForecast3,
+    ...forecast.retail,
+    ...forecast.ecommerce,
   ].sort((a, b) => parseDate(a.ds) - parseDate(b.ds));
 
   const labels = [...new Set(allRows.map(r => r.ds))];
@@ -192,29 +191,23 @@ function computeMetricsFromRows({ historyByPlatform, forecastByPlatform }) {
       .filter(r => nextQMonths.includes(r.ds.split("-")[1]))
       .reduce((a, r) => a + Number(r.y || 0), 0);
 
-  platformNextSales.shopee =
-    forecastByPlatform.ecommerce
-      .filter(r => r.platform === "shopee" && nextQMonths.includes(r.ds.split("-")[1]))
-      .reduce((a, r) => a + Number(r.y || 0), 0);
-
   platformNextSales.tiktok =
     forecastByPlatform.ecommerce
       .filter(r => r.platform === "tiktok" && nextQMonths.includes(r.ds.split("-")[1]))
       .reduce((a, r) => a + Number(r.y || 0), 0);
 
-  // ---- F) ORDERS QUARTER FIX (AOV = 500) ----
-  baselineOrdersCurrent = totalCurrent / 500;
-  baselineOrdersNext = totalNext / 500;
+
 
   // ---- G) Chart Data ----
   const chartData = computeChartSeries(historyByPlatform, forecastByPlatform);
 
   return {
-    totalCurrent,
-    totalNext,
-    growthRate,
-    chartData,
-  };
+  totalCurrent,
+  totalNext,
+  growthRate,
+  chartData,
+  nextQMonths,  
+  }; 
 }
 
 /* ---------- WATCH USER OVERRIDES ---------- */
@@ -229,138 +222,6 @@ function attachOverrideWatcher(inputId) {
       el.classList.remove("manual-override");
     }
   });
-}
-
-/* ============================================================
-   BUDGET ALLOCATION ENGINE
-   ============================================================ */
-function updateBudgetAllocation(m) {
-  if (!m) return;
-
-  /* ---------- A) Grab Inputs ---------- */
-  const retailMarginEl = document.getElementById("retailMarginInput");
-  const tiktokMarginEl = document.getElementById("tiktokMarginInput");
-
-  const retailBudgetEl = document.getElementById("retailBudgetInput");
-  const tiktokBudgetEl = document.getElementById("tiktokBudgetInput");
-
-  /* ---------- B) Read Inputs ---------- */
-  const retailMarginInput = Number(retailMarginEl?.value) / 100;
-  const tiktokMarginInput = Number(tiktokMarginEl?.value) / 100;
-
-  const retailBudgetInput = Number(retailBudgetEl?.value);
-  const tiktokBudgetInput = Number(tiktokBudgetEl?.value);
-
-  /* ---------- C) Detect Per-Field Overrides ---------- */
-  const retailMarginOverride = retailMarginEl?.value.trim() !== "";
-  const tiktokMarginOverride = tiktokMarginEl?.value.trim() !== "";
-
-  const retailBudgetOverride = retailBudgetEl?.value.trim() !== "";
-  const tiktokBudgetOverride = tiktokBudgetEl?.value.trim() !== "";
-
-  /* ---------- D) Compute Profit Margins ---------- */
-  const profitMargins = {
-    retail: retailMarginOverride ? retailMarginInput : 0.30,
-    tiktok: tiktokMarginOverride ? tiktokMarginInput : 0.25,
-  };
-
-  /* ---------- E) Total Marketing Budget ---------- */
-  let totalNext = baselineSalesNext || 0;
-  let totalBudget = totalNext * 0.2; // default 20%
-
-  const anyBudgetOverride =
-    retailBudgetOverride || tiktokBudgetOverride;
-
-  if (anyBudgetOverride) {
-    totalBudget =
-      (retailBudgetOverride ? retailBudgetInput : 0) +
-      0 +
-      (tiktokBudgetOverride ? tiktokBudgetInput : 0);
-  }
-
-  /* ---------- F) Compute Allocation Scores ---------- */
-  const platforms = ["retail", "tiktok"];
-  const scores = {};
-  let totalScore = 0;
-
-  platforms.forEach((p) => {
-    const sales = platformNextSales[p] || 0;
-    const margin = profitMargins[p] || 0;
-    const score = Math.max(sales, 0) * margin;
-    scores[p] = score;
-    totalScore += score;
-  });
-
-  /* ---------- G) Allocate Budgets ---------- */
-  const budgets = {};
-  const allocPercents = {};
-
-  platforms.forEach((p) => {
-    let bud = totalScore > 0 ? (totalBudget * scores[p]) / totalScore : 0;
-
-    if (p === "retail" && retailBudgetOverride) bud = retailBudgetInput;
-    if (p === "shopee" && shopeeBudgetOverride) bud = shopeeBudgetInput;
-    if (p === "tiktok" && tiktokBudgetOverride) bud = tiktokBudgetInput;
-
-    budgets[p] = bud;
-    allocPercents[p] = totalBudget > 0 ? (bud / totalBudget) * 100 : 0;
-  });
-
-  /* ---------- H) Update Placeholders (Margins) ---------- */
-  if (!retailMarginOverride)
-    retailMarginEl.placeholder = `(${Math.round(profitMargins.retail * 100)}%)`;
-  if (!tiktokMarginOverride)
-    tiktokMarginEl.placeholder = `(${Math.round(profitMargins.tiktok * 100)}%)`;
-
-  /* ---------- I) Update Placeholders (Budgets) ---------- */
-  if (!retailBudgetOverride)
-    retailBudgetEl.placeholder = `(${formatPeso(budgets.retail)})`;
-  if (!tiktokBudgetOverride)
-    tiktokBudgetEl.placeholder = `(${formatPeso(budgets.tiktok)})`;
-
-  /* ---------- J) Update TOTAL Budget ---------- */
-  setText("totalBudget", formatPeso(totalBudget));
-
-  /* ---------- K) Update UI Cards ---------- */
-  setText("allocationRetail", formatPeso(budgets.retail));
-  setText("allocationTiktok", formatPeso(budgets.tiktok));
-
-  setText("allocationRetailPct", allocPercents.retail.toFixed(1) + "%");
-  setText("allocationTiktokPct", allocPercents.tiktok.toFixed(1) + "%");
-
-  /* ============================================================
-     CHANNEL-LEVEL FORECAST AFTER BUDGETS
-     ============================================================ */
-  function updateChannelCards(m, budgets, margins) {
-    const retailBase = platformNextSales.retail || 0;
-
-    const tiktokBase = platformNextSales.tiktok || 0;
-
-    const efficiency = {
-      retail: 1.3,
-      shopee: 1.1,
-      tiktok: 1.8,
-    };
-
-    const marginFactor = {
-      retail: 1 + (margins.retail || 0),
-      shopee: 1 + (margins.shopee || 0),
-      tiktok: 1 + (margins.tiktok || 0),
-    };
-
-    const retailAfter =
-      retailBase + budgets.retail * efficiency.retail * marginFactor.retail;
-    const tiktokAfter =
-      tiktokBase + budgets.tiktok * efficiency.tiktok * marginFactor.tiktok;
-
-    setText("retailBaseForecast", formatPeso(retailBase));
-    setText("retailAfterAllocation", formatPeso(retailAfter));
-
-    setText("tiktokBaseForecast", formatPeso(tiktokBase));
-    setText("tiktokAfterAllocation", formatPeso(tiktokAfter));
-  }
-
-  updateChannelCards(m, budgets, profitMargins);
 }
 
 /* ============================================================
@@ -385,44 +246,87 @@ function populateSalesTab(m) {
   renderSalesChart(m.chartData);
 }
 
+function computeOrdersFromForecast(orderForecast, nextQMonths) {
+  const tiktok = orderForecast
+    .filter(r => r.platform === "tiktok" && nextQMonths.includes(r.ds.split("-")[1]))
+    .reduce((a, r) => a + Number(r.orders), 0);
+
+  const retail = orderForecast
+    .filter(r => r.platform === "retail" && nextQMonths.includes(r.ds.split("-")[1]))
+    .reduce((a, r) => a + Number(r.orders), 0);
+
+  return {
+    tiktok,
+    retail,
+    total: tiktok + retail
+  };
+}
+
 /* ============================================================
    ORDERS TAB RENDERING
    ============================================================ */
 function populateOrdersTab(m) {
-  const ordersCurrent = Math.round(baselineOrdersCurrent);
-  const ordersNext = Math.round(baselineOrdersNext);
+  const ordersCurrent = Math.round(m.current);
+  const ordersNext = Math.round(m.next);
 
-  const growth =
-    ordersCurrent > 0
-      ? ((ordersNext - ordersCurrent) / ordersCurrent) * 100
-      : 0;
+  const growth = ordersCurrent > 0
+    ? ((ordersNext - ordersCurrent) / ordersCurrent) * 100
+    : 0;
 
   setText("ordersCurrent", ordersCurrent.toLocaleString());
   setText("ordersNext", ordersNext.toLocaleString());
 
   const arrow = growth > 0 ? "▲" : growth < 0 ? "▼" : "";
-  const color =
-    growth > 0 ? "#3fd965" : growth < 0 ? "#ff4e4e" : "#b5b5b5";
+  const color = growth > 0 ? "#3fd965" : growth < 0 ? "#ff4e4e" : "#b5b5b5";
 
   setHTML(
     "ordersGrowth",
-    `<span style="color:${color}; font-weight:700;">${arrow} ${Math.abs(
-      growth
-    ).toFixed(1)}%</span>`
+    `<span style="color:${color}; font-weight:700;">${arrow} ${Math.abs(growth).toFixed(1)}%</span>`
   );
-
-  const AOV = 500;
-  setText(
-    "ordersRetail",
-    Math.round((platformNextSales.retail || 0) / AOV).toLocaleString()
-  );
-  setText(
-    "ordersTiktok",
-    Math.round((platformNextSales.tiktok || 0) / AOV).toLocaleString()
-  );
-
-  renderOrdersChart(m.chartData, AOV);
 }
+
+/* ============================================================
+   TOP PRODUCTS RENDERING (SALES + ORDERS)
+   ============================================================ */
+
+function renderTopProductsSales(items) {
+  const container = document.getElementById("topForecastedItems");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  items.forEach((item, index) => {
+    const rank = index + 1;
+    const row = document.createElement("div");
+    row.className = "top-item";
+    row.innerHTML = `
+      <div class="top-item-rank">${rank}</div>
+      <div class="top-item-name">${item.product_name}</div>
+      <div class="top-item-value">${formatPeso(item.total_sales || 0)}</div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function renderTopProductsOrders(items) {
+  const container = document.getElementById("topForecastedOrders");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  items.forEach((item, index) => {
+    const rank = index + 1;
+    const row = document.createElement("div");
+    row.className = "top-item";
+    row.innerHTML = `
+      <div class="top-item-rank">${rank}</div>
+      <div class="top-item-name">${item.product_name}</div>
+      <div class="top-item-value">${(item.total_orders || 0).toLocaleString()}</div>
+    `;
+    container.appendChild(row);
+  });
+}
+
 /* ============================================================
    Charts, Sliders, Tabs, NeonDB Fetch, Initialization
    ============================================================ */
@@ -445,15 +349,15 @@ function renderSalesChart(chartData) {
     data: {
       labels: chartData.labels,
       datasets: [
-        {
-          label: "E-Commerce (Current)",
+                {
+          label: "TikTok (Current)",
           data: chartData.currentEcom,
           borderColor: "#00c2ff",
           borderWidth: 2,
           tension: 0.3,
         },
         {
-          label: "E-Commerce (Projected)",
+          label: "TikTok (Projected)",
           data: chartData.forecastEcomSeries,
           borderColor: "#00c2ff",
           borderDash: [6, 6],
@@ -505,40 +409,20 @@ function renderSalesChart(chartData) {
 /* ============================================================
    ORDERS CHART
    ============================================================ */
-function renderOrdersChart(chartData, aov) {
+function renderOrdersChart(chartData) {
   const ctx = document.getElementById("ordersChart");
   if (!ctx) return;
 
-  if (ordersChartInstance) {
-    ordersChartInstance.destroy();
-  }
+  if (ordersChartInstance) ordersChartInstance.destroy();
 
-  // Convert sales series → orders series per platform
-  const currentEcomOrders = chartData.currentEcom.map(v =>
-    v == null ? null : v / aov
+  // Compute max Y from all 4 series
+  const maxY = Math.max(
+    ...chartData.tiktokCurrent,
+    ...chartData.retailCurrent,
+    ...chartData.tiktokForecast,
+    ...chartData.retailForecast,
+    10
   );
-  const forecastEcomOrders = chartData.forecastEcomSeries.map(v =>
-    v == null ? null : v / aov
-  );
-
-  const currentRetailOrders = chartData.currentRetail.map(v =>
-    v == null ? null : v / aov
-  );
-  const forecastRetailOrders = chartData.forecastRetailSeries.map(v =>
-    v == null ? null : v / aov
-  );
-
-  // Compute max for y-axis
-  const allValues = [
-    ...currentEcomOrders,
-    ...forecastEcomOrders,
-    ...currentRetailOrders,
-    ...forecastRetailOrders,
-  ].filter(v => v != null && !isNaN(v));
-
-  const maxOrders = allValues.length
-    ? Math.max(...allValues, 10)
-    : 10;
 
   ordersChartInstance = new Chart(ctx, {
     type: "line",
@@ -546,59 +430,49 @@ function renderOrdersChart(chartData, aov) {
       labels: chartData.labels,
       datasets: [
         {
-          label: "E-Commerce (Current Orders)",
-          data: currentEcomOrders,
+          label: "TikTok (Current)",
+          data: chartData.tiktokCurrent,
           borderColor: "#00c2ff",
           borderWidth: 2,
           tension: 0.3,
         },
         {
-          label: "E-Commerce (Projected Orders)",
-          data: forecastEcomOrders,
+          label: "TikTok (Projected)",
+          data: chartData.tiktokForecast,
           borderColor: "#00c2ff",
           borderDash: [6, 6],
           borderWidth: 2,
           tension: 0.3,
         },
         {
-          label: "Retail (Current Orders)",
-          data: currentRetailOrders,
+          label: "Retail (Current)",
+          data: chartData.retailCurrent,
           borderColor: "#f5b400",
           borderWidth: 2,
           tension: 0.3,
         },
         {
-          label: "Retail (Projected Orders)",
-          data: forecastRetailOrders,
+          label: "Retail (Projected)",
+          data: chartData.retailForecast,
           borderColor: "#f5b400",
           borderDash: [6, 6],
           borderWidth: 2,
           tension: 0.3,
-        },
-      ],
+        }
+      ]
     },
-
     options: {
       responsive: true,
       plugins: {
-        legend: {
-          labels: { color: "#fff" },
-        },
+        legend: { labels: { color: "#fff" } }
       },
       scales: {
-        x: {
-          ticks: { color: "#fff" },
-          grid: { color: "#333" },
-        },
         y: {
-          ticks: { color: "#fff" },
-          grid: { color: "#333" },
           beginAtZero: true,
-          min: 0,
-          max: 5000,
-        },
-      },
-    },
+          max: 7000
+        }
+      }
+    }
   });
 }
 
@@ -668,6 +542,119 @@ function setupTabs() {
 }
 
 /* ============================================================
+   LOAD TOP PRODUCTS (SALES + ORDERS)
+   ============================================================ */
+async function loadTopProducts() {
+  try {
+    // Top 5 by SALES (for Sales tab)
+    const salesResp = await fetch("http://localhost:5000/api/top-products?metric=sales&platform=all");
+    const salesTop = await salesResp.json();
+    renderTopProductsSales(salesTop);
+
+    // Top 5 by ORDERS (for Orders tab)
+    const ordersResp = await fetch("http://localhost:5000/api/top-products?metric=orders&platform=all");
+    const ordersTop = await ordersResp.json();
+    renderTopProductsOrders(ordersTop);
+  } catch (err) {
+    console.error("❌ Failed to load top products:", err);
+  }
+}
+
+/* ============================================================
+   LOAD SHARE PROJECTIONS (SALES + ORDERS)
+   ============================================================ */
+async function loadShareProjection() {
+  renderSalesShare();  
+  renderOrdersShare();
+}
+
+/* ---------- RENDER SALES SHARE ---------- */
+function renderSalesShare() {
+  // Base values come from forecast totals
+  const tiktokBase = platformNextSales.tiktok;
+  const retailBase = platformNextSales.retail;
+
+  // Optimistic +15%, Conservative –10%
+  const tiktokOpt = tiktokBase * 1.15;
+  const tiktokCon = tiktokBase * 0.90;
+
+  const retailOpt = retailBase * 1.15;
+  const retailCon = retailBase * 0.90;
+
+  // Populate UI — Peso formatting
+  setText("tiktokShareBase", formatPeso(tiktokBase));
+  setText("tiktokShareOptimistic", formatPeso(tiktokOpt));
+  setText("tiktokShareConservative", formatPeso(tiktokCon));
+
+  setText("retailShareBase", formatPeso(retailBase));
+  setText("retailShareOptimistic", formatPeso(retailOpt));
+  setText("retailShareConservative", formatPeso(retailCon));
+}
+
+
+/* ---------- RENDER ORDERS SHARE ---------- */
+function renderOrdersShare() {
+  const tiktokBase = Math.round(platformNextOrders.tiktok);
+  const retailBase = Math.round(platformNextOrders.retail);
+
+  const tiktokOpt = Math.round(tiktokBase * 1.15);
+  const tiktokCon = Math.round(tiktokBase * 0.90);
+
+  const retailOpt = Math.round(retailBase * 1.15);
+  const retailCon = Math.round(retailBase * 0.90);
+
+  setText("tiktokOrdersShareBase", tiktokBase.toLocaleString());
+  setText("tiktokOrdersShareOptimistic", tiktokOpt.toLocaleString());
+  setText("tiktokOrdersShareConservative", tiktokCon.toLocaleString());
+
+  setText("retailOrdersShareBase", retailBase.toLocaleString());
+  setText("retailOrdersShareOptimistic", retailOpt.toLocaleString());
+  setText("retailOrdersShareConservative", retailCon.toLocaleString());
+}
+
+function buildOrdersChartSeries(history, forecast) {
+  const AOV = 500;
+
+  const all = [...history, ...forecast].sort(
+    (a, b) => new Date(a.ds) - new Date(b.ds)
+  );
+
+  const labels = [...new Set(all.map(r => r.ds))];
+
+  const tiktokCurrent = labels.map(() => null);
+  const retailCurrent = labels.map(() => null);
+  const tiktokForecast = labels.map(() => null);
+  const retailForecast = labels.map(() => null);
+
+  labels.forEach((date, i) => {
+    // Convert historical sales → orders
+    history.forEach(r => {
+      if (r.ds === date) {
+        if (r.platform === "tiktok") tiktokCurrent[i] = r.y / AOV;
+        if (r.platform === "retail") retailCurrent[i] = r.y / AOV;
+      }
+    });
+
+    // Forecasted orders
+    forecast.forEach(r => {
+      if (r.ds === date) {
+        if (r.platform === "tiktok") tiktokForecast[i] = r.orders;
+        if (r.platform === "retail") retailForecast[i] = r.orders;
+      }
+    });
+  });
+
+  return {
+    labels,
+    tiktokCurrent,
+    retailCurrent,
+    tiktokForecast,
+    retailForecast
+  };
+}
+
+
+/* ============================================================
    LOAD DATA FROM NEON DATABASE
    ============================================================ */
 async function loadNeonData() {
@@ -678,214 +665,107 @@ async function loadNeonData() {
     const foreResp = await fetch("http://localhost:5000/api/forecast");
     const forecast = await foreResp.json();
 
+    const orderResp = await fetch("http://localhost:5000/api/order-forecast");
+    const orderForecast = await orderResp.json();
+
+
     console.log("🔥 RAW HISTORY ROWS:", history);
     console.log("🔥 RAW FORECAST ROWS:", forecast);
 
     history.forEach(r => r.isHistory = true);
     forecast.forEach(r => r.isHistory = false);
 
+    /* ---------- MODEL INFORMATION POPULATION (PER PLATFORM) ---------- */
+    if (forecast.length > 0) {
+
+      // TikTok rows always contain the same RMSE/SMAPE repeated
+      const tiktokRow = forecast.find(r => r.platform === "tiktok");
+      const retailRow = forecast.find(r => r.platform === "retail");
+
+      const tiktokRMSE  = tiktokRow ? Number(tiktokRow.rmse)  : 0;
+      const tiktokSMAPE = tiktokRow ? Number(tiktokRow.smape) : 0;
+
+      const retailRMSE  = retailRow ? Number(retailRow.rmse)  : 0;
+      const retailSMAPE = retailRow ? Number(retailRow.smape) : 0;
+
+      // Populate sales tab
+      setText("rmseTiktok", tiktokRMSE.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+      setText("smapeTiktok", tiktokSMAPE.toFixed(2) + "%");
+
+      setText("rmseRetail", retailRMSE.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+      setText("smapeRetail", retailSMAPE.toFixed(2) + "%");
+
+      /* ---------- MODEL INFORMATION FOR ORDERS TAB (USE order_forecast) ---------- */
+      const tiktokOrderRow = orderForecast.find(r => r.platform === "tiktok");
+      const retailOrderRow = orderForecast.find(r => r.platform === "retail");
+
+      const tiktokOrdersRMSE  = tiktokOrderRow ? Number(tiktokOrderRow.rmse)  : 0;
+      const tiktokOrdersSMAPE = tiktokOrderRow ? Number(tiktokOrderRow.smape) : 0;
+
+      const retailOrdersRMSE  = retailOrderRow ? Number(retailOrderRow.rmse)  : 0;
+      const retailOrdersSMAPE = retailOrderRow ? Number(retailOrderRow.smape) : 0;
+
+      // Populate ONLY the Orders tab fields
+      setText("rmseTiktokOrders", tiktokOrdersRMSE.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+      setText("smapeTiktokOrders", tiktokOrdersSMAPE.toFixed(2) + "%");
+
+      setText("rmseRetailOrders", retailOrdersRMSE.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+      setText("smapeRetailOrders", retailOrdersSMAPE.toFixed(2) + "%");
+
+    }
+
     /* ---------- PLATFORM GROUPING (OPTION A) ---------- */
     const historyByPlatform = {
       retail: history.filter(r => r.platform === "retail"),
-      ecommerce: history.filter(r => r.platform === "shopee" || r.platform === "tiktok"),
+      ecommerce: history.filter(r => r.platform === "tiktok"),  // 👈 FIXED
     };
 
     const forecastByPlatform = {
       retail: forecast.filter(r => r.platform === "retail"),
-      ecommerce: forecast.filter(r => r.platform === "shopee" || r.platform === "tiktok"),
+      ecommerce: forecast.filter(r => r.platform === "tiktok"), // 👈 FIXED
     };
 
     /* ---------- METRICS ---------- */
-    const metrics = computeMetricsFromRows({
+    const salesMetrics = computeMetricsFromRows({
       historyByPlatform,
       forecastByPlatform,
     });
 
-    lastMetrics = metrics;
+    const nextQMonths = salesMetrics.nextQMonths;
+    const ordersData = computeOrdersFromForecast(orderForecast, nextQMonths);
 
-    baselineSalesCurrent = metrics.totalCurrent;
-    baselineSalesNext = metrics.totalNext;
+    const ordersMetrics = {
+      current: salesMetrics.totalCurrent / 500,  // still the current quarter = sales/AOV
+      next: ordersData.total,
+    };
+    
+    platformNextOrders = {
+    tiktok: ordersData.tiktok,
+    retail: ordersData.retail
+    };
 
-    populateSalesTab(metrics);
-    populateOrdersTab(metrics);
+    baselineSalesCurrent = salesMetrics.totalCurrent;
+    baselineSalesNext = salesMetrics.totalNext;
+
+    populateSalesTab(salesMetrics);
+    const ordersChartData = buildOrdersChartSeries(
+      historyByPlatform.retail.concat(historyByPlatform.ecommerce),
+      orderForecast
+    );
+
+    // Render UI
+    populateOrdersTab(ordersMetrics);
+    renderOrdersChart(ordersChartData);
     initSliders();
+
+
+    loadShareProjection();
 
   } catch (err) {
     console.error("❌ Failed to load NeonDB analytics:", err);
     alert("Failed to load analytics data. Check console for details.");
   }
 }
-
- /* ============================================================
-   LOAD PRESCRIPTIVE ALLOCATION PRODUCTS (from NeonDB)
-   ============================================================ */
-  async function loadPrescriptiveProducts() {
-    try {
-      const resp = await fetch("http://localhost:5000/api/prescriptive-products");
-      const products = await resp.json();
-
-      prescriptiveProducts = products;
-
-      console.log("📦 Prescriptive Allocation Products:", products);
-
-      const selSales = document.getElementById("productSelectorSales");
-      const selOrders = document.getElementById("productSelectorOrders");
-
-      if (selSales) selSales.innerHTML = "";
-      if (selOrders) selOrders.innerHTML = "";
-
-      products.forEach(p => {
-        const cleanId = Number(String(p.product_id).split(":")[0]);
-
-        const opt1 = document.createElement("option");
-        opt1.value = cleanId;
-        opt1.textContent = p.product_name;
-
-        const opt2 = document.createElement("option");
-        opt2.value = cleanId;
-        opt2.textContent = p.product_name;
-
-        if (selSales) selSales.appendChild(opt1);
-        if (selOrders) selOrders.appendChild(opt2);
-    });
-
-    // Auto-fill first product summary
-    if (products.length > 0) {
-      const cleanId = Number(String(products[0].product_id).split(":")[0]);
-      selSales.value = cleanId;
-      updateProductSummary(products[0], "sales");
-    }
-
-    // Sales dropdown listener
-    if (selSales) {
-      selSales.addEventListener("change", () => {
-        const selected = products.find(
-          p => Number(String(p.product_id).split(":")[0]) == selSales.value
-        );
-        updateProductSummary(selected, "sales");
-      });
-    }
-
-    // Orders dropdown listener
-    if (selOrders) {
-      selOrders.addEventListener("change", () => {
-        const selected = products.find(
-          p => Number(String(p.product_id).split(":")[0]) == selOrders.value
-        );
-        updateProductSummary(selected, "orders");
-      });
-    }
-
-  } catch (err) {
-    console.error("❌ Error loading prescriptive products:", err);
-  }
-}
-
-
-async function calculateProductAllocationForSales() {
-  const selector = document.getElementById("productSelectorSales");
-  if (!selector) return;
-
-  const productId = Number(selector.value);
-  if (!productId) return;
-
-  try {
-    const resp = await fetch("http://localhost:5000/api/prescriptive-allocation?productId=" + productId);
-    const data = await resp.json();
-
-    const allocRetail = data.allocations.retail;
-    const allocTiktok = data.allocations.tiktok;
-    const allocShopee = data.allocations.shopee ?? 0;
-
-    // Update allocation result UI
-    setText("allocRetail", allocRetail.toLocaleString());
-    setText("allocTikTok", allocTiktok.toLocaleString());
-    setText("allocShopee", allocShopee.toLocaleString()); 
-
-    setText("allocTotal", (allocRetail + allocTiktok + allocShopee).toLocaleString());
-
-
-    // Revenue per unit
-    const rpuRetail = data.rpu.retail;   // always 0
-    const rpuTiktok = data.rpu.tiktok;
-
-    const addedRetailRevenue = allocRetail * rpuRetail;
-    const addedTiktokRevenue = allocTiktok * rpuTiktok;
-
-    // Base forecasts
-    const baseRetail = platformNextSales.retail || 0;
-    const baseTiktok = platformNextSales.tiktok || 0;
-
-    // Update channel cards (ONLY retail + tiktok)
-    // Shopee
-    setText("shopeeBaseForecast", "-");
-    setText("shopeeAfterAllocation", "-");
-
-    // Retail
-    setText("retailBaseForecast", formatPeso(baseRetail));
-    if (rpuRetail > 0) {
-      setText("retailAfterAllocation", formatPeso(baseRetail + addedRetailRevenue));
-    } else {
-      setText("retailAfterAllocation", "—"); // hide until real RPU exists
-    }
-
-    // TikTok
-    setText("tiktokBaseForecast", formatPeso(baseTiktok));
-    if (rpuTiktok > 0) {
-      setText("tiktokAfterAllocation", formatPeso(baseTiktok + addedTiktokRevenue));
-    } else {
-      setText("tiktokAfterAllocation", "—"); // hide until valid
-    }
-
-
-    // Show result panel
-    const el = document.getElementById("allocationResult");
-    if (el) el.style.display = "block";
-
-  } catch (err) {
-    console.error("❌ Error calculating product allocation:", err);
-    alert("Error computing allocation. See console.");
-  }
-}
-
-  /* ============================================================
-    UPDATE PRODUCT SUMMARY PANEL
-    ============================================================ */
-  function updateProductSummary(p, tab) {
-  if (!p) return;
-
-  if (tab === "sales") {
-    setText("summaryStock", p.current_stock ?? "--");
-    setText("summaryDemand", p.demand ?? "--");
-  }
-
-  if (tab === "orders") {
-    setText("summaryStockOrders", p.current_stock ?? "--");
-    setText("summaryDemandOrders", p.demand ?? "--");
-
-    setText("summaryAllocatedOrders", p.allocated ?? "--");
-    setText("summaryShortageOrders", p.shortage ?? "--");
-    setText("summaryExcessOrders", p.excess_stock ?? "--");
-    setText("summaryWeightOrders", p.weight ?? "--");
-  }
-}
-
-
-function getRevenuePerUnitForPlatform(product, platformKey) {
-  if (!product || !product.revenue_breakdown) return 0;
-
-  // platformKey: "retail" | "shopee" | "tiktok"
-  const row = product.revenue_breakdown.find(r => {
-    const p = (r.platform_name || "").toLowerCase();
-    if (platformKey === "shopee") return p.includes("shopee");
-    if (platformKey === "tiktok") return p.includes("tiktok");
-    if (platformKey === "retail") return p.includes("retail");
-    return false;
-  });
-
-  return row ? Number(row.revenue_per_unit || 0) : 0;
-}
-
 
 /* ============================================================
    INIT
@@ -894,44 +774,5 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFirebaseAuth();
   setupTabs();
   loadNeonData();
-  loadPrescriptiveProducts();
-
-
-  attachOverrideWatcher("retailMarginInput");
-  attachOverrideWatcher("shopeeMarginInput");
-  attachOverrideWatcher("tiktokMarginInput");
-  
-
-  attachOverrideWatcher("retailBudgetInput");
-  attachOverrideWatcher("shopeeBudgetInput");
-  attachOverrideWatcher("tiktokBudgetInput");
-  const calcBtn = document.getElementById("calculateAllocationBtn");
-  if (calcBtn) {
-      calcBtn.addEventListener("click", calculateProductAllocationForSales);
-  }
-
-
-  const recalcBtn = document.getElementById("recalcAllocationBtn");
-  if (recalcBtn) {
-    recalcBtn.addEventListener("click", () => {
-      if (lastMetrics) updateBudgetAllocation(lastMetrics);
-    });
-  }
-
-  const allocationInputs = [
-    "retailMarginInput",
-    "shopeeMarginInput",
-    "tiktokMarginInput",
-    "retailBudgetInput",
-    "shopeeBudgetInput",
-    "tiktokBudgetInput",
-  ];
-
-  allocationInputs.forEach((id) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener("input", () => {
-      if (lastMetrics) updateBudgetAllocation(lastMetrics);
-    });
-  });
+  loadTopProducts();
 });

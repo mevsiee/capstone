@@ -106,21 +106,37 @@ app.get("/api/history", async (req, res) => {
   try {
     const sql = `
           SELECT 
-            LOWER(platform_name) AS platform,
-            TO_CHAR(DATE_TRUNC('month', order_date), 'YYYY-MM-01') AS ds,
-            SUM(order_amount) AS y
-          FROM denormalized_table
-          WHERE LOWER(order_status) = 'completed'
-            AND EXTRACT(YEAR FROM order_date) = 2025
-            AND LOWER(platform_name) NOT LIKE '%shopee%'
-            AND LOWER(platform_name) NOT LIKE '%shop%'
-            AND LOWER(platform_name) NOT LIKE '%ecom%'
-          GROUP BY 
-            LOWER(platform_name),
-            DATE_TRUNC('month', order_date)
-          ORDER BY 
-            platform ASC,
-            ds ASC;
+          CASE
+            WHEN LOWER(platform_name) LIKE '%tiktok%' THEN 'tiktok'
+            WHEN LOWER(platform_name) LIKE '%retail%' 
+              OR LOWER(platform_name) LIKE '%pos%'
+              OR LOWER(platform_name) LIKE '%store%' THEN 'retail'
+            ELSE 'other'
+          END AS platform,
+
+          TO_CHAR(DATE_TRUNC('month', order_date), 'YYYY-MM-01') AS ds,
+          SUM(order_amount) AS y
+
+        FROM denormalized_table
+        WHERE LOWER(order_status) = 'completed'
+          AND EXTRACT(YEAR FROM order_date) = 2025
+          AND LOWER(platform_name) NOT LIKE '%shopee%'
+          AND LOWER(platform_name) NOT LIKE '%shop%'
+          AND LOWER(platform_name) NOT LIKE '%ecom%'
+
+        GROUP BY
+          CASE
+            WHEN LOWER(platform_name) LIKE '%tiktok%' THEN 'tiktok'
+            WHEN LOWER(platform_name) LIKE '%retail%' 
+              OR LOWER(platform_name) LIKE '%pos%'
+              OR LOWER(platform_name) LIKE '%store%' THEN 'retail'
+            ELSE 'other'
+          END,
+          DATE_TRUNC('month', order_date)
+
+        ORDER BY 
+          platform ASC,
+          ds ASC;
           `;
 
     const result = await pool.query(sql);
@@ -164,6 +180,41 @@ app.get("/api/forecast", async (req, res) => {
   }
 });
 
+// ========================================
+// GET /api/order-forecast
+// Pulls order forecasting values from NEW table
+// ========================================
+app.get("/api/order-forecast", async (req, res) => {
+  try {
+    const sql = `
+      SELECT
+        CASE
+          WHEN LOWER(platform_name) LIKE '%tiktok%' THEN 'tiktok'
+          WHEN LOWER(platform_name) LIKE '%retail%' THEN 'retail'
+          ELSE 'other'
+        END AS platform,
+
+        TO_CHAR(DATE_TRUNC('month', forecast_date), 'YYYY-MM-01') AS ds,
+        forecast_value AS orders,
+
+        rmse,
+        smape
+      FROM order_forecast
+      WHERE DATE_PART('year', forecast_date) = 2025
+      ORDER BY forecast_date ASC, platform_name ASC;
+    `;
+
+    const result = await pool.query(sql);
+    res.json(result.rows);
+
+  } catch (err) {
+    console.error("❌ Error fetching order forecast:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 app.get("/api/sales-breakdown", async (req, res) => {
   try {
     const sql = `
@@ -199,151 +250,175 @@ app.get("/api/sales-breakdown", async (req, res) => {
   }
 });
 
-// =============================================================
-// GET /api/prescriptive-products
-// Returns products from NeonDB prescriptive_stock_allocation table
-// =============================================================
-app.get("/api/prescriptive-products", async (req, res) => {
+// ========================================
+// GET /api/top-products
+// Top 5 products by sales or orders
+// metric=sales|orders  platform=all|tiktok|retail
+// ========================================
+app.get("/api/top-products", async (req, res) => {
+  try {
+    let metric = (req.query.metric || "sales").toLowerCase();
+    const platform = (req.query.platform || "all").toLowerCase();
+
+    if (!["sales", "orders"].includes(metric)) {
+      metric = "sales";
+    }
+
+    const sql = `
+      WITH filtered AS (
+        SELECT *,
+          CASE 
+            WHEN LOWER(platform_name) LIKE '%retail%'
+                 AND LOWER(order_status) = 'completed'
+              THEN TRUE
+            WHEN LOWER(platform_name) NOT LIKE '%retail%'
+                 AND LOWER(order_status) = 'completed'
+                 AND delivered_date IS NOT NULL
+              THEN TRUE
+            ELSE FALSE
+          END AS is_completed
+        FROM denormalized_table
+        WHERE DATE_PART('year', order_date) = 2025
+          AND LOWER(platform_name) NOT LIKE '%shopee%'
+          AND LOWER(platform_name) NOT LIKE '%shop%'
+          AND LOWER(platform_name) NOT LIKE '%ecom%'
+      ),
+      agg AS (
+        SELECT
+          product_name,
+          SUM(
+            CASE WHEN is_completed THEN COALESCE(quantity, 0) ELSE 0 END
+          ) AS total_orders,
+          SUM(
+            CASE WHEN is_completed THEN COALESCE(order_amount, 0) ELSE 0 END
+          ) AS total_sales
+        FROM filtered
+        WHERE product_name <> 'UNKNOWN'
+          AND (
+            $1 = 'all'
+            OR ($1 = 'tiktok' AND LOWER(platform_name) LIKE '%tiktok%')
+            OR ($1 = 'retail' AND LOWER(platform_name) LIKE '%retail%')
+          )
+        GROUP BY product_name
+      )
+      SELECT 
+        product_name,
+        total_orders,
+        total_sales
+      FROM agg
+      ORDER BY
+        CASE WHEN $2 = 'orders' THEN total_orders END DESC,
+        CASE WHEN $2 = 'sales'  THEN total_sales  END DESC
+      LIMIT 5;
+    `;
+
+    const result = await pool.query(sql, [platform, metric]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ Error fetching top products:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ========================================
+// GET /api/share-projection
+// Computes sales + orders share for TikTok & Retail
+// ========================================
+app.get("/api/share-projection", async (req, res) => {
   try {
     const sql = `
-      SELECT 
-        id,
-        product_id,
-        product_name,
-        current_stock,
-        demand,
-        allocated,
-        shortage,
-        excess_stock,
-        weight
-      FROM prescriptive_stock_allocation
-      ORDER BY weight DESC;
+      SELECT
+        CASE
+          WHEN LOWER(platform) LIKE '%tiktok%' THEN 'tiktok'
+          WHEN LOWER(platform) LIKE '%retail%' 
+            OR LOWER(platform) LIKE '%pos%'
+            OR LOWER(platform) LIKE '%store%' THEN 'retail'
+          ELSE 'other'
+        END AS platform,
+        TO_CHAR(DATE_TRUNC('month', ds), 'YYYY-MM-01') AS ds,
+        forecast_value AS y
+      FROM forecast
+      WHERE DATE_PART('year', ds) = 2025
+        AND LOWER(platform) NOT LIKE '%shopee%'
+        AND LOWER(platform) NOT LIKE '%shop%'
+        AND LOWER(platform) NOT LIKE '%ecom%'
+      ORDER BY ds ASC;
     `;
 
     const result = await pool.query(sql);
-    res.json(result.rows);
+    const rows = result.rows;
 
-  } catch (err) {
-    console.error("❌ Error fetching prescriptive products:", err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
+    if (rows.length === 0) {
+      return res.json({
+        sales: {},
+        orders: {}
+      });
+    }
 
+    // ---- Identify next quarter months from latest history-like row ----
+    const lastDate = new Date(rows[rows.length - 1].ds);
+    const m = lastDate.getMonth() + 1;
 
-// =============================================================
-// GET /api/revenue-per-unit
-// Returns the revenue_per_unit breakdown per variation + platform
-// =============================================================
-app.get("/api/revenue-per-unit", async (req, res) => {
-  try {
-    const sql = `
-      SELECT 
-        variation_product_id AS product_id,
-        LOWER(platform_name) AS platform,
-        revenue_per_unit
-      FROM revenue_per_unit;
-    `;
+    function nextQuarterMonths(m) {
+      if (m <= 3) return ["04", "05", "06"];
+      if (m <= 6) return ["07", "08", "09"];
+      if (m <= 9) return ["10", "11", "12"];
+      return ["01", "02", "03"];
+    }
 
-    const rows = (await pool.query(sql)).rows;
+    const nextQ = nextQuarterMonths(m);
 
-    const map = {};
+    // ---- Sum TikTok / Retail forecast for NEXT QUARTER ----
+    let tiktokSales = 0;
+    let retailSales = 0;
+
     rows.forEach(r => {
-      if (!map[r.product_id]) map[r.product_id] = {};
-      map[r.product_id][r.platform] = Number(r.revenue_per_unit);
+      const [, month] = r.ds.split("-");
+      if (nextQ.includes(month)) {
+        if (r.platform === "tiktok") tiktokSales += Number(r.y);
+        if (r.platform === "retail") retailSales += Number(r.y);
+      }
     });
 
-    res.json(map);
+    const totalSales = tiktokSales + retailSales;
+
+    const baseTikTokShare = totalSales > 0 ? (tiktokSales / totalSales) : 0;
+    const baseRetailShare = totalSales > 0 ? (retailSales / totalSales) : 0;
+
+    // ---- Optimistic (+10%), Conservative (-10%) ----
+    function scenario(value) {
+      return {
+        base: value,
+        optimistic: value * 1.10,
+        conservative: value * 0.90
+      };
+    }
+
+    // ---- Orders (AOV = 500) ----
+    const AOV = 500;
+    const tiktokOrders = tiktokSales / AOV;
+    const retailOrders = retailSales / AOV;
+    const totalOrders = tiktokOrders + retailOrders;
+
+    const baseTikTokOrdersShare =
+      totalOrders > 0 ? (tiktokOrders / totalOrders) : 0;
+    const baseRetailOrdersShare =
+      totalOrders > 0 ? (retailOrders / totalOrders) : 0;
+
+    res.json({
+      sales: {
+        tiktok: scenario(baseTikTokShare),
+        retail: scenario(baseRetailShare)
+      },
+      orders: {
+        tiktok: scenario(baseTikTokOrdersShare),
+        retail: scenario(baseRetailOrdersShare)
+      }
+    });
 
   } catch (err) {
-    console.error("❌ Error fetching revenue-per-unit:", err.message);
+    console.error("❌ Error computing share projection:", err);
     res.status(500).json({ error: err.message });
-  }
-});
-
-/* =============================================================
-   GET /api/prescriptive-allocation?productId=#
-   Computes Retail + TikTok allocation for a single product
-============================================================= */
-app.get("/api/prescriptive-allocation", async (req, res) => {
-  try {
-    const productId = Number(req.query.productId);
-    if (!productId) {
-      return res.status(400).json({ error: "Missing productId" });
-    }
-
-    // 1. Fetch product from prescriptive table
-    const productSql = `
-      SELECT 
-        product_id,
-        product_name,
-        current_stock,
-        demand
-      FROM prescriptive_stock_allocation
-      WHERE product_id = $1;
-    `;
-
-    const productRows = (await pool.query(productSql, [productId])).rows;
-    if (productRows.length === 0) {
-      return res.status(404).json({ error: "Product not found" });
-    }
-
-    const product = productRows[0];
-    const stock = Number(product.current_stock || 0);
-    const demand = Number(product.demand || 0);
-
-    // 2. Fetch revenue-per-unit safely (TikTok + Shopee supported, Retail = 0)
-    let rpuRows = [];
-    try {
-      const r = await pool.query(
-        `
-          SELECT platform_name, revenue_per_unit
-          FROM revenue_per_unit
-          WHERE variation_product_id = $1;
-        `,
-        [productId]
-      );
-      rpuRows = r.rows || [];
-    } catch (err) {
-      console.warn("⚠️ RPU lookup failed for product", productId, err.message);
-      rpuRows = [];
-    }
-
-    let rpuRetail = 0;   // always 0
-    let rpuTiktok = 0;
-    let rpuShopee = 0;
-
-    rpuRows.forEach(r => {
-      const platform = (r.platform_name || "").toLowerCase();
-      const value = Number(r.revenue_per_unit || 0);
-
-      if (platform.includes("tiktok")) rpuTiktok = value;
-      if (platform.includes("shopee")) rpuShopee = value;
-    });
-
-    // 3. Allocation logic (retail first, leftover → tiktok)
-    let allocRetail = Math.min(stock, demand);
-    let remaining = stock - allocRetail;
-
-    let allocTiktok = remaining; // all leftovers to tiktok
-
-    return res.json({
-    productId,
-    allocations: {
-      retail: allocRetail,
-      tiktok: allocTiktok,
-      shopee: 0
-    },
-    rpu: {
-      retail: rpuRetail,
-      tiktok: rpuTiktok,
-      shopee: rpuShopee
-    }
-  });
-
-
-  } catch (err) {
-    console.error("❌ Allocation API error:", err);
-    res.status(500).json({ error: "Server error computing allocation" });
   }
 });
 
