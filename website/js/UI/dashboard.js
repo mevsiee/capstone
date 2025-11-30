@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupPlatformTabs();
   setupMetricTabs();
   setupTrendButtons();
+  setupCorrelationButtons();
 
   initDashboard();
 });
@@ -521,7 +522,7 @@ function updateCategoryChart(data) {
             font: { size: 12 },
             padding: 12,
             usePointStyle: true,
-            pointStyle: "rectRounded"
+            pointStyle: "rect"
           }
         },
         tooltip: {
@@ -607,6 +608,141 @@ function updateTopSellingProductsChart(data, canvasId) {
   } else if (canvasId === "ordersDemandChart") {
     ordersDemandChart = chart;
   }
+}
+
+function renderSalesOrderCorrelation(data) {
+  const ctx = document.getElementById("salesOrderCorrelationChart");
+  if (!ctx) return;
+
+  if (window.correlationChart) window.correlationChart.destroy();
+
+  let points = [];
+
+  // =========================
+  // Build plot points
+  // =========================
+  data.forEach(entry => {
+    ["tiktok","retail"].forEach(platform => {
+      const orders = entry[platform].orders;
+      const totalSales = entry[platform].sales;
+
+      if (orders > 0 && totalSales > 0) {
+        const avg = totalSales / orders;
+        points.push({
+          x: orders,
+          y: avg,
+          r: bubbleScale(totalSales),
+          platform,
+          label: `${platform.toUpperCase()} – ${entry.label}`
+        });
+      }
+    });
+  });
+
+  // =========================
+  // Compute regression
+  // =========================
+  const xs = points.map(p => p.x);
+  const ys = points.map(p => p.y);
+  const regression = linearRegression(xs, ys);
+
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+
+  const extendedMin = minX - (maxX * 0.2);
+  const extendedMax = maxX + (maxX * 0.2);
+
+  let regressionPoints = [
+    { x: extendedMin, y: regression.predict(extendedMin) },
+    { x: extendedMax, y: regression.predict(extendedMax) }
+  ];
+
+  // =========================
+  // Platform visibility
+  // =========================
+  let showTikTok = selectedPlatform === "all" || selectedPlatform === "tiktok";
+  let showRetail = selectedPlatform === "all" || selectedPlatform === "retail";
+
+  // =========================
+  // Build chart
+  // =========================
+  window.correlationChart = new Chart(ctx, {
+    type: 'bubble',
+    data: {
+      datasets: [
+        {
+          label: "Trend Line",
+          type: 'line',
+          data: regressionPoints,
+          borderColor: "#ffffff",
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: false,
+          tension: 0,
+          order: 0
+        },
+        {
+          label: "TikTok",
+          data: showTikTok ? points.filter(p => p.platform === "tiktok") : [],
+          hidden: !showTikTok,
+          backgroundColor: "transparent",
+          borderColor: "#00f5ff",
+          borderWidth: 2,
+          order: 1
+        },
+        {
+          label: "Retail",
+          data: showRetail ? points.filter(p => p.platform === "retail") : [],
+          hidden: !showRetail,
+          backgroundColor: "transparent",
+          borderColor:"#facc15",
+          borderWidth: 2,
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+
+      plugins: {
+        legend: {
+          position: "top",
+          labels: {
+            color: "#fff",
+            filter: (item) => {
+              if (item.text === "TikTok" && !showTikTok) return false;
+              if (item.text === "Retail" && !showRetail) return false;
+              return true;
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              if (!ctx.raw.label) return "";
+              return [
+                ctx.raw.label,
+                `Orders: ${ctx.raw.x}`,
+                `Avg sales/order: ₱${ctx.raw.y.toFixed(2)}`
+              ];
+            }
+          }
+        }
+      },
+
+      scales: {
+        x: {
+          title: { display: true, text: "Order Volume", color: "#fff" },
+          ticks: { color: "#fff" }
+        },
+        y: {
+          title: { display: true, text: "Avg Sales per Order", color: "#fff" },
+          ticks: { color: "#fff" }
+        }
+      }
+    }
+  });
 }
 
 // ================================
@@ -770,74 +906,81 @@ function renderOrdersTrendChartFromData(data) {
   });
 }
 
-// 3. Orders summary + demand chart – placeholder
-async function loadOrderSummaryAndDemand() {
-  try {
-    const qs = buildFilterQuery(true);
-    const res = await fetch(`${API_BASE}/products/top` + qs);
-    const data = await res.json();
+// 3. Sales and correlation + high demand products chart
 
-    renderSalesOrderCorrelation(data);
-    updateTopSellingProductsChart(data, "ordersDemandChart");
+function setupCorrelationButtons() {
+  document.querySelectorAll(".correlation-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document
+        .querySelectorAll(".correlation-toggle")
+        .forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      currentCorrelationMode = btn.dataset.mode || "daily";
+      loadOrderSummaryAndDemand();
+    });
+  });
+}
+
+let currentCorrelationMode = "daily";
+
+async function loadOrderSummaryAndDemand() {
+  const qs = buildFilterQuery(true);
+
+  // Load correlation chart
+  try {
+    const endpoint = currentCorrelationMode === "monthly"
+      ? "/orders/sales_correlation/monthly"
+      : "/orders/sales_correlation/daily";
+
+    const res = await fetch(API_BASE + endpoint + qs);
+    const corrData = await res.json();
+    renderSalesOrderCorrelation(corrData);
 
   } catch (err) {
-    console.error("Orders correlation failed:", err);
+    console.error("Correlation fetch failed:", err);
+  }
+
+  // Load product demand chart
+  try {
+    const res = await fetch(API_BASE + "/products/top" + qs);
+    const prodData = await res.json();
+    updateTopSellingProductsChart(prodData, "ordersDemandChart");
+
+  } catch (err) {
+    console.error("Top products fetch failed:", err);
   }
 }
 
-function renderSalesOrderCorrelation(data) {
-  const ctx = document.getElementById("salesOrderCorrelationChart");
-  if (!ctx) return;
+function linearRegression(xs, ys) {
+  const n = xs.length;
 
-  if (window.correlationChart) window.correlationChart.destroy();
+  const sumX = xs.reduce((a, b) => a + b, 0);
+  const sumY = ys.reduce((a, b) => a + b, 0);
+  const sumXY = xs.reduce((a, b, i) => a + b * ys[i], 0);
+  const sumX2 = xs.reduce((a, b) => a + b * b, 0);
 
-  const points = data.map(p => {
-    const avgSales = p.total_sales / p.total_quantity;
-    return {
-      x: p.total_quantity,
-      y: avgSales,
-      r: Math.sqrt(p.total_sales) / 6,
-      label: p.product_name
-    };
-  });
+  const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+  const intercept = (sumY - slope * sumX) / n;
 
-  window.correlationChart = new Chart(ctx, {
-    type: 'bubble',
-    data: { datasets: [{
-      label: "Products",
-      data: points,
-      backgroundColor: "rgba(34, 197, 94, 0.4)",
-      borderColor: "#22c55e",
-      borderWidth: 1
-    }]},
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) {
-              return [
-                ctx.raw.label,
-                `Orders: ${ctx.raw.x}`,
-                `Avg sales/order: ₱${ctx.raw.y.toFixed(2)}`,
-                `Total sales: ₱${(ctx.raw.y * ctx.raw.x).toLocaleString()}`
-              ];
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          title: { display: true, text: "Order Volume", color: "#fff" },
-          ticks: { color: "#fff" }
-        },
-        y: {
-          title: { display: true, text: "Avg Sales per Order", color: "#fff" },
-          ticks: { color: "#fff" }
-        }
-      }
+  return {
+    slope,
+    intercept,
+    predict(x) {
+      return slope * x + intercept;
     }
-  });
+  };
+}
+
+function bubbleScale(value) {
+  // Prevent zero error
+  if (!value) return 4;
+
+  // Scale radii consistent between daily & monthly
+  const minR = 4;
+  const maxR = 22;
+
+  const scaled = Math.log(value) / Math.log(2);    // compress huge numbers
+
+  return Math.min(maxR, Math.max(minR, scaled));
 }

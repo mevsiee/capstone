@@ -24,7 +24,7 @@ from endpoints.top_selling_products import get_top_selling_products
 from endpoints.orders_trend_hourly import get_orders_trend_hourly
 from endpoints.orders_trend_daily import get_orders_trend_daily
 from endpoints.orders_trend_monthly import get_orders_trend_monthly
-from endpoints.products_sales_orders_correlation import get_products_correlation
+from endpoints.sales_order_correlation_daily import get_sales_order_correlation_daily
 
 # Settings endpoint
 from endpoints.platform_integration import get_platform_integration
@@ -215,6 +215,16 @@ def route_orders_trend_monthly(request: Request):
     platform = request.query_params.get("platform", "all").lower()
     return get_orders_trend_monthly(engine, year, platform)
 
-@app.get("/products/correlation")
-def route_products_correlation(year: int, month: int, platform: str = "all"):
-    return get_products_correlation(engine, year, month, platform)
+@app.get("/orders/sales_correlation/daily")
+def route_sales_order_correlation_daily(request: Request):
+    year = int(request.query_params.get("year"))
+    month = int(request.query_params.get("month"))
+    platform = request.query_params.get("platform", "all").lower()
+
+    return get_sales_order_correlation_daily(engine, year, month, platform)
+
+@app.get("/orders/sales_correlation/monthly")
+def route_sales_order_correlation_monthly(request: Request):
+    year = int(request.query_params.get("year"))
+    platform = request.query_params.get("platform", "all").lower()
+
