@@ -25,6 +25,7 @@ from endpoints.orders_trend_hourly import get_orders_trend_hourly
 from endpoints.orders_trend_daily import get_orders_trend_daily
 from endpoints.orders_trend_monthly import get_orders_trend_monthly
 from endpoints.sales_order_correlation_daily import get_sales_order_correlation_daily
+from endpoints.sales_order_correlation_monthly import get_sales_order_correlation_monthly
 
 # Settings endpoint
 from endpoints.platform_integration import get_platform_integration
@@ -228,3 +229,4 @@ def route_sales_order_correlation_monthly(request: Request):
     year = int(request.query_params.get("year"))
     platform = request.query_params.get("platform", "all").lower()
 
+    return get_sales_order_correlation_monthly(engine, year, platform)
