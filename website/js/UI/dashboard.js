@@ -136,16 +136,24 @@ function formatPeso(value) {
 function setupPlatformTabs() {
   document.querySelectorAll(".platform-tab").forEach((btn) => {
     btn.addEventListener("click", () => {
+
+      // visually toggle UI buttons
       document
         .querySelectorAll(".platform-tab")
         .forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
 
       selectedPlatform = btn.dataset.platform || "all";
+
+      // IMMEDIATE KPI UI UPDATE
+      applyRetailKpiVisibility();
+
+      // then load data
       initDashboard();
     });
   });
 }
+
 
 function setupMetricTabs() {
   document.querySelectorAll(".metric-tab").forEach((btn) => {
@@ -602,35 +610,90 @@ function updateTopSellingProductsChart(data, canvasId) {
 }
 
 // ================================
-// ORDERS VIEW (UI + placeholders)
+// ORDERS VIEW
 // ================================
 let currentTrendModeOrders = "daily";
 
 // 1. Order KPIs – placeholder structure
 async function loadOrderKPIs() {
-  // TODO: wire to real endpoints when available
-  // For now this just leaves the zeros / placeholder text
+  const qs = buildFilterQuery(true);
+
+  const endpoints = {
+    "completed": "/kpi/completed_orders",
+    "completion-rate": "/kpi/completion_rate",
+    "avg-qty": "/kpi/avg_qty",
+    "cancelled": "/kpi/cancelled_orders",
+    "cancel-rate": "/kpi/cancellation_rate"
+  };
+
+  for (const [key, route] of Object.entries(endpoints)) {
+    try {
+      const res = await fetch(API_BASE + route + qs);
+      const data = await res.json();
+      updateOrdersKpiCard(key, data);
+    } catch (err) {
+      console.error(`Failed to load Orders KPI (${key}):`, err);
+    }
+  }
+
+  // NEW:
+  applyRetailKpiVisibility();
 }
 
-// 2. Order Volume Trend – placeholder line using same endpoints as sales
+function updateOrdersKpiCard(type, data) {
+  const card = document.querySelector(`#kpi-orders-${type}`);
+  if (!card) return;
+
+  const val = card.querySelector(".kpi-value");
+  const deltaEl = card.querySelector(".kpi-delta");
+
+  let curr = data.current ?? 0;
+  let prev = data.previous ?? 0;
+
+  if (type === "completion-rate" || type === "cancel-rate") {
+    val.textContent = `${curr.toFixed(2)}%`;
+  } else {
+    val.textContent = curr.toLocaleString();
+  }
+
+  let delta = 0;
+  if (prev !== 0) delta = ((curr - prev) / prev) * 100;
+
+  deltaEl.textContent = `${delta.toFixed(1)}% from last month`;
+}
+
+function applyRetailKpiVisibility() {
+  const isRetail = selectedPlatform === "retail";
+
+  const cancelled = document.querySelector("#kpi-orders-cancelled");
+  const cancelRate = document.querySelector("#kpi-orders-cancel-rate");
+
+  if (cancelled) cancelled.style.display = isRetail ? "none" : "block";
+  if (cancelRate) cancelRate.style.display = isRetail ? "none" : "block";
+
+  const section = document.querySelector("#orders-kpis");
+  if (section) section.style.justifyContent = isRetail ? "center" : "flex-start";
+}
+
+// 2. Order Volume Trend
 async function loadOrdersTrend() {
-  // If you later add dedicated order-volume endpoints, replace below.
+  const qs = buildFilterQuery(true);
+
+  let endpoint = "";
+  if (currentTrendModeOrders === "hourly") {
+    endpoint = "/orders/trend/hourly";
+  } else if (currentTrendModeOrders === "monthly") {
+    endpoint = "/orders/trend/monthly";
+  } else {
+    endpoint = "/orders/trend/daily"; // default
+  }
+
   try {
-    const qs = buildFilterQuery(true);
-    const res = await fetch(`${API_BASE}/orders/trend/daily` + qs);
+    const res = await fetch(API_BASE + endpoint + qs);
     const data = await res.json();
     renderOrdersTrendChartFromData(data);
   } catch (err) {
-    // Fallback: clear chart if endpoint not implemented
-    const ctx = document.getElementById("ordersTrendChart");
-    if (!ctx) return;
-    if (ordersTrendChart) ordersTrendChart.destroy();
-    ordersTrendChart = new Chart(ctx, {
-      type: "line",
-      data: { labels: [], datasets: [] },
-      options: { plugins: { legend: { display: false } } }
-    });
-    console.warn("Orders trend endpoint not implemented yet.");
+    console.error("Orders trend failed:", err);
   }
 }
 
@@ -641,8 +704,20 @@ function renderOrdersTrendChartFromData(data) {
   if (ordersTrendChart) ordersTrendChart.destroy();
 
   const labels = data.map((d) => d.label);
-  const valuesTikTok = data.map((d) => d.tiktok_orders || 0);
-  const valuesRetail = data.map((d) => d.retail_orders || 0);
+
+  let valuesTikTok = [];
+  let valuesRetail = [];
+
+  if (selectedPlatform === "tiktok") {
+    valuesTikTok = data.map((d) => d.tiktok_orders || 0);
+    valuesRetail = data.map(() => 0);
+  } else if (selectedPlatform === "retail") {
+    valuesTikTok = data.map(() => 0);
+    valuesRetail = data.map((d) => d.retail_orders || 0);
+  } else {
+    valuesTikTok = data.map((d) => d.tiktok_orders || 0);
+    valuesRetail = data.map((d) => d.retail_orders || 0);
+  }
 
   ordersTrendChart = new Chart(ctx, {
     type: "line",
@@ -656,7 +731,8 @@ function renderOrdersTrendChartFromData(data) {
           backgroundColor: "transparent",
           borderWidth: 2,
           tension: 0.3,
-          pointRadius: 0
+          pointRadius: 0,
+          hidden: selectedPlatform === "retail"
         },
         {
           label: "Retail",
@@ -665,14 +741,19 @@ function renderOrdersTrendChartFromData(data) {
           backgroundColor: "transparent",
           borderWidth: 2,
           tension: 0.3,
-          pointRadius: 0
+          pointRadius: 0,
+          hidden: selectedPlatform === "tiktok"
         }
       ]
     },
     options: {
       maintainAspectRatio: false,
       plugins: {
-        legend: { position: "bottom", labels: { color: "#fff" } }
+        legend: { 
+          position: "bottom", 
+          labels: { color: "#fff" },
+          display: selectedPlatform === "all"
+        }
       },
       scales: {
         x: {
@@ -691,28 +772,72 @@ function renderOrdersTrendChartFromData(data) {
 
 // 3. Orders summary + demand chart – placeholder
 async function loadOrderSummaryAndDemand() {
-  // You can wire these to real endpoints later.
-  // For now we'll reuse /products/top as the "high demand" list.
   try {
     const qs = buildFilterQuery(true);
     const res = await fetch(`${API_BASE}/products/top` + qs);
     const data = await res.json();
 
-    // Top and lowest products by quantity
-    if (data.length > 0) {
-      const sorted = [...data].sort((a, b) => b.total_quantity - a.total_quantity);
-      document.getElementById("orders-top-product-name").textContent =
-        sorted[0].product_name;
-      document.getElementById("orders-lowest-product-name").textContent =
-        sorted[sorted.length - 1].product_name;
-    }
-
-    // Demand chart
+    renderSalesOrderCorrelation(data);
     updateTopSellingProductsChart(data, "ordersDemandChart");
-  } catch (err) {
-    console.error("Orders demand load failed:", err);
-  }
 
-  // Completed orders numbers would come from dedicated order KPI endpoints later.
-  // You can fill ids: #orders-tiktok-completed, #orders-retail-completed
+  } catch (err) {
+    console.error("Orders correlation failed:", err);
+  }
+}
+
+function renderSalesOrderCorrelation(data) {
+  const ctx = document.getElementById("salesOrderCorrelationChart");
+  if (!ctx) return;
+
+  if (window.correlationChart) window.correlationChart.destroy();
+
+  const points = data.map(p => {
+    const avgSales = p.total_sales / p.total_quantity;
+    return {
+      x: p.total_quantity,
+      y: avgSales,
+      r: Math.sqrt(p.total_sales) / 6,
+      label: p.product_name
+    };
+  });
+
+  window.correlationChart = new Chart(ctx, {
+    type: 'bubble',
+    data: { datasets: [{
+      label: "Products",
+      data: points,
+      backgroundColor: "rgba(34, 197, 94, 0.4)",
+      borderColor: "#22c55e",
+      borderWidth: 1
+    }]},
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              return [
+                ctx.raw.label,
+                `Orders: ${ctx.raw.x}`,
+                `Avg sales/order: ₱${ctx.raw.y.toFixed(2)}`,
+                `Total sales: ₱${(ctx.raw.y * ctx.raw.x).toLocaleString()}`
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: "Order Volume", color: "#fff" },
+          ticks: { color: "#fff" }
+        },
+        y: {
+          title: { display: true, text: "Avg Sales per Order", color: "#fff" },
+          ticks: { color: "#fff" }
+        }
+      }
+    }
+  });
 }

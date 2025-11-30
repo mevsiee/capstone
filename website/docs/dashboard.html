@@ -9,10 +9,8 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -43,143 +41,138 @@
 
     <!-- MAIN CONTENT -->
     <main class="main-content">
-      <div class="main-inner">
+      <div class="main-inner">   <!-- OPEN ✔ -->
 
-        <!-- ⭐ 85% SCALE WRAPPER START -->
-        <div class="dashboard-scale">
-
-          <!-- Platform tabs -->
-          <div class="top-filters">
-            <div class="platform-tabs">
-              <button class="platform-tab active" data-platform="all">All Platforms</button>
-              <button class="platform-tab" data-platform="tiktok">TikTok</button>
-              <button class="platform-tab" data-platform="retail">Retail</button>
-            </div>
-
-            <div class="metric-row">
-              <div class="metric-tabs">
-                <button class="metric-tab active" data-metric="sales">Total Sales</button>
-                <button class="metric-tab" data-metric="orders">Total Orders</button>
-              </div>
-              <div class="month-picker">
-                <label><input type="month" id="monthPicker"></label>
-              </div>
-            </div>
+        <!-- PLATFORM FILTERS -->
+        <div class="top-filters">
+          <div class="platform-tabs">
+            <button class="platform-tab active" data-platform="all">All Platforms</button>
+            <button class="platform-tab" data-platform="tiktok">TikTok</button>
+            <button class="platform-tab" data-platform="retail">Retail</button>
           </div>
 
-          <!-- KPI CARDS -->
-          <section class="kpi-section metric-section metric-sales" id="sales-kpis">
-            <div class="kpi-card" id="kpi-gross">
-              <div class="kpi-title">Total Gross Sales</div>
-              <div class="kpi-value">₱0.00</div>
-              <div class="kpi-delta">0.0% from last month</div>
+          <div class="metric-row">
+            <div class="metric-tabs">
+              <button class="metric-tab active" data-metric="sales">Total Sales</button>
+              <button class="metric-tab" data-metric="orders">Total Orders</button>
             </div>
-
-            <div class="kpi-card" id="kpi-net">
-              <div class="kpi-title">Total Net Sales</div>
-              <div class="kpi-value">₱0.00</div>
-              <div class="kpi-delta">0.0% from last month</div>
+            <div class="month-picker">
+              <label><input type="month" id="monthPicker"></label>
             </div>
-
-            <div class="kpi-card" id="kpi-discounts">
-              <div class="kpi-title">Total Discounts</div>
-              <div class="kpi-value">₱0.00</div>
-              <div class="kpi-delta">0.0% from last month</div>
-            </div>
-
-            <div class="kpi-card" id="kpi-aov">
-              <div class="kpi-title">Average Order Value</div>
-              <div class="kpi-value">₱0.00</div>
-              <div class="kpi-delta">0.0% from last month</div>
-            </div>
-          </section>
-
-          <!-- SALES TREND -->
-          <section class="sales-trend-section metric-section metric-sales">
-            <div class="trend-header">
-              <div>
-                <h2>Sales Trend Over Time</h2>
-                <p class="section-subtitle">Sales performance for the selected period.</p>
-              </div>
-              <div class="sales-toggle-group">
-                <button class="sales-toggle" data-mode="hourly">Hourly</button>
-                <button class="sales-toggle active" data-mode="daily">Daily</button>
-                <button class="sales-toggle" data-mode="monthly">Monthly</button>
-              </div>
-            </div>
-
-            <div class="chart-wrapper">
-              <canvas id="salesTrendChart"></canvas>
-            </div>
-          </section>
-
-          <!-- CATEGORY + TOP PRODUCTS (2 columns) -->
-          <div class="bottom-row metric-section metric-sales">
-            <section class="category-wrapper">
-              <div class="section-header">
-                <div>
-                  <h2>Top Category Performance</h2>
-                  <p class="section-subtitle">Best-performing categories by total sales.</p>
-                </div>
-              </div>
-              <div class="category-container">
-                <canvas id="categoryPieChart"></canvas>
-              </div>
-            </section>
-
-            <section class="top-products-wrapper">
-              <div class="section-header">
-                <div>
-                  <h2>Top-Selling Products</h2>
-                  <p class="section-subtitle">Best-performing items by generated sales.</p>
-                </div>
-              </div>
-              <div class="top-products-container">
-                <canvas id="topProductsChart"></canvas>
-              </div>
-            </section>
           </div>
-
         </div>
-        <!-- ⭐ 85% SCALE WRAPPER END -->
 
-        <!-- ======================= -->
-        <!-- ORDERS VIEW             -->
-        <!-- ======================= -->
-        <!-- KPI CARDS (ORDERS) -->
-        <section class="kpi-section metric-section metric-orders hidden" id="orders-kpis">
-          <div class="kpi-card" id="kpi-orders-completed">
-            <div class="kpi-title">Total Completed Orders</div>
-            <div class="kpi-value">0</div>
+        <!-- KPI CARDS (SALES) -->
+        <section class="kpi-section metric-section metric-sales" id="sales-kpis">
+          <div class="kpi-card" id="kpi-gross">
+            <div class="kpi-title">Total Gross Sales</div>
+            <div class="kpi-value">—</div>
             <div class="kpi-delta">0.0% from last month</div>
           </div>
 
-          <div class="kpi-card" id="kpi-orders-completion-rate">
-            <div class="kpi-title">Order Completion Rate</div>
-            <div class="kpi-value">00.00%</div>
+          <div class="kpi-card" id="kpi-net">
+            <div class="kpi-title">Total Net Sales</div>
+            <div class="kpi-value">—</div>
             <div class="kpi-delta">0.0% from last month</div>
           </div>
 
-          <div class="kpi-card" id="kpi-orders-avg-qty">
-            <div class="kpi-title">Average Order Quantity</div>
-            <div class="kpi-value">0</div>
+          <div class="kpi-card" id="kpi-discounts">
+            <div class="kpi-title">Total Discounts</div>
+            <div class="kpi-value">—</div>
             <div class="kpi-delta">0.0% from last month</div>
           </div>
 
-          <div class="kpi-card" id="kpi-orders-cancelled">
-            <div class="kpi-title">Total Cancelled Orders</div>
-            <div class="kpi-value">0</div>
-            <div class="kpi-delta">0.0% from last month</div>
-          </div>
-
-          <div class="kpi-card" id="kpi-orders-cancel-rate">
-            <div class="kpi-title">Order Cancellation Rate</div>
-            <div class="kpi-value">00.00%</div>
+          <div class="kpi-card" id="kpi-aov">
+            <div class="kpi-title">Average Order Value</div>
+            <div class="kpi-value">—</div>
             <div class="kpi-delta">0.0% from last month</div>
           </div>
         </section>
 
-        <!-- Order Volume Trend -->
+        <!-- SALES CHART -->
+        <section class="sales-trend-section metric-section metric-sales">
+          <div class="trend-header">
+            <div>
+              <h2>Sales Trend Over Time</h2>
+              <p class="section-subtitle">Sales performance for the selected period.</p>
+            </div>
+            <div class="sales-toggle-group">
+              <button class="sales-toggle" data-mode="hourly">Hourly</button>
+              <button class="sales-toggle active" data-mode="daily">Daily</button>
+              <button class="sales-toggle" data-mode="monthly">Monthly</button>
+            </div>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="salesTrendChart"></canvas>
+          </div>
+        </section>
+
+        <!-- SALES — BOTTOM ROW -->
+        <div class="bottom-row metric-section metric-sales">
+          <section class="category-wrapper">
+            <div class="section-header">
+              <div>
+                <h2>Top Category Performance</h2>
+                <p class="section-subtitle">Best-performing categories by total sales.</p>
+              </div>
+            </div>
+            <div class="category-container">
+              <canvas id="categoryPieChart"></canvas>
+            </div>
+          </section>
+
+          <section class="top-products-wrapper">
+            <div class="section-header">
+              <div>
+                <h2>Top-Selling Products</h2>
+                <p class="section-subtitle">Best-performing items by generated sales.</p>
+              </div>
+            </div>
+            <div class="top-products-container">
+              <canvas id="topProductsChart"></canvas>
+            </div>
+          </section>
+        </div>
+
+
+        <!-- ======================= -->
+        <!-- ORDERS VIEW             -->
+        <!-- ======================= -->
+
+        <!-- KPI CARDS (ORDERS) -->
+        <section class="kpi-section metric-section metric-orders hidden" id="orders-kpis">
+          <div class="kpi-card" id="kpi-orders-completed">
+            <div class="kpi-title">Total Completed Orders</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-delta">0.00% from last month</div>
+          </div>
+
+          <div class="kpi-card" id="kpi-orders-completion-rate">
+            <div class="kpi-title">Order Completion Rate</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-delta">0.00% from last month</div>
+          </div>
+
+          <div class="kpi-card" id="kpi-orders-avg-qty">
+            <div class="kpi-title">Average Order Quantity</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-delta">0.00% from last month</div>
+          </div>
+
+          <div class="kpi-card" id="kpi-orders-cancelled">
+            <div class="kpi-title">Total Cancelled Orders</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-delta">0.00% from last month</div>
+          </div>
+
+          <div class="kpi-card" id="kpi-orders-cancel-rate">
+            <div class="kpi-title">Order Cancellation Rate</div>
+            <div class="kpi-value">— </div>
+            <div class="kpi-delta">0.00% from last month</div>
+          </div>
+        </section>
+
+        <!-- ORDERS CHART -->
         <section class="sales-trend-section metric-section metric-orders hidden">
           <div class="trend-header">
             <div>
@@ -188,12 +181,11 @@
             </div>
 
             <div class="sales-toggle-group">
-              <button class="sales-toggle active" data-mode="hourly">Hourly</button>
-              <button class="sales-toggle" data-mode="daily">Daily</button>
-              <button class="sales-toggle" data-mode="monthly">Weekly</button>
+              <button class="sales-toggle" data-mode="hourly">Hourly</button>
+              <button class="sales-toggle active" data-mode="daily">Daily</button>
+              <button class="sales-toggle" data-mode="monthly">Monthly</button>
             </div>
           </div>
-
           <div class="chart-wrapper">
             <div class="sales-trend-chart-container">
               <canvas id="ordersTrendChart"></canvas>
@@ -201,51 +193,43 @@
           </div>
         </section>
 
-        <!-- Bottom row (Orders): summary cards + demand products -->
+        <!-- ORDERS — BOTTOM ROW -->
         <div class="bottom-row metric-section metric-orders hidden">
-          <!-- Left: summary cards -->
-          <section class="orders-summary-wrapper">
-            <div class="orders-summary-card">
-              <div class="orders-summary-label">Top Product</div>
-              <div class="orders-summary-main" id="orders-top-product-name">—</div>
-            </div>
 
-            <div class="orders-summary-card">
-              <div class="orders-summary-label">Completed TikTok Orders</div>
-              <div class="orders-summary-main" id="orders-tiktok-completed">0</div>
+          <section class="orders-correlation-wrapper">
+            <div class="section-header correlation-header">
+              <div class="section-title-block">
+                <h2>Sales × Order Correlation</h2>
+                <p class="section-subtitle">Relationship between order volume and revenue quality.</p>
+              </div>
+              <div class="correlation-toggle-group">
+                <button class="correlation-toggle active" data-mode="daily">Daily</button>
+                <button class="correlation-toggle" data-mode="monthly">Monthly</button>
+              </div>
             </div>
-
-            <div class="orders-summary-card">
-              <div class="orders-summary-label">Completed Retail Orders</div>
-              <div class="orders-summary-main" id="orders-retail-completed">0</div>
-            </div>
-
-            <div class="orders-summary-card">
-              <div class="orders-summary-label">Lowest Product</div>
-              <div class="orders-summary-main" id="orders-lowest-product-name">—</div>
+            <div class="correlation-chart-container">
+              <canvas id="salesOrderCorrelationChart"></canvas>
             </div>
           </section>
 
-          <!-- Right: Products with High Customer Demand -->
           <section class="orders-demand-wrapper">
             <div class="section-header">
               <div>
                 <h2>Products with High Customer Demand</h2>
-                <p class="section-subtitle">
-                  Best-performing items by order volume.
-                </p>
+                <p class="section-subtitle">Best-selling items by order count.</p>
               </div>
             </div>
             <div class="top-products-container">
               <canvas id="ordersDemandChart"></canvas>
             </div>
           </section>
-        </div>
-      </div>
-    </main>
-  </div>
 
-  <!-- SCRIPTS -->
+        </div>
+
+      </div>  <!-- CLOSE main-inner ✔ -->
+    </main>   <!-- CLOSE main-content ✔ -->
+  </div> <!-- CLOSE dashboard-container ✔ -->
+
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <script src="../js/login-auth/firebase-auth.js"></script>
   <script src="../js/login-auth/dashboard-auth.js"></script>
@@ -255,14 +239,13 @@
     (function () {
       const input = document.getElementById("monthPicker");
       if (!input) return;
-
       const now = new Date();
       const ym = now.toISOString().slice(0, 7);
       input.value = ym;
-
       window.selectedYear = parseInt(ym.split("-")[0]);
       window.selectedMonth = parseInt(ym.split("-")[1]);
     })();
   </script>
+
 </body>
 </html>

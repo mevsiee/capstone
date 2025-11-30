@@ -210,7 +210,7 @@ body.dashboard-body {
 
 /* KPI SECTION */
 .kpi-section {
-  display: grid;
+  display: flex;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 16px;
@@ -222,6 +222,9 @@ body.dashboard-body {
   color: #ffffff;
   min-height: 80px;
   padding: 14px 16px;
+  flex: 1;
+  min-width: 180px;
+  transition: all 0.2s ease;
 }
 
 /* Gradients (Sales KPIs) */
@@ -372,7 +375,7 @@ body.dashboard-body {
 /* BOTTOM ROW */
 .bottom-row {
   display: grid;
-  grid-template-columns: 1.1fr 1.4fr;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-top: 12px;
 }
@@ -393,7 +396,7 @@ body.dashboard-body {
   border-radius: 14px;
   border: 1px solid #1c1c1c;
   padding: 18px;
-  height: 200px;
+  height: 250px;
 }
 
 .category-container canvas,
@@ -434,6 +437,87 @@ body.dashboard-body {
 
 .metric-section {
   transition: opacity 0.15s ease;
+}
+/* Container for correlation section */
+.orders-correlation-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Align header horizontally like other trend sections */
+.correlation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Toggle button container */
+.correlation-toggle-group {
+  display: flex;
+  gap: 8px;
+}
+
+/* Toggle buttons (default) */
+.correlation-toggle {
+  background: #111;
+  color: #ddd;
+  border: 1px solid #333;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* Hover style */
+.correlation-toggle:hover {
+  background: #333;
+  color: #fff;
+}
+
+/* Active state */
+.correlation-toggle.active {
+  background: #f0b810;
+  color: #000;
+  border-color: #f0b810;
+  font-weight: 700;
+}
+
+/* Chart container */
+.correlation-chart-container {
+  background: #101010;
+  border-radius: 14px;
+  border: 1px solid #1c1c1c;
+  padding: 18px;
+  height: 250px;
+}
+
+.section-title-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.orders-correlation-wrapper h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.orders-correlation-wrapper .section-subtitle {
+  font-size: 0.78rem;
+  color: #bdbdbd;
+  margin-left: 1px;
+  margin-top: 0;
+}
+
+.correlation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 8px;
 }
 
 /* RESPONSIVE */
