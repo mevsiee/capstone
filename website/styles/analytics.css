@@ -673,6 +673,56 @@ body {
     padding-bottom: 30px;   /* bottom breathing room */
 }
 
+/* ============================================
+   FINAL FIX — NO-SCROLL ANALYTICS LAYOUT FIT
+   ============================================ */
+
+/* Chart */
+.chart-wrapper {
+    min-height: 200px !important;
+}
+
+/* KPI */
+.kpi-card {
+    padding: 8px 12px !important;
+}
+
+/* Right-hand cards */
+.model-info-card,
+.top-items-card {
+    padding: 14px 16px !important;
+}
+
+/* Sales + Orders shared overrides */
+#sales-tab .breakdown-card,
+#orders-tab .breakdown-card {
+    min-height: 140px !important;
+}
+
+#sales-tab .platform-allocation-grid,
+#orders-tab .platform-allocation-grid {
+    min-height: 120px !important;
+}
+
+#sales-tab .channel-card,
+#orders-tab .channel-card {
+    min-height: 120px !important;
+}
+
+/* Projections row */
+.share-box {
+    padding: 10px 12px !important;
+}
+
+/* Reduce overall spacing */
+.analytics-main-grid > * {
+    margin-bottom: 8px !important;
+}
+.analytics-content {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
 /* ==== RESPONSIVE ==== */
 
 @media (max-width: 1100px) {
