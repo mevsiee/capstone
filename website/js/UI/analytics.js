@@ -383,6 +383,10 @@ function renderSalesChart(chartData) {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,          // <— let it fill the 240px height
+      layout: {
+        padding: { top: 10, right: 15, bottom: 10, left: 0 }  // tighter, less deadspace
+      },
       plugins: {
         legend: {
           labels: { color: "#fff" },
@@ -394,15 +398,15 @@ function renderSalesChart(chartData) {
           grid: { color: "#333" },
         },
         y: {
+          beginAtZero: true,
           ticks: { color: "#fff" },
           grid: { color: "#333" },
-          beginAtZero: true,
-
-          min: 0,
-          max: 2000000, 
+          // ❌ remove the fixed min/max you had here
+          // min: 0,
+          // max: 2000000,
         },
       },
-    },
+    }
   });
 }
 
@@ -463,13 +467,24 @@ function renderOrdersChart(chartData) {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: { top: 10, right: 15, bottom: 10, left: 0 }
+      },
       plugins: {
         legend: { labels: { color: "#fff" } }
       },
       scales: {
+        x: {
+          ticks: { color: "#fff" },
+          grid: { color: "#333" },
+        },
         y: {
           beginAtZero: true,
-          max: 7000
+          ticks: { color: "#fff" },
+          grid: { color: "#333" },
+          // you can keep a max if you want, or let it autoscale too
+          // max: 7000
         }
       }
     }

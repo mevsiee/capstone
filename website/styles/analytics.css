@@ -11,11 +11,11 @@ body {
 
 .analytics-content {
     width: 100%;
-    padding: 0;
     margin: 0;
+    padding: 4px 0 18px;   /* light spacing top/bottom */
 }
 
-/* Header wrapper */
+/* Optional header wrapper (not used right now, but kept) */
 .analytics-header-wrapper {
     width: 100%;
     margin-bottom: 25px;
@@ -62,20 +62,20 @@ body {
 }
 
 /* ============================================================
-   SIMPLE DASHBOARD-STYLE TABS (MATCHES MAIN DASHBOARD)
+   TABS
    ============================================================ */
 
 .tab-container {
     display: flex;
     width: 100%;
-    margin: 10px 0 20px;
+    margin: 10px 0 16px;
     background: #111;
     border: 1px solid #333;
 }
 
 .tab-button {
     flex: 1;
-    padding: 10px 0;
+    padding: 8px 0;
     background: #1a1a1a;
     color: #ddd;
     border: none;
@@ -90,7 +90,7 @@ body {
 }
 
 .tab-button.active {
-    background: #f0b810;      /* dashboard yellow */
+    background: #f0b810;  /* dashboard yellow */
     color: #000;
 }
 
@@ -107,20 +107,22 @@ body {
     display: block;
 }
 
-/* ==== CARDS GENERAL ==== */
+/* ============================================================
+   GENERIC CARD
+   ============================================================ */
 
 .card {
     background: #131313;
     border-radius: 14px;
-    padding: 18px 20px;
+    padding: 16px 18px;
     border: 1px solid #242424;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.35);
 }
 
 .card-header h3 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     font-weight: 600;
 }
 
@@ -129,22 +131,23 @@ body {
     opacity: 0.75;
 }
 
-/* ==== KPI ROW ==== */
+/* ============================================================
+   KPI ROW
+   ============================================================ */
 
 .kpi-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-    margin-bottom: 15px;
+    gap: 16px;
+    margin-bottom: 12px;
 }
 
 .kpi-card {
     border-radius: 14px;
-    padding: 14px 18px;
+    padding: 10px 14px;
     background: #111;
     border: 1px solid #1f1f1f;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
-
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -154,7 +157,7 @@ body {
     font-size: 0.9rem;
     font-weight: 500;
     opacity: 0.85;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .kpi-value {
@@ -181,26 +184,50 @@ body {
 }
 
 /* Growth value (positive/negative) */
-.kpi-value.positive { color: #3fd965 !important; }
-.kpi-value.negative { color: #ff4e4e !important; }
+.kpi-value.positive { color: #3fd965; }
+.kpi-value.negative { color: #ff4e4e; }
 
-/* ==== GRID ==== */
+/* ============================================================
+   MAIN GRID LAYOUT
+   ============================================================ */
 
 .analytics-main-grid {
     display: grid;
     grid-template-columns: 1.3fr 0.7fr;
-    gap: 18px;
+    gap: 16px;
+    align-items: stretch;
 }
+
+/* Left column wrapper: chart + share projections */
+.analytics-left {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Right column stack */
+.right-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+}
+
+/* ============================================================
+   CHART CARD
+   ============================================================ */
 
 .chart-card {
     display: flex;
     flex-direction: column;
 }
 
+/* fixed, comfortable chart height */
 .chart-wrapper {
-    flex: 1;
+    flex: 0 0 auto;
     width: 100%;
-    min-height: 300px !important;
+    height: 650px;    /* tweak 220–260 if you want */
+    min-height: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -213,315 +240,33 @@ body {
 
 .chart-card h3,
 .chart-card .card-subtitle {
-    text-align: left !important;
-}
-
-/* ==== SIDE STACK ==== */
-
-.right-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;    
-}
-
-/* ==== PRODUCT STOCK ALLOCATION ==== */
-
-/* ================================================
-   IMPROVED PRODUCT ALLOCATION CARD (Premium UI)
-   ================================================ */
-
-.allocation-card {
-    background: linear-gradient(145deg, #1b1b1b, #111);
-    border: 1px solid rgba(255, 200, 60, 0.35);
-    padding: 28px 26px;
-    border-radius: 16px;
-    min-height: 420px;
-
-    box-shadow:
-        0 0 25px rgba(255, 200, 60, 0.08),
-        inset 0 0 12px rgba(255, 200, 60, 0.05);
-
-    position: relative;
-    overflow: hidden;
-}
-
-/* Subtle neon border glow */
-.allocation-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    pointer-events: none;
-    box-shadow:
-        0 0 25px rgba(255, 200, 60, 0.15),
-        inset 0 0 15px rgba(255, 200, 60, 0.1);
-}
-
-/* Title inside allocation card */
-.allocation-card .side-title {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 6px;
-    color: #ffdd66;
-    text-shadow: 0 0 8px rgba(255, 220, 100, 0.5);
-}
-
-.allocation-card .side-description {
-    color: #cfcfcf;
-    opacity: 0.85;
-    font-size: 0.95rem;
-    margin-bottom: 18px;
-}
-
-/* Labels */
-.allocation-label {
-    font-size: 1rem;
-    color: #e6e6e6;
-    font-weight: 600;
-    margin-bottom: 6px;
-}
-
-/* Inputs & dropdown */
-.allocation-card select,
-.allocation-card input {
-    background: #1f1f1f;
-    border: 1px solid #333;
-    padding: 10px 12px;
-    color: #fff;
-    font-size: 1.05rem;
-    border-radius: 8px;
-    transition: border 0.2s, box-shadow 0.2s;
-}
-
-.allocation-card select:focus,
-.allocation-card input:focus {
-    border-color: #ffcc44;
-    box-shadow: 0 0 10px rgba(255, 200, 50, 0.4);
-    outline: none;
-}
-
-/* Calculation Button */
-.allocation-recalc {
-    margin-top: 12px;
-    width: 100%;
-    background: linear-gradient(135deg, #ffcc00, #ffb700);
-    color: #000 !important;
-    font-weight: 700;
-    padding: 12px 14px;
-    border-radius: 10px;
-    text-align: center;
-    border: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.allocation-recalc:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 18px rgba(255, 200, 50, 0.5);
-}
-
-/* Results box */
-.allocation-result {
-    margin-top: 22px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(255, 200, 60, 0.4);
-}
-
-.allocation-result-title {
-    font-size: 1.15rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-    color: #ffe28d;
-}
-
-.allocation-result div {
-    font-size: 1rem;
-    margin-bottom: 6px;
-    color: #eaeaea;
-}
-
-/* Bigger text for allocation summaries */
-#productSummary p,
-#productSummaryOrders p {
-    font-size: 1.15rem;
-    font-weight: 500;
-    color: #e6e6e6;
-    margin: 6px 0;
-}
-
-/* Bigger values */
-#productSummary span,
-#productSummaryOrders span {
-    font-weight: 700;
-    color: #fff;
-}
-
-
-/* ==== BREAKDOWN CARDS (now inside right column) ==== */
-
-.breakdown-card {
-    margin-top: 5px !important;
-    padding-bottom: 25px;   
-}
-
-.platform-allocation-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-}
-
-.platform-card {
-    background: #1a1a1a;
-    border: 1px solid #222;
-    border-radius: 10px;
-    padding: 14px;
-    min-height: 200px;
-}
-
-/* SALES TAB — increase height of projection cards */
-#sales-tab .platform-card {
-    min-height: 260px !important;
-}
-
-
-.breakdown-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-}
-
-.breakdown-item {
-    text-align: center;
-    padding: 12px 0;
-    background: #1a1a1a;
-    border-radius: 10px;
-    border: 1px solid #222;
-}
-
-.breakdown-label { color: #bbb; }
-.breakdown-value {
-    margin-top: 8px;
-    font-size: 1.4rem;
-    font-weight: 700;
-}
-
-.channel-card {
-    background: #1a1a1a;
-    padding: 18px 20px;
-    border-radius: 12px;
-    border: 1px solid #2a2a2a;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-/* Title */
-.channel-card-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #fff;
-}
-
-/* Label text */
-.channel-label {
-    font-size: 0.85rem;
-    color: #bbbbbb;
-    margin-bottom: -4px;
-}
-
-/* Base Forecast Value */
-.channel-value {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #e0e0e0;
-}
-
-/* After Allocation (highlighted) */
-.channel-after {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #3fd965;   /* green positive default */
-}
-
-/* If 0 or negative, tone it down */
-.channel-after.negative {
-    color: #ff4e4e;
-}
-
-/* Add spacing between sections */
-.channel-section {
-    margin-top: 6px;
-}
-
-#sales-tab .breakdown-card {
-    min-height: 320px !important;
-}
-
-#sales-tab .platform-allocation-grid {
-    min-height: 250px !important;
-}
-
-#sales-tab .channel-card {
-    min-height: 200px !important;
-}
-
-.contrib-list {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin-top: 12px;
-}
-
-.contrib-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 18px 20px;
-    min-height: 60px;
-    border-radius: 12px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #fff;
-}
-
-/* Retail = red */
-.contrib-retail {
-    background: rgba(200, 40, 40, 0.25);
-    border: 1px solid rgba(255, 70, 70, 0.5);
-}
-
-/* TikTok = lively gray (with neon accents hint) */
-.contrib-tiktok {
-    background: #1f1f1f;
-    border: 1px solid #333;
-    box-shadow: inset 0 0 0 1px rgba(0,255,255,0.1), 
-                inset 0 0 12px rgba(255,0,255,0.05);
-}
-
-/* Text adjustments */
-.contrib-label {
-    font-size: 1rem;
-    opacity: 0.9;
-}
-
-.contrib-value {
-    font-size: 1.3rem;
+    text-align: left;
 }
 
 /* ============================================================
-   MODEL INFORMATION & VALIDATION
+   MODEL INFORMATION & TOP ITEMS
    ============================================================ */
 
 .model-info-card {
     background: #161616;
     border-radius: 14px;
-    padding: 20px 24px;
+    padding: 20px 22px;           /* was 16px 18px */
     border: 1px solid #2a2a2a;
+    min-height: 350px;
 }
 
+/* Title inside model info */
+.model-info-card h3 {
+    font-size: 1.6rem;           /* bigger title */
+    font-weight: 700;
+}
+
+/* Grid of metrics */
 .model-info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px 14px;
-    margin-top: 14px;
+    gap: 10px 18px;               /* a bit more gap */
+    margin-top: 12px;
 }
 
 .model-info-item {
@@ -530,72 +275,90 @@ body {
 }
 
 .model-info-label {
-    font-size: 0.78rem;
-    opacity: 0.75;
+    font-size: 1.3rem;            /* was 0.78rem */
+    opacity: 0.8;
 }
 
 .model-info-value {
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 1.3rem;            /* was 0.95rem */
+    line-height: 1.4;
 }
+
+/* ---------- TOP FORECASTED ITEMS PANEL ---------- */
 
 .top-items-card {
     background: #161616;
     border-radius: 14px;
-    padding: 20px 24px;
+    padding: 20px 20px;           /* was 16px 18px */
     border: 1px solid #2a2a2a;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Title "Top Forecasted Selling Items (Ranked)" */
+.top-items-card h3 {
+    font-size: 1.6rem;           /* bigger title */
+    font-weight: 700;
+}
+
+/* Optional subtitle text under the title */
+.top-items-card .card-subtitle {
+    font-size: 0.95rem;
 }
 
 .top-items-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-top: 16px;
+    gap: 19px;                    /* was 10px */
+    margin-top: 16px;             /* was 12px */
+    flex: 1;
+    overflow-y: auto;
 }
 
 .top-item {
     display: grid;
-    grid-template-columns: 40px 1fr auto;
-    gap: 12px;
-    padding: 10px 14px;
+    grid-template-columns: 44px 1fr auto;  /* a bit wider rank col */
+    gap: 14px;                             /* more breathing room */
+    padding: 15px 16px;                    /* bigger row padding */
     border-radius: 12px;
     background: #1d1d1d;
     border: 1px solid #2d2d2d;
 }
 
 .top-item-rank {
-    font-size: 1rem;
+    font-size: 1.1rem;           /* was 1rem */
     font-weight: 700;
     color: #ffdd66;
 }
 
 .top-item-name {
-    font-size: 1rem;
+    font-size: 1.24rem;           /* was 1rem */
     color: #eaeaea;
     font-weight: 500;
 }
 
 .top-item-value {
-    font-size: 1rem;
+    font-size: 1.20rem;           /* was 1rem */
     font-weight: 700;
-    color: #3fd965; /* green, consistent with positive forecast coloring */
+    color: #3fd965;
 }
 
 /* ============================================================
    SHARE PROJECTION BOXES (SALES + ORDERS)
-   Cleaner, consolidated, no duplicates
    ============================================================ */
 
 .share-container-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    margin-top: 15px;
+    gap: 16px;
+    margin-top: 6px;
 }
 
 .share-box {
     background: #161616;
-    padding: 18px 20px;
+    padding: 12px 14px;
     border: 1px solid #2a2a2a;
     border-radius: 14px;
     position: relative;
@@ -631,7 +394,7 @@ body {
 
 .share-main-value {
     font-size: 1.6rem;
-    margin: 6px 0;
+    margin: 4px 0 6px;
     font-weight: 700;
 }
 
@@ -639,14 +402,13 @@ body {
 .share-scenarios {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
 }
 
 .scenario-row {
     display: flex;
     justify-content: space-between;
     font-size: 0.85rem;
-    padding-top: 2px;
 }
 
 .scenario-row span:last-child {
@@ -659,71 +421,252 @@ body {
 }
 
 /* ============================================================
-   MATCH DASHBOARD PADDING + LAYOUT FOR ANALYTICS PAGE
+   PRODUCT STOCK ALLOCATION / BREAKDOWN (kept for future use)
    ============================================================ */
 
-.content-area {
-    max-width: 95%;
-    margin: 8px auto;
-    padding: 0 8px 20px;   /* same as dashboard main-inner */
+.allocation-card {
+    background: linear-gradient(145deg, #1b1b1b, #111);
+    border: 1px solid rgba(255, 200, 60, 0.35);
+    padding: 24px 22px;
+    border-radius: 16px;
+    min-height: 420px;
+    box-shadow:
+        0 0 25px rgba(255, 200, 60, 0.08),
+        inset 0 0 12px rgba(255, 200, 60, 0.05);
+    position: relative;
+    overflow: hidden;
 }
 
-.analytics-content {
-    padding-top: 10px;      /* spacing under tabs/header */
-    padding-bottom: 30px;   /* bottom breathing room */
+.allocation-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    pointer-events: none;
+    box-shadow:
+        0 0 25px rgba(255, 200, 60, 0.15),
+        inset 0 0 15px rgba(255, 200, 60, 0.1);
 }
 
-/* ============================================
-   FINAL FIX — NO-SCROLL ANALYTICS LAYOUT FIT
-   ============================================ */
-
-/* Chart */
-.chart-wrapper {
-    min-height: 200px !important;
+.allocation-card .side-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #ffdd66;
+    text-shadow: 0 0 8px rgba(255, 220, 100, 0.5);
 }
 
-/* KPI */
-.kpi-card {
-    padding: 8px 12px !important;
+.allocation-card .side-description {
+    color: #cfcfcf;
+    opacity: 0.85;
+    font-size: 0.95rem;
+    margin-bottom: 18px;
 }
 
-/* Right-hand cards */
-.model-info-card,
-.top-items-card {
-    padding: 14px 16px !important;
+.allocation-label {
+    font-size: 1rem;
+    color: #e6e6e6;
+    font-weight: 600;
+    margin-bottom: 6px;
 }
 
-/* Sales + Orders shared overrides */
-#sales-tab .breakdown-card,
-#orders-tab .breakdown-card {
-    min-height: 140px !important;
+.allocation-card select,
+.allocation-card input {
+    background: #1f1f1f;
+    border: 1px solid #333;
+    padding: 10px 12px;
+    color: #fff;
+    font-size: 1.05rem;
+    border-radius: 8px;
+    transition: border 0.2s, box-shadow 0.2s;
 }
 
-#sales-tab .platform-allocation-grid,
-#orders-tab .platform-allocation-grid {
-    min-height: 120px !important;
+.allocation-card select:focus,
+.allocation-card input:focus {
+    border-color: #ffcc44;
+    box-shadow: 0 0 10px rgba(255, 200, 50, 0.4);
+    outline: none;
 }
 
-#sales-tab .channel-card,
-#orders-tab .channel-card {
-    min-height: 120px !important;
+.allocation-recalc {
+    margin-top: 12px;
+    width: 100%;
+    background: linear-gradient(135deg, #ffcc00, #ffb700);
+    color: #000;
+    font-weight: 700;
+    padding: 12px 14px;
+    border-radius: 10px;
+    text-align: center;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Projections row */
-.share-box {
-    padding: 10px 12px !important;
+.allocation-recalc:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 18px rgba(255, 200, 50, 0.5);
 }
 
-/* Reduce overall spacing */
-.analytics-main-grid > * {
-    margin-bottom: 8px !important;
-}
-.analytics-content {
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+.allocation-result {
+    margin-top: 22px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 200, 60, 0.4);
 }
 
-/* ==== RESPONSIVE ==== */
+.allocation-result-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #ffe28d;
+}
+
+.allocation-result div {
+    font-size: 1rem;
+    margin-bottom: 6px;
+    color: #eaeaea;
+}
+
+#productSummary p,
+#productSummaryOrders p {
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: #e6e6e6;
+    margin: 6px 0;
+}
+
+#productSummary span,
+#productSummaryOrders span {
+    font-weight: 700;
+    color: #fff;
+}
+
+/* Breakdown / channel cards (kept) */
+
+.breakdown-card {
+    margin-top: 5px;
+    padding-bottom: 25px;
+}
+
+.platform-allocation-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.platform-card {
+    background: #1a1a1a;
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 14px;
+    min-height: 200px;
+}
+
+.breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.breakdown-item {
+    text-align: center;
+    padding: 12px 0;
+    background: #1a1a1a;
+    border-radius: 10px;
+    border: 1px solid #222;
+}
+
+.breakdown-label { color: #bbb; }
+
+.breakdown-value {
+    margin-top: 8px;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.channel-card {
+    background: #1a1a1a;
+    padding: 18px 20px;
+    border-radius: 12px;
+    border: 1px solid #2a2a2a;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.channel-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.channel-label {
+    font-size: 0.85rem;
+    color: #bbbbbb;
+    margin-bottom: -4px;
+}
+
+.channel-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #e0e0e0;
+}
+
+.channel-after {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #3fd965;
+}
+
+.channel-after.negative {
+    color: #ff4e4e;
+}
+
+.channel-section {
+    margin-top: 6px;
+}
+
+.contrib-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.contrib-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 18px 20px;
+    min-height: 60px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.contrib-retail {
+    background: rgba(200, 40, 40, 0.25);
+    border: 1px solid rgba(255, 70, 70, 0.5);
+}
+
+.contrib-tiktok {
+    background: #1f1f1f;
+    border: 1px solid #333;
+    box-shadow:
+        inset 0 0 0 1px rgba(0,255,255,0.1),
+        inset 0 0 12px rgba(255,0,255,0.05);
+}
+
+.contrib-label {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.contrib-value {
+    font-size: 1.3rem;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 
 @media (max-width: 1100px) {
     .analytics-main-grid {
