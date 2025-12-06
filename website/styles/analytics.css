@@ -290,7 +290,7 @@ body {
 .top-items-card {
     background: #161616;
     border-radius: 14px;
-    padding: 20px 20px;           /* was 16px 18px */
+    padding: 20px 20px;           
     border: 1px solid #2a2a2a;
     flex: 1;
     display: flex;
@@ -299,11 +299,10 @@ body {
 
 /* Title "Top Forecasted Selling Items (Ranked)" */
 .top-items-card h3 {
-    font-size: 1.6rem;           /* bigger title */
+    font-size: 1.6rem;           
     font-weight: 700;
 }
 
-/* Optional subtitle text under the title */
 .top-items-card .card-subtitle {
     font-size: 0.95rem;
 }
@@ -311,36 +310,36 @@ body {
 .top-items-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;                    /* was 10px */
-    margin-top: 16px;             /* was 12px */
+    gap: 16px;                    
+    margin-top: 16px;             
     flex: 1;
     overflow-y: auto;
 }
 
 .top-item {
     display: grid;
-    grid-template-columns: 44px 1fr auto;  /* a bit wider rank col */
-    gap: 14px;                             /* more breathing room */
-    padding: 15px 16px;                    /* bigger row padding */
+    grid-template-columns: 44px 1fr auto;  
+    gap: 14px;                             
+    padding: 15px 16px;                    
     border-radius: 12px;
     background: #1d1d1d;
     border: 1px solid #2d2d2d;
 }
 
 .top-item-rank {
-    font-size: 1.1rem;           /* was 1rem */
+    font-size: 1.1rem;           
     font-weight: 700;
     color: #ffdd66;
 }
 
 .top-item-name {
-    font-size: 1.24rem;           /* was 1rem */
+    font-size: 1.24rem;           
     color: #eaeaea;
     font-weight: 500;
 }
 
 .top-item-value {
-    font-size: 1.20rem;           /* was 1rem */
+    font-size: 1.20rem;          
     font-weight: 700;
     color: #3fd965;
 }
