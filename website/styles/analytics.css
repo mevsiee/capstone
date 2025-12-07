@@ -12,7 +12,7 @@ body {
 .analytics-content {
     width: 100%;
     margin: 0;
-    padding: 4px 0 18px;   /* light spacing top/bottom */
+    padding: 3px 0 14px;
 }
 
 /* Optional header wrapper (not used right now, but kept) */
@@ -68,21 +68,22 @@ body {
 .tab-container {
     display: flex;
     width: 100%;
-    margin: 10px 0 16px;
+    margin: 8px 0 13px;
     background: #111;
     border: 1px solid #333;
 }
 
 .tab-button {
     flex: 1;
-    padding: 8px 0;
-    background: #1a1a1a;
-    color: #ddd;
-    border: none;
-    font-size: 0.9rem;
+    padding: 7px 0;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s ease, color 0.2s ease;
+    background: #1a1a1a;
+    color: #999;
+    border: none;
+    font-family: 'Poppins', sans-serif;
 }
 
 .tab-button + .tab-button {
@@ -90,13 +91,13 @@ body {
 }
 
 .tab-button.active {
-    background: #f0b810;  /* dashboard yellow */
+    background: #f0b810;
     color: #000;
 }
 
 .tab-button:not(.active):hover {
     background: #222;
-    color: #fff;
+    color: #ccc;
 }
 
 .tab-content {
@@ -138,33 +139,32 @@ body {
 .kpi-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 12px;
+    gap: 13px;
+    margin-bottom: 10px;
 }
 
 .kpi-card {
-    border-radius: 14px;
-    padding: 10px 14px;
+    border-radius: 12px;
+    padding: 12px 14px;
     background: #111;
     border: 1px solid #1f1f1f;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+    min-height: auto;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 .kpi-label {
-    font-size: 0.9rem;
+    font-size: 0.75rem;
+    margin-bottom: 8px;
     font-weight: 500;
-    opacity: 0.85;
-    margin-bottom: 6px;
+    color: #aaa;
 }
 
 .kpi-value {
-    font-size: 1.6rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: #fff;
-    letter-spacing: 0.5px;
 }
 
 /* Color Themes */
@@ -194,8 +194,8 @@ body {
 .analytics-main-grid {
     display: grid;
     grid-template-columns: 1.3fr 0.7fr;
-    gap: 16px;
-    align-items: stretch;
+    gap: 13px;
+    margin-bottom: 10px;
 }
 
 /* Left column wrapper: chart + share projections */
@@ -226,7 +226,7 @@ body {
 .chart-wrapper {
     flex: 0 0 auto;
     width: 100%;
-    height: 650px;    /* tweak 220–260 if you want */
+    height: 380px;
     min-height: 0;
     display: flex;
     justify-content: center;
@@ -250,39 +250,45 @@ body {
 .model-info-card {
     background: #161616;
     border-radius: 14px;
-    padding: 20px 22px;           /* was 16px 18px */
+    padding: 14px 16px;
     border: 1px solid #2a2a2a;
-    min-height: 350px;
+    min-height: auto;
 }
 
 /* Title inside model info */
 .model-info-card h3 {
-    font-size: 1.6rem;           /* bigger title */
+    font-size: 1.05rem;
     font-weight: 700;
+    margin-bottom: 10px;
 }
 
 /* Grid of metrics */
 .model-info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px 18px;               /* a bit more gap */
-    margin-top: 12px;
+    gap: 10px 12px;
 }
 
 .model-info-item {
     display: flex;
     flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #222;
 }
 
 .model-info-label {
-    font-size: 1.3rem;            /* was 0.78rem */
-    opacity: 0.8;
+    font-size: 0.75rem;
+    color: #888;
+    font-weight: 500;
 }
 
 .model-info-value {
+    font-size: 0.95rem;
     font-weight: 700;
-    font-size: 1.3rem;            /* was 0.95rem */
-    line-height: 1.4;
+    color: #fff;
 }
 
 /* ---------- TOP FORECASTED ITEMS PANEL ---------- */
@@ -290,58 +296,65 @@ body {
 .top-items-card {
     background: #161616;
     border-radius: 14px;
-    padding: 20px 20px;           
+    padding: 16px 16px;
     border: 1px solid #2a2a2a;
     flex: 1;
     display: flex;
     flex-direction: column;
+    font-family: 'Poppins', sans-serif;
 }
 
 /* Title "Top Forecasted Selling Items (Ranked)" */
 .top-items-card h3 {
-    font-size: 1.6rem;           
+    font-size: 0.975rem;
     font-weight: 700;
+    font-family: 'Poppins', sans-serif;
 }
 
 .top-items-card .card-subtitle {
-    font-size: 0.95rem;
+    font-size: 0.68rem;
+    font-family: 'Poppins', sans-serif;
 }
 
 .top-items-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;                    
-    margin-top: 16px;             
+    gap: 12px;
+    margin-top: 12px;
     flex: 1;
     overflow-y: auto;
 }
 
 .top-item {
     display: grid;
-    grid-template-columns: 44px 1fr auto;  
-    gap: 14px;                             
-    padding: 15px 16px;                    
-    border-radius: 12px;
+    grid-template-columns: 36px 1fr auto;
+    gap: 10px;
+    padding: 10px 11px;
+    border-radius: 10px;
     background: #1d1d1d;
     border: 1px solid #2d2d2d;
+    font-family: 'Poppins', sans-serif;
 }
 
 .top-item-rank {
-    font-size: 1.1rem;           
+    font-size: 0.765rem;
     font-weight: 700;
     color: #ffdd66;
+    font-family: 'Poppins', sans-serif;
 }
 
 .top-item-name {
-    font-size: 1.24rem;           
+    font-size: 0.765rem;
     color: #eaeaea;
     font-weight: 500;
+    font-family: 'Poppins', sans-serif;
 }
 
 .top-item-value {
-    font-size: 1.20rem;          
+    font-size: 0.765rem;
     font-weight: 700;
     color: #3fd965;
+    font-family: 'Poppins', sans-serif;
 }
 
 /* ============================================================
@@ -351,17 +364,21 @@ body {
 .share-container-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 6px;
+    gap: 13px;
+    margin-top: 5px;
 }
 
 .share-box {
+    padding: 11px 12px;
     background: #161616;
-    padding: 12px 14px;
     border: 1px solid #2a2a2a;
     border-radius: 14px;
     position: relative;
     overflow: hidden;
+    min-height: 155px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 /* Bottom accent strip (dynamic per platform) */
@@ -387,13 +404,13 @@ body {
 
 /* Title */
 .share-title {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     opacity: 0.85;
 }
 
 .share-main-value {
-    font-size: 1.6rem;
-    margin: 4px 0 6px;
+    font-size: 1.4rem;
+    margin: 3px 0 4px;
     font-weight: 700;
 }
 
@@ -407,7 +424,7 @@ body {
 .scenario-row {
     display: flex;
     justify-content: space-between;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 
 .scenario-row span:last-child {
@@ -567,7 +584,7 @@ body {
 
 .breakdown-item {
     text-align: center;
-    padding: 12px 0;
+    padding: 10px 0;
     background: #1a1a1a;
     border-radius: 10px;
     border: 1px solid #222;
@@ -576,8 +593,8 @@ body {
 .breakdown-label { color: #bbb; }
 
 .breakdown-value {
-    margin-top: 8px;
-    font-size: 1.4rem;
+    margin-top: 6px;
+    font-size: 1.2rem;
     font-weight: 700;
 }
 

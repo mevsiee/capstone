@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from db import engine
 from sqlalchemy import text
+import asyncio
 
 # KPI endpoints
 from endpoints.kpi_net import get_net_sales
@@ -230,3 +231,70 @@ def route_sales_order_correlation_monthly(request: Request):
     platform = request.query_params.get("platform", "all").lower()
 
     return get_sales_order_correlation_monthly(engine, year, platform)
+
+@app.get("/dashboard/batch")
+def route_dashboard_batch(request: Request):
+    """
+    Batch endpoint to fetch all dashboard data in a single request.
+    """
+    year = int(request.query_params.get("year"))
+    month = int(request.query_params.get("month"))
+    platform = request.query_params.get("platform", "all").lower()
+    trend_mode = request.query_params.get("trendMode", "daily").lower()
+    corr_mode = request.query_params.get("corrMode", "daily").lower()
+
+    # Fetch all data in parallel
+    kpis = {
+        "gross": get_gross_sales(engine, year, month, platform),
+        "net": get_net_sales(engine, year, month, platform),
+        "discounts": get_discounts(engine, year, month, platform),
+        "aov": get_aov_kpi(engine, year, month, platform),
+    }
+
+    order_kpis = {
+        "completed": get_completed_orders(engine, year, month, platform),
+        "completion-rate": get_completion_rate(engine, year, month, platform),
+        "avg-qty": get_avg_qty(engine, year, month, platform),
+        "cancelled": get_cancelled_orders(engine, year, month, platform),
+        "cancel-rate": get_cancellation_rate(engine, year, month, platform),
+    }
+
+    # Fetch sales trend based on the selected mode
+    if trend_mode == "hourly":
+        sales_trend = get_sales_trend_hourly(engine, year, month)
+    elif trend_mode == "monthly":
+        sales_trend = get_sales_trend_monthly(engine, year)
+    else:  # daily
+        sales_trend = get_sales_trend_daily(engine, year, month)
+
+    # Fetch orders trend based on the selected mode
+    if trend_mode == "hourly":
+        orders_trend = get_orders_trend_hourly(engine, year, month, platform)
+    elif trend_mode == "monthly":
+        orders_trend = get_orders_trend_monthly(engine, year, platform)
+    else:  # daily
+        orders_trend = get_orders_trend_daily(engine, year, month, platform)
+
+    # Fetch correlation data based on the selected mode
+    if corr_mode == "monthly":
+        correlation = get_sales_order_correlation_monthly(engine, year, platform)
+    else:  # daily
+        correlation = get_sales_order_correlation_daily(engine, year, month, platform)
+
+    # Fetch other data
+    categories = get_top_categories(engine, year, month, platform)
+    top_products = get_top_selling_products(engine, year, month, platform)
+
+    # Return all data in a single response
+    return {
+        "kpis": kpis,
+        "orderKpis": order_kpis,
+        "salesTrend": {
+            "data": sales_trend,
+            "mode": trend_mode,
+        },
+        "ordersTrend": orders_trend,
+        "categories": categories,
+        "topProducts": top_products,
+        "correlation": correlation,
+    }

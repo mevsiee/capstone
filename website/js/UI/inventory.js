@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let inventoryData = [];
   let filteredData = [];
   let currentPage = 1;
-  const itemsPerPage = 15;
+  const itemsPerPage = 10;
 
   // ------------------------------
   // Load Thresholds (localStorage)

@@ -104,20 +104,13 @@ body.dashboard-body {
 
 .main-inner {
   max-width: 95%;
-  margin: 8px auto;
-  padding: 0 8px 12px;
+  margin: 6px auto;
+  padding: 0 6px 10px;
 }
 
 /* PAGE TITLE */
-.dashboard-top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-}
-
 .page-title {
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: #f0b810;
@@ -127,8 +120,8 @@ body.dashboard-body {
 .top-filters {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 22px;
+  gap: 8px;
+  margin-bottom: 18px;
 }
 
 .platform-tabs {
@@ -142,9 +135,9 @@ body.dashboard-body {
 .platform-tab {
   background: #151515;
   color: #fff;
-  padding: 10px 0;
+  padding: 8px 0;
   border: none;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: 0.15s ease;
 }
@@ -167,16 +160,16 @@ body.dashboard-body {
 
 .metric-tabs {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .metric-tab {
-  padding: 7px 22px;
+  padding: 6px 18px;
   background: #111;
   border-radius: 3px;
   border: 1px solid #444;
   color: #fff;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: 0.15s ease;
 }
@@ -211,19 +204,18 @@ body.dashboard-body {
 /* KPI SECTION */
 .kpi-section {
   display: flex;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .kpi-card {
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.55);
   color: #ffffff;
-  min-height: 80px;
-  padding: 14px 16px;
+  min-height: 70px;
+  padding: 11px 13px;
   flex: 1;
-  min-width: 180px;
+  min-width: 160px;
   transition: all 0.2s ease;
 }
 
@@ -266,76 +258,76 @@ body.dashboard-body {
 }
 
 .kpi-title {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .kpi-value {
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   font-weight: 700;
 }
 
 .kpi-delta {
-  margin-top: 8px;
-  font-size: 0.75rem;
+  margin-top: 6px;
+  font-size: 0.7rem;
   opacity: 0.9;
 }
 
-/* SHARED SECTION STYLES */
+/* SECTION STYLES */
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .section-header h2 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 
 .section-subtitle {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: #bdbdbd;
 }
 
 /* SALES TREND */
 .sales-trend-section {
-  margin-top: 4px;
-  padding-bottom: 12px;
+  margin-top: 3px;
+  padding-bottom: 10px;
 }
 
 .trend-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .trend-header h2 {
-  font-size: 20px;
+  font-size: 1.05rem;
   font-weight: 600;
 }
 
 .trend-header .section-subtitle {
-  margin-top: 4px;
-  font-size: 13px;
+  margin-top: 2px;
+  font-size: 0.75rem;
   opacity: 0.6;
 }
 
 /* Trend toggle buttons */
 .sales-toggle-group {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .sales-toggle {
-  padding: 7px 16px;
+  padding: 6px 14px;
   background: #1a1a1a;
   border: none;
   color: #ffffff;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
@@ -352,9 +344,9 @@ body.dashboard-body {
 .chart-wrapper {
   background: #111;
   border-radius: 12px;
-  padding: 18px;
+  padding: 14px;
   width: 100%;
-  height: 350px; /* was gigantic — now fixed */
+  height: 280px;
   margin: 0 auto;
   position: relative;
 }
@@ -376,8 +368,8 @@ body.dashboard-body {
 .bottom-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-top: 12px;
+  gap: 12px;
+  margin-top: 10px;
 }
 
 /* Category + Top products containers */
@@ -387,7 +379,7 @@ body.dashboard-body {
 .orders-demand-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .category-container,
@@ -395,8 +387,8 @@ body.dashboard-body {
   background: #101010;
   border-radius: 14px;
   border: 1px solid #1c1c1c;
-  padding: 18px;
-  height: 250px;
+  padding: 14px;
+  height: 220px;
 }
 
 .category-container canvas,
@@ -407,24 +399,24 @@ body.dashboard-body {
 
 /* Orders summary cards (left column in orders view) */
 .orders-summary-wrapper {
-  gap: 14px;
+  gap: 10px;
 }
 
 .orders-summary-card {
   background: #111;
   border-radius: 10px;
   border: 1px solid #242424;
-  padding: 16px 18px;
+  padding: 12px 14px;
 }
 
 .orders-summary-label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #c4c4c4;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .orders-summary-main {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
@@ -442,20 +434,21 @@ body.dashboard-body {
 .orders-correlation-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 /* Align header horizontally like other trend sections */
 .correlation-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
+  margin-bottom: 6px;
 }
 
 /* Toggle button container */
 .correlation-toggle-group {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* Toggle buttons (default) */
@@ -463,9 +456,9 @@ body.dashboard-body {
   background: #111;
   color: #ddd;
   border: 1px solid #333;
-  padding: 7px 16px;
+  padding: 6px 14px;
   border-radius: 6px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
@@ -485,39 +478,25 @@ body.dashboard-body {
   font-weight: 700;
 }
 
-/* Chart container */
 .correlation-chart-container {
   background: #101010;
   border-radius: 14px;
   border: 1px solid #1c1c1c;
-  padding: 18px;
-  height: 250px;
-}
-
-.section-title-block {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  padding: 14px;
+  height: 220px;
 }
 
 .orders-correlation-wrapper h2 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   margin-bottom: 2px;
 }
 
 .orders-correlation-wrapper .section-subtitle {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: #bdbdbd;
   margin-left: 1px;
   margin-top: 0;
-}
-
-.correlation-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 8px;
 }
 
 /* RESPONSIVE */
