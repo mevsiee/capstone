@@ -268,11 +268,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const lowInput = document.getElementById("lowThreshold");
   const highInput = document.getElementById("highThreshold");
 
-  document.querySelector(".control-btn:nth-child(3)")?.addEventListener("click", () => {
-    thresholdsModal.classList.add("active");
-    lowInput.value = thresholds.low;
-    highInput.value = thresholds.high;
-  });
+  document.getElementById("editThresholdsBtn")?.addEventListener("click", () => {
+  thresholdsModal.classList.add("active");
+  lowInput.value = thresholds.low;
+  highInput.value = thresholds.high;
+});
 
   thresholdsModal?.querySelector(".save-btn")?.addEventListener("click", () => {
     const low = parseInt(lowInput.value);
@@ -318,8 +318,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const updateCostModal = document.getElementById("updateCostModal");
 
   // Open Update Product Cost Modal (4th control button)
-  document.querySelector(".control-btn:nth-child(4)")?.addEventListener("click", () => {
-      updateCostModal.classList.add("active");
+  document.getElementById("updateCostBtn")?.addEventListener("click", () => {
+    updateCostModal.classList.add("active");
   });
 
   // Close button (X)
