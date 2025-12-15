@@ -22,13 +22,13 @@ const pool = new Pool({
 
 pool.connect()
   .then(client => {
-    console.log("✅ Connected to Neon successfully!");
+    console.log("Connected to Neon successfully!");
     client.release();
   })
-  .catch(err => console.error("❌ Connection failed:", err.message));
+  .catch(err => console.error("Connection failed:", err.message));
 
 /* ------------------------------------------------------------------
-   🧠 API Endpoint: /api/inventory
+   API Endpoint: /api/inventory
    Combines E-Commerce + Retail tables into one unified dataset
 ------------------------------------------------------------------ */
 app.get("/api/inventory", async (req, res) => {
@@ -38,7 +38,7 @@ app.get("/api/inventory", async (req, res) => {
             p.product_name,
             pv.size,
             pv.variation AS color,
-            'E-commerce' AS platform,   -- 🔥 HARD CODED PLATFORM
+            'E-commerce' AS platform,
             pv.original_price AS price,
             p.cost AS cost,
             pv.stock
@@ -53,12 +53,12 @@ app.get("/api/inventory", async (req, res) => {
     res.json(result.rows);
 
   } catch (err) {
-    console.error("❌ Database error:", err.message);
+    console.error("Database error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// 🟨 Update product cost API endpoint
+// Update product cost API endpoint
 app.use(express.json());
 
 app.post("/api/update-cost", async (req, res) => {
@@ -143,7 +143,7 @@ app.get("/api/history", async (req, res) => {
     res.json(result.rows);
 
   } catch (err) {
-    console.error("❌ Error fetching history:", err);
+    console.error("Error fetching history:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -175,7 +175,7 @@ app.get("/api/forecast", async (req, res) => {
     res.json(result.rows);
 
   } catch (err) {
-    console.error("❌ Error fetching forecast:", err);
+    console.error("Error fetching forecast:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -208,7 +208,7 @@ app.get("/api/order-forecast", async (req, res) => {
     res.json(result.rows);
 
   } catch (err) {
-    console.error("❌ Error fetching order forecast:", err);
+    console.error("Error fetching order forecast:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -245,7 +245,7 @@ app.get("/api/sales-breakdown", async (req, res) => {
     res.json(breakdown);
 
   } catch (err) {
-    console.error("❌ Error calculating breakdown:", err.message);
+    console.error("Error calculating breakdown:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -315,7 +315,7 @@ app.get("/api/top-products", async (req, res) => {
     const result = await pool.query(sql, [platform, metric]);
     res.json(result.rows);
   } catch (err) {
-    console.error("❌ Error fetching top products:", err.message);
+    console.error("Error fetching top products:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -417,10 +417,10 @@ app.get("/api/share-projection", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Error computing share projection:", err);
+    console.error("Error computing share projection:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
 const PORT = 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
