@@ -106,43 +106,12 @@ app.post("/api/update-cost", async (req, res) => {
 
 // ========================================
 // GET /api/history
-// Pulls 2025+ completed sales from denormalized_table
+// Pulls 2026+ completed sales from denormalized_table
 // ========================================
 app.get("/api/history", async (req, res) => {
   try {
     const sql = `
-          SELECT 
-          CASE
-            WHEN LOWER(platform_name) LIKE '%tiktok%' THEN 'tiktok'
-            WHEN LOWER(platform_name) LIKE '%retail%' 
-              OR LOWER(platform_name) LIKE '%pos%'
-              OR LOWER(platform_name) LIKE '%store%' THEN 'retail'
-            ELSE 'other'
-          END AS platform,
-
-          TO_CHAR(DATE_TRUNC('month', order_date), 'YYYY-MM-01') AS ds,
-          SUM(order_amount) AS y
-
-        FROM denormalized_table
-        WHERE LOWER(order_status) = 'completed'
-          AND EXTRACT(YEAR FROM order_date) = 2025
-          AND LOWER(platform_name) NOT LIKE '%shopee%'
-          AND LOWER(platform_name) NOT LIKE '%shop%'
-          AND LOWER(platform_name) NOT LIKE '%ecom%'
-
-        GROUP BY
-          CASE
-            WHEN LOWER(platform_name) LIKE '%tiktok%' THEN 'tiktok'
-            WHEN LOWER(platform_name) LIKE '%retail%' 
-              OR LOWER(platform_name) LIKE '%pos%'
-              OR LOWER(platform_name) LIKE '%store%' THEN 'retail'
-            ELSE 'other'
-          END,
-          DATE_TRUNC('month', order_date)
-
-        ORDER BY 
-          platform ASC,
-          ds ASC;
+           
           `;
 
     const result = await pool.query(sql);
@@ -170,7 +139,7 @@ app.get("/api/forecast", async (req, res) => {
         forecast_value AS y,
         mae, rmse, mape, smape
       FROM forecast
-      WHERE DATE_PART('year', ds) = 2025
+      WHERE DATE_PART('year', ds) = 2026
         AND LOWER(platform) NOT LIKE '%shopee%'
         AND LOWER(platform) NOT LIKE '%shop%'
         AND LOWER(platform) NOT LIKE '%ecom%'
@@ -206,7 +175,7 @@ app.get("/api/order-forecast", async (req, res) => {
         rmse,
         smape
       FROM order_forecast
-      WHERE DATE_PART('year', forecast_date) = 2025
+      WHERE DATE_PART('year', forecast_date) = 2026
       ORDER BY forecast_date ASC, platform_name ASC;
     `;
 
@@ -229,7 +198,7 @@ app.get("/api/sales-breakdown", async (req, res) => {
         SUM(order_amount) AS total_sales
       FROM denormalized_table
       WHERE LOWER(order_status) = 'completed'
-        AND DATE_PART('year', order_date) = 2025
+        AND DATE_PART('year', order_date) = 2026
         AND LOWER(platform_name) NOT LIKE '%shopee%'
         AND LOWER(platform_name) NOT LIKE '%shop%'
         AND LOWER(platform_name) NOT LIKE '%ecom%'
@@ -284,7 +253,7 @@ app.get("/api/top-products", async (req, res) => {
             ELSE FALSE
           END AS is_completed
         FROM denormalized_table
-        WHERE DATE_PART('year', order_date) = 2025
+        WHERE DATE_PART('year', order_date) = 2026
           AND LOWER(platform_name) NOT LIKE '%shopee%'
           AND LOWER(platform_name) NOT LIKE '%shop%'
           AND LOWER(platform_name) NOT LIKE '%ecom%'
@@ -344,7 +313,7 @@ app.get("/api/share-projection", async (req, res) => {
         TO_CHAR(DATE_TRUNC('month', ds), 'YYYY-MM-01') AS ds,
         forecast_value AS y
       FROM forecast
-      WHERE DATE_PART('year', ds) = 2025
+      WHERE DATE_PART('year', ds) = 2026
         AND LOWER(platform) NOT LIKE '%shopee%'
         AND LOWER(platform) NOT LIKE '%shop%'
         AND LOWER(platform) NOT LIKE '%ecom%'
