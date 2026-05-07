@@ -111,7 +111,38 @@ app.post("/api/update-cost", async (req, res) => {
 app.get("/api/history", async (req, res) => {
   try {
     const sql = `
-           
+                     SELECT 
+          CASE
+            WHEN LOWER(platform_name) LIKE '%tiktok%' THEN 'tiktok'
+            WHEN LOWER(platform_name) LIKE '%retail%' 
+              OR LOWER(platform_name) LIKE '%pos%'
+              OR LOWER(platform_name) LIKE '%store%' THEN 'retail'
+            ELSE 'other'
+          END AS platform,
+
+          TO_CHAR(DATE_TRUNC('month', order_date), 'YYYY-MM-01') AS ds,
+          SUM(order_amount) AS y
+
+        FROM denormalized_table
+        WHERE LOWER(order_status) = 'completed'
+          AND EXTRACT(YEAR FROM order_date) = 2026
+          AND LOWER(platform_name) NOT LIKE '%shopee%'
+          AND LOWER(platform_name) NOT LIKE '%shop%'
+          AND LOWER(platform_name) NOT LIKE '%ecom%'
+
+        GROUP BY
+          CASE
+            WHEN LOWER(platform_name) LIKE '%tiktok%' THEN 'tiktok'
+            WHEN LOWER(platform_name) LIKE '%retail%' 
+              OR LOWER(platform_name) LIKE '%pos%'
+              OR LOWER(platform_name) LIKE '%store%' THEN 'retail'
+            ELSE 'other'
+          END,
+          DATE_TRUNC('month', order_date)
+
+        ORDER BY 
+          platform ASC,
+          ds ASC;
           `;
 
     const result = await pool.query(sql);
